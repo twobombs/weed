@@ -143,8 +143,6 @@ typedef std::unique_ptr<real1[], void (*)(real1 *)> RealPtr;
 typedef std::unique_ptr<complex[], void (*)(complex *)> ComplexPtr;
 typedef std::shared_ptr<Storage> StoragePtr;
 
-typedef std::function<void(void)> DispatchFn;
-
 class QEngine;
 typedef std::shared_ptr<QEngine> QEnginePtr;
 
