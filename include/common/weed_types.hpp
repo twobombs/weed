@@ -143,9 +143,6 @@ typedef std::unique_ptr<real1[], void (*)(real1 *)> RealPtr;
 typedef std::unique_ptr<complex[], void (*)(complex *)> ComplexPtr;
 typedef std::shared_ptr<Storage> StoragePtr;
 
-class QEngine;
-typedef std::shared_ptr<QEngine> QEnginePtr;
-
 #define bitsInByte 8U
 #define WEED_ALIGN_SIZE 64U
 
