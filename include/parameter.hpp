@@ -14,5 +14,9 @@
 namespace Weed {
 struct Parameter {
   Tensor value;
+
+  Parameter() {
+    value.requires_grad = true;
+  }
 };
 } // namespace Weed
