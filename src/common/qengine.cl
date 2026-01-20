@@ -61,3 +61,20 @@ void kernel add_promote(constant vecCapIntGpu* veCapIntArgs, global real1* a, gl
 {
     out[ID + OFFSET_OUT] = (cmplx)(a[ID + OFFSET_A] + b[ID + OFFSET_B], 0);
 }
+
+void kernel mul_real(constant vecCapIntGpu* veCapIntArgs, global real1* a, global real1* b, global real1* out)
+{
+    out[ID + OFFSET_OUT] = a[ID + OFFSET_A] * b[ID + OFFSET_B];
+}
+void kernel mul_complex(constant vecCapIntGpu* veCapIntArgs, global cmplx* a, global cmplx* b, global cmplx* out)
+{
+    out[ID + OFFSET_OUT] = zmul(a[ID + OFFSET_A], b[ID + OFFSET_B]);
+}
+void kernel mul_mixed(constant vecCapIntGpu* veCapIntArgs, global cmplx* a, global real1* b, global cmplx* out)
+{
+    out[ID + OFFSET_OUT] = b[ID + OFFSET_B] * a[ID + OFFSET_A];
+}
+void kernel mul_promote(constant vecCapIntGpu* veCapIntArgs, global real1* a, global real1* b, global cmplx* out)
+{
+    out[ID + OFFSET_OUT] = (cmplx)(a[ID + OFFSET_A] * b[ID + OFFSET_B], 0);
+}
