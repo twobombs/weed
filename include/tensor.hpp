@@ -16,7 +16,11 @@
 #include <vector>
 
 namespace Weed {
-struct Tensor {
+struct Tensor;
+
+typedef std::shared_ptr<Tensor> TensorPtr;
+
+struct Tensor : public std::enable_shared_from_this<Tensor> {
   StoragePtr storage;
   StoragePtr grad;
 
@@ -31,10 +35,12 @@ struct Tensor {
     validate();
   }
 
+  TensorPtr get_ptr() { return shared_from_this(); }
+
   Tensor allocate_like(const Tensor &orig);
   void validate() const;
 
-  Tensor add(const Tensor &a, const Tensor &b);
-  Tensor mul(const Tensor &a, const Tensor &b);
+  Tensor add(Tensor &a, Tensor &b);
+  Tensor mul(Tensor &a, Tensor &b);
 };
 } // namespace Weed

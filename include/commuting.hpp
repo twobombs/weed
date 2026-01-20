@@ -76,7 +76,7 @@ struct CommutingKernel {
 
   void commuting_inplace(StoragePtr a, const StoragePtr b) {
     const bool isAComplex = a->dtype == DType::COMPLEX;
-    const bool isBComplex =b->dtype == DType::COMPLEX;
+    const bool isBComplex = b->dtype == DType::COMPLEX;
     if (isAComplex != isBComplex) {
       throw std::runtime_error("Output tensor dtype mismatch!");
     }

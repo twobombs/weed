@@ -11,9 +11,9 @@
 
 #include "tensor.hpp"
 #include "add.hpp"
-#include "mul.hpp"
 #include "cpu_complex_storage.hpp"
 #include "cpu_real_storage.hpp"
+#include "mul.hpp"
 #include "node.hpp"
 
 namespace Weed {
@@ -68,9 +68,9 @@ Tensor Tensor::allocate_like(const Tensor &orig) {
   return out;
 }
 
-std::vector<const Tensor *> filterParents(std::vector<const Tensor *> parents) {
-  std::vector<const Tensor *> filtered;
-  for (const Tensor *p : parents) {
+std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
+  std::vector<TensorPtr> filtered;
+  for (TensorPtr p : parents) {
     if (p->requires_grad) {
       filtered.push_back(p);
     }
@@ -79,7 +79,7 @@ std::vector<const Tensor *> filterParents(std::vector<const Tensor *> parents) {
   return filtered;
 }
 
-Tensor Tensor::add(const Tensor &a, const Tensor &b) {
+Tensor Tensor::add(Tensor &a, Tensor &b) {
   Tensor out = allocate_like(a);
 
   Weed::add(a, b, out);
@@ -88,9 +88,10 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
     return out;
   }
 
-  const std::vector<const Tensor *> parents = filterParents({ &a, &b });
+  const std::vector<TensorPtr> parents =
+      filterParents({a.get_ptr(), b.get_ptr()});
   out.grad_node = std::make_shared<Node>(parents, [=]() {
-    for (const Tensor *in : parents) {
+    for (TensorPtr in : parents) {
       add_inplace(in->grad, out.grad);
     }
   });
@@ -98,7 +99,7 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
   return out;
 }
 
-Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
+Tensor Tensor::mul(Tensor &a, Tensor &b) {
   Tensor out = allocate_like(a);
 
   Weed::mul(a, b, out);
@@ -107,9 +108,10 @@ Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
     return out;
   }
 
-  const std::vector<const Tensor *> parents = filterParents({ &a, &b });
+  const std::vector<TensorPtr> parents =
+      filterParents({a.get_ptr(), b.get_ptr()});
   out.grad_node = std::make_shared<Node>(parents, [=]() {
-    for (const Tensor *in : parents) {
+    for (TensorPtr in : parents) {
       mul_inplace(in->grad, out.grad);
     }
   });
