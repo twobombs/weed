@@ -139,14 +139,6 @@ constexpr vecLenInt bitsInCap = ((vecLenInt)1U) << ((vecLenInt)VCAPPOW);
 
 typedef std::shared_ptr<complex> BitOp;
 
-// Called once per value between begin and end.
-typedef std::function<void(const vecCapIntGpu &, const unsigned &cpu)>
-    ParallelFunc;
-typedef std::function<vecCapIntGpu(const vecCapIntGpu &)> IncrementFunc;
-typedef std::function<vecCapInt(const vecCapInt &)> BdtFunc;
-typedef std::function<void(const vecCapInt &, const unsigned &cpu)>
-    ParallelFuncBdt;
-
 struct Storage;
 
 typedef std::unique_ptr<real1[], void (*)(real1 *)> RealPtr;

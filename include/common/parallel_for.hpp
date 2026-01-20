@@ -15,6 +15,11 @@
 
 namespace Weed {
 
+// Called once per value between begin and end.
+typedef std::function<void(const vecCapIntGpu &, const unsigned &cpu)>
+    ParallelFunc;
+typedef std::function<vecCapIntGpu(const vecCapIntGpu &)> IncrementFunc;
+
 class ParallelFor {
 private:
   const vecCapIntGpu pStride;
