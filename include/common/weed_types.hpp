@@ -2,11 +2,12 @@
 //
 // (C) Daniel Strano and the Qrack contributors 2017-2026. All rights reserved.
 //
-// Weed is for minimalist AI/ML inference and backprogation in the style of Qrack.
+// Weed is for minimalist AI/ML inference and backprogation in the style of
+// Qrack.
 //
 // Licensed under the GNU Lesser General Public License V3.
-// See LICENSE.md in the project root or https://www.gnu.org/licenses/lgpl-3.0.en.html
-// for details.
+// See LICENSE.md in the project root or
+// https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #pragma once
 
@@ -72,11 +73,11 @@ using std::size_t;
 #elif BOOST_AVAILABLE
 #include <boost/multiprecision/cpp_int.hpp>
 typedef boost::multiprecision::cpp_int vecCapInt;
-constexpr size_t WEED_MAX_DIM_POW = (1 <<VCAPPOW);
+constexpr size_t WEED_MAX_DIM_POW = (1 << VCAPPOW);
 #else
 #include "big_integer.hpp"
 #define vecCapInt BigInteger
-constexpr size_t WEED_MAX_DIM_POW = (1 <<VCAPPOW);
+constexpr size_t WEED_MAX_DIM_POW = (1 << VCAPPOW);
 #endif
 
 #if FPPOW < 5
@@ -134,15 +135,17 @@ typedef double real1_s;
 typedef std::complex<real1> complex;
 const vecCapInt ONE_BCI = 1U;
 const vecCapInt ZERO_BCI = 0U;
-constexpr vecLenInt bitsInCap = ((vecLenInt)1U) << ((vecLenInt)CAPPOW);
+constexpr vecLenInt bitsInCap = ((vecLenInt)1U) << ((vecLenInt)VCAPPOW);
 
 typedef std::shared_ptr<complex> BitOp;
 
 // Called once per value between begin and end.
-typedef std::function<void(const vecCapIntGpu&, const unsigned& cpu)> ParallelFunc;
-typedef std::function<vecCapIntGpu(const vecCapIntGpu&)> IncrementFunc;
-typedef std::function<vecCapInt(const vecCapInt&)> BdtFunc;
-typedef std::function<void(const vecCapInt&, const unsigned& cpu)> ParallelFuncBdt;
+typedef std::function<void(const vecCapIntGpu &, const unsigned &cpu)>
+    ParallelFunc;
+typedef std::function<vecCapIntGpu(const vecCapIntGpu &)> IncrementFunc;
+typedef std::function<vecCapInt(const vecCapInt &)> BdtFunc;
+typedef std::function<void(const vecCapInt &, const unsigned &cpu)>
+    ParallelFuncBdt;
 
 struct Storage;
 
@@ -198,16 +201,20 @@ WEED_CONST real1 ONE_R1 = (real1)1.0f;
 #endif
 
 #if FPPOW < 5
-// Half the probability in any single permutation of 20 maximally superposed qubits
+// Half the probability in any single permutation of 20 maximally superposed
+// qubits
 WEED_CONST real1 REAL1_EPSILON = (real1)0.000000477f;
 #elif FPPOW < 6
-// Half the probability in any single permutation of 48 maximally superposed qubits
+// Half the probability in any single permutation of 48 maximally superposed
+// qubits
 #define REAL1_EPSILON 1.7763568394002505e-15f
 #elif FPPOW < 7
-// Half the probability in any single permutation of 96 maximally superposed qubits
+// Half the probability in any single permutation of 96 maximally superposed
+// qubits
 #define REAL1_EPSILON 6.310887241768095e-30
 #else
-// Half the probability in any single permutation of 192 maximally superposed qubits
+// Half the probability in any single permutation of 192 maximally superposed
+// qubits
 WEED_CONST real1 REAL1_EPSILON = (real1)7.965459555662261e-59;
 #endif
 
@@ -216,9 +223,9 @@ WEED_CONST real1 REAL1_EPSILON = (real1)7.965459555662261e-59;
 #include <cuda_fp16.h>
 #define qCudaReal1 __half
 #define qCudaReal2 __half2
-#define qCudaReal4 __half2*
+#define qCudaReal4 __half2 *
 #define qCudaCmplx __half2
-#define qCudaCmplx2 __half2*
+#define qCudaCmplx2 __half2 *
 #define qCudaReal1_f float
 #define make_qCudaCmplx make_half2
 #define ZERO_R1_CUDA ((qCudaReal1)0.0f)
@@ -258,8 +265,10 @@ WEED_CONST complex ZERO_CMPLX = complex(ZERO_R1, ZERO_R1);
 WEED_CONST complex I_CMPLX = complex(ZERO_R1, ONE_R1);
 WEED_CONST complex HALF_I_HALF_CMPLX = complex(HALF_R1, HALF_R1);
 WEED_CONST complex HALF_NEG_I_HALF_CMPLX = complex(HALF_R1, -HALF_R1);
-WEED_CONST complex CMPLX_DEFAULT_ARG = complex((real1)REAL1_DEFAULT_ARG, (real1)REAL1_DEFAULT_ARG);
-WEED_CONST real1 FP_NORM_EPSILON = (real1)(std::numeric_limits<real1>::epsilon() / 4);
+WEED_CONST complex CMPLX_DEFAULT_ARG =
+    complex((real1)REAL1_DEFAULT_ARG, (real1)REAL1_DEFAULT_ARG);
+WEED_CONST real1 FP_NORM_EPSILON =
+    (real1)(std::numeric_limits<real1>::epsilon() / 4);
 WEED_CONST real1_f FP_NORM_EPSILON_F = (real1_f)FP_NORM_EPSILON;
 const double FIDELITY_MIN = log((double)FP_NORM_EPSILON);
 } // namespace Weed

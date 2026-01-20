@@ -4,10 +4,11 @@
 #cmakedefine ENABLE_OPENCL 1
 #cmakedefine ENABLE_OOO_OCL 1
 #cmakedefine ENABLE_PTHREAD 1
+#cmakedefine ENABLE_ASYNC 1
 #cmakedefine ENABLE_SNUCL 1
 #cmakedefine FPPOW @FPPOW@
 #cmakedefine PSTRIDEPOW @PSTRIDEPOW@
-#cmakedefine VCAPPOW @CAPPOW@
+#cmakedefine VCAPPOW @VCAPPOW@
 #cmakedefine UINTPOW @UINTPOW@
 #cmakedefine OPENCL_V3 @OPENCL_V3@
 #cmakedefine CPP_STD @CPP_STD@

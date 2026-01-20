@@ -7,8 +7,8 @@
 // phase, to leverage what advantages classical emulation of qubits can have.
 //
 // Licensed under the GNU Lesser General Public License V3.
-// See LICENSE.md in the project root or https://www.gnu.org/licenses/lgpl-3.0.en.html
-// for details.
+// See LICENSE.md in the project root or
+// https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #pragma once
 
@@ -25,8 +25,8 @@ extern bool use_host_dma;
 extern bool async_time;
 extern bool sparse;
 extern int device_id;
-extern bitLenInt max_qubits;
-extern bitLenInt min_qubits;
+extern vecLenInt max_qubits;
+extern vecLenInt min_qubits;
 extern bool single_qubit_run;
 extern int benchmarkSamples;
 extern int benchmarkDepth;
@@ -38,7 +38,7 @@ extern bool optimal_single;
 /* Declare the stream-to-probability prior to including catch.hpp. */
 namespace Weed {
 // TODO: Output functions
-} // namespace Qrack
+} // namespace Weed
 
 #include "catch.hpp"
 
@@ -48,8 +48,8 @@ namespace Weed {
  */
 class TensorTestFixture {
 protected:
-    Weed::Tensor tensor;
+  Weed::Tensor tensor;
 
 public:
-    TensorTestFixture();
+  TensorTestFixture();
 };
