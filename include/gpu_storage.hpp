@@ -26,11 +26,10 @@ struct GpuStorage : Storage {
   std::vector<EventVecPtr> wait_refs;
   std::list<QueueItem> wait_queue_items;
 
-  GpuStorage(vecCapIntGpu n)
+  GpuStorage()
     : buffer(nullptr)
   {
     device = DeviceTag::GPU;
-    size = n;
   }
 
   ~GpuStorage() {}
