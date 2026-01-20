@@ -51,6 +51,7 @@ class OCLDeviceContext;
 typedef std::shared_ptr<OCLDeviceContext> DeviceContextPtr;
 typedef std::vector<cl::Event> EventVec;
 typedef std::shared_ptr<EventVec> EventVecPtr;
+typedef std::shared_ptr<cl::Buffer> BufferPtr;
 
 struct OCLKernelHandle {
   OCLAPI oclapi;

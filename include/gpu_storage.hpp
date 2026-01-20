@@ -11,24 +11,38 @@
 
 #pragma once
 
-#include "common/oclengine.hpp"
+#include "pool_item.hpp"
+#include "queue_item.hpp"
 #include "storage.hpp"
 
-namespace Weed {
-typedef std::unique_ptr<cl::Buffer> BufferPtr;
+#include <list>
 
+namespace Weed {
 struct GpuStorage : Storage {
   BufferPtr buffer;
   cl_int callbackError;
+  size_t totalOclAllocSize;
+  int64_t deviceID;
+  std::mutex queue_mutex;
   cl::CommandQueue queue;
   cl::Context context;
   DeviceContextPtr device_context;
   std::vector<EventVecPtr> wait_refs;
   std::list<QueueItem> wait_queue_items;
+  std::vector<PoolItemPtr> poolItems;
 
   GpuStorage() : buffer(nullptr) { device = DeviceTag::GPU; }
 
   ~GpuStorage() {}
+
+  BufferPtr MakeBuffer(cl_mem_flags flags, size_t size,
+                       void *host_ptr = nullptr);
+
+  void clFinish(bool doHard = false);
+  void tryOcl(std::string message, std::function<int()> oclCall);
+  void PopQueue(bool isDispatch);
+  void DispatchQueue();
+  EventVecPtr ResetWaitEvents(bool waitQueue = true);
 
   void CheckCallbackError() {
     if (callbackError == CL_SUCCESS) {
@@ -42,73 +56,19 @@ struct GpuStorage : Storage {
                              std::to_string(callbackError));
   }
 
-  void clFinish(bool doHard) {
-    if (!device_context) {
-      return;
+  void AddAlloc(size_t size) {
+    size_t currentAlloc =
+        OCLEngine::Instance().AddToActiveAllocSize(deviceID, size);
+    if (device_context &&
+        (currentAlloc > device_context->GetGlobalAllocLimit())) {
+      OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+      throw bad_alloc("VRAM limits exceeded in QEngineOCL::AddAlloc()");
     }
-
-    CheckCallbackError();
-
-    while (wait_queue_items.size() > 1) {
-      device_context->WaitOnAllEvents();
-      PopQueue(true);
-      CheckCallbackError();
-    }
-
-    if (doHard) {
-      tryOcl("Failed to finish queue", [&] { return queue.finish(); });
-    } else {
-      device_context->WaitOnAllEvents();
-      CheckCallbackError();
-    }
-
-    wait_refs.clear();
+    totalOclAllocSize += size;
   }
-
-  BufferPtr MakeBuffer(cl_mem_flags flags, size_t size,
-                       void *host_ptr = nullptr) {
-    CheckCallbackError();
-
-    cl_int error;
-    BufferPtr toRet =
-        std::make_shared<cl::Buffer>(context, flags, size, host_ptr, &error);
-    if (error == CL_SUCCESS) {
-      // Success
-      return toRet;
-    }
-
-    // Soft finish (just for this GpuStorage)
-    clFinish();
-
-    toRet =
-        std::make_shared<cl::Buffer>(context, flags, size, host_ptr, &error);
-    if (error == CL_SUCCESS) {
-      // Success after clearing GpuStorage queue
-      return toRet;
-    }
-
-    // Hard finish (for the unique OpenCL device)
-    clFinish(true);
-
-    toRet =
-        std::make_shared<cl::Buffer>(context, flags, size, host_ptr, &error);
-    if (error != CL_SUCCESS) {
-      if (error == CL_MEM_OBJECT_ALLOCATION_FAILURE) {
-        throw bad_alloc(
-            "CL_MEM_OBJECT_ALLOCATION_FAILURE in GpuStorage::MakeBuffer()");
-      }
-      if (error == CL_OUT_OF_HOST_MEMORY) {
-        throw bad_alloc("CL_OUT_OF_HOST_MEMORY in GpuStorage::MakeBuffer()");
-      }
-      if (error == CL_INVALID_BUFFER_SIZE) {
-        throw bad_alloc("CL_INVALID_BUFFER_SIZE in GpuStorage::MakeBuffer()");
-      }
-      throw std::runtime_error(
-          "OpenCL error code on buffer allocation attempt: " +
-          std::to_string(error));
-    }
-
-    return toRet;
+  void SubtractAlloc(size_t size) {
+    OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+    totalOclAllocSize -= size;
   }
 };
 } // namespace Weed
