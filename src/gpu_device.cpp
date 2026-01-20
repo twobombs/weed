@@ -9,15 +9,15 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#include "gpu_storage.hpp"
+#include "gpu_device.hpp"
 
 namespace Weed {
 void CL_CALLBACK _PopQueue(cl_event event, cl_int type, void *user_data) {
-  ((GpuStorage *)user_data)->PopQueue(true);
+  ((GpuDevice *)user_data)->PopQueue(true);
 }
 
-BufferPtr GpuStorage::MakeBuffer(cl_mem_flags flags, size_t size,
-                                 void *host_ptr) {
+BufferPtr GpuDevice::MakeBuffer(cl_mem_flags flags, size_t size,
+                                void *host_ptr) {
   CheckCallbackError();
 
   cl_int error;
@@ -28,12 +28,12 @@ BufferPtr GpuStorage::MakeBuffer(cl_mem_flags flags, size_t size,
     return toRet;
   }
 
-  // Soft finish (just for this GpuStorage)
+  // Soft finish (just for this GpuDevice)
   clFinish();
 
   toRet = std::make_shared<cl::Buffer>(context, flags, size, host_ptr, &error);
   if (error == CL_SUCCESS) {
-    // Success after clearing GpuStorage queue
+    // Success after clearing GpuDevice queue
     return toRet;
   }
 
@@ -44,13 +44,13 @@ BufferPtr GpuStorage::MakeBuffer(cl_mem_flags flags, size_t size,
   if (error != CL_SUCCESS) {
     if (error == CL_MEM_OBJECT_ALLOCATION_FAILURE) {
       throw bad_alloc(
-          "CL_MEM_OBJECT_ALLOCATION_FAILURE in GpuStorage::MakeBuffer()");
+          "CL_MEM_OBJECT_ALLOCATION_FAILURE in GpuDevice::MakeBuffer()");
     }
     if (error == CL_OUT_OF_HOST_MEMORY) {
-      throw bad_alloc("CL_OUT_OF_HOST_MEMORY in GpuStorage::MakeBuffer()");
+      throw bad_alloc("CL_OUT_OF_HOST_MEMORY in GpuDevice::MakeBuffer()");
     }
     if (error == CL_INVALID_BUFFER_SIZE) {
-      throw bad_alloc("CL_INVALID_BUFFER_SIZE in GpuStorage::MakeBuffer()");
+      throw bad_alloc("CL_INVALID_BUFFER_SIZE in GpuDevice::MakeBuffer()");
     }
     throw std::runtime_error(
         "OpenCL error code on buffer allocation attempt: " +
@@ -60,7 +60,7 @@ BufferPtr GpuStorage::MakeBuffer(cl_mem_flags flags, size_t size,
   return toRet;
 }
 
-void GpuStorage::PopQueue(bool isDispatch) {
+void GpuDevice::PopQueue(bool isDispatch) {
   // For lock_guard scope
   if (true) {
     std::lock_guard<std::mutex> lock(queue_mutex);
@@ -91,7 +91,7 @@ void GpuStorage::PopQueue(bool isDispatch) {
   }
 }
 
-void GpuStorage::clFinish(bool doHard) {
+void GpuDevice::clFinish(bool doHard) {
   if (!device_context) {
     return;
   }
@@ -115,7 +115,7 @@ void GpuStorage::clFinish(bool doHard) {
 }
 
 // For std::function, cl_int use might discard int qualifiers.
-void GpuStorage::tryOcl(std::string message, std::function<int()> oclCall) {
+void GpuDevice::tryOcl(std::string message, std::function<int()> oclCall) {
   CheckCallbackError();
 
   if (oclCall() == CL_SUCCESS) {
@@ -123,11 +123,11 @@ void GpuStorage::tryOcl(std::string message, std::function<int()> oclCall) {
     return;
   }
 
-  // Soft finish (just for this GpuStorage)
+  // Soft finish (just for this GpuDevice)
   clFinish();
 
   if (oclCall() == CL_SUCCESS) {
-    // Success after clearing GpuStorage queue
+    // Success after clearing GpuDevice queue
     return;
   }
 
@@ -147,7 +147,7 @@ void GpuStorage::tryOcl(std::string message, std::function<int()> oclCall) {
   throw std::runtime_error(message + ", error code: " + std::to_string(error));
 }
 
-void GpuStorage::DispatchQueue() {
+void GpuDevice::DispatchQueue() {
   QueueItem item;
 
   if (true) {
@@ -163,7 +163,7 @@ void GpuStorage::DispatchQueue() {
   std::vector<BufferPtr> args = item.buffers;
 
   // We have to reserve the kernel, because its argument hooks are unique. The
-  // same kernel therefore can't be used by other GpuStorage instances, until
+  // same kernel therefore can't be used by other GpuDevice instances, until
   // we're done queueing it.
   OCLDeviceCall ocl = device_context->Reserve(item.api_call);
 
@@ -211,7 +211,7 @@ void GpuStorage::DispatchQueue() {
   }
 }
 
-EventVecPtr GpuStorage::ResetWaitEvents(bool waitQueue) {
+EventVecPtr GpuDevice::ResetWaitEvents(bool waitQueue) {
   if (waitQueue) {
     while (wait_queue_items.size() > 1) {
       device_context->WaitOnAllEvents();
