@@ -22,7 +22,11 @@ struct Storage {
   vecCapIntGpu size;
 
   Storage(DeviceTag dtg, DType dtp, vecCapIntGpu n)
-      : device(dtg), dtype(dtp), size(n) {}
+      : device(dtg), dtype(dtp), size(n) {
+    if (!size) {
+      throw std::invalid_argument("Storage must have size of at least 1!");
+    }
+  }
 
   virtual ~Storage() {}
 };
