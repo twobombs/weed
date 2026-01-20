@@ -10,46 +10,17 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "tensor.hpp"
-#include "add.hpp"
-#include "cpu_complex_storage.hpp"
-#include "cpu_real_storage.hpp"
-#include "mul.hpp"
 #include "node.hpp"
 
+#include "add.hpp"
+#include "mul.hpp"
+
+#include "cpu_complex_storage.hpp"
+#include "cpu_real_storage.hpp"
+#include "gpu_complex_storage.hpp"
+#include "gpu_real_storage.hpp"
+
 namespace Weed {
-void Tensor::validate() const {
-  if (!storage) {
-    throw std::logic_error("Tensor has null storage");
-  }
-
-  if (shape.size() != stride.size()) {
-    throw std::logic_error("Tensor shape/stride rank mismatch");
-  }
-
-  // offset must be in-bounds
-  if (offset >= storage->size) {
-    throw std::out_of_range("Tensor offset exceeds storage size");
-  }
-
-  // Compute maximum reachable index
-  vecCapIntGpu max_index = offset;
-
-  for (size_t d = 0; d < shape.size(); ++d) {
-    if (shape[d] == 0) {
-      // Empty tensor: safe by definition
-      return;
-    }
-
-    // Guard against overflow if you want to be extra careful
-    vecCapIntGpu extent = shape[d] - 1;
-    max_index += extent * stride[d];
-  }
-
-  if (max_index >= storage->size) {
-    throw std::out_of_range("Tensor view exceeds storage bounds");
-  }
-}
-
 Tensor Tensor::allocate_like(const Tensor &orig) {
   Tensor out;
   vecCapIntGpu size = 0U;
@@ -65,6 +36,40 @@ Tensor Tensor::allocate_like(const Tensor &orig) {
   }
 
   return out;
+}
+
+Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
+               bool rg, DType dtype, DeviceTag dtag, int64_t did)
+    : grad(nullptr), shape(shp), stride(strd), offset(0U), requires_grad(rg),
+      grad_node(nullptr) {
+  if (shape.size() != stride.size()) {
+    throw std::invalid_argument(
+        "Tensor shape vector must have same length as stride vector!");
+  }
+
+  vecCapIntGpu size = 0U;
+  for (size_t i = 0U; i < shape.size(); ++i) {
+    size += (shape[i] - 1U) * stride[i];
+  }
+
+  switch (dtype) {
+  case DType::COMPLEX:
+    switch (dtag) {
+    case DeviceTag::GPU:
+      storage = std::make_shared<GpuComplexStorage>(size, did);
+    case DeviceTag::CPU:
+    default:
+      storage = std::make_shared<CpuComplexStorage>(size);
+    }
+  case DType::REAL:
+    switch (dtag) {
+    case DeviceTag::GPU:
+      storage = std::make_shared<GpuRealStorage>(size, did);
+    case DeviceTag::CPU:
+    default:
+      storage = std::make_shared<CpuRealStorage>(size);
+    }
+  }
 }
 
 std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {

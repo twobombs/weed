@@ -72,4 +72,5 @@ struct GpuDevice {
     totalOclAllocSize -= size;
   }
 };
+typedef std::shared_ptr<GpuDevice> GpuDevicePtr;
 } // namespace Weed

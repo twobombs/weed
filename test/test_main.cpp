@@ -155,8 +155,6 @@ int main(int argc, char *argv[]) {
 }
 
 TensorTestFixture::TensorTestFixture() {
-  // uint32_t rngSeed = Catch::getCurrentContext().getConfig()->rngSeed();
-
   std::cout << ">>> '" << Catch::getResultCapture().getCurrentTestName()
             << "':" << std::endl;
 }

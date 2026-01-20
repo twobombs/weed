@@ -294,11 +294,13 @@ install (FILES
 # Install weed library headers
 install (FILES
     include/add.hpp
+    include/cpu_complex_storage.hpp
     include/cpu_real_storage.hpp
     include/device_tag.hpp
     include/dtype.hpp
     include/gpu_device.hpp
-    include/gpu_storage.hpp
+    include/gpu_complex_storage.hpp
+    include/gpu_real_storage.hpp
     include/matmul.hpp
     include/module.hpp
     include/mul.hpp

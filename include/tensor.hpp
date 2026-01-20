@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "weed_types.hpp"
+#include "common/weed_types.hpp"
+#include "device_tag.hpp"
+#include "dtype.hpp"
 
 #include <vector>
 
@@ -31,14 +33,15 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
   bool requires_grad;
   NodePtr grad_node;
 
-  Tensor() : offset(0U), requires_grad(false), grad_node(nullptr) {
-    validate();
-  }
+  Tensor()
+      : storage(nullptr), grad(nullptr), shape(), stride(), offset(0U),
+        requires_grad(false), grad_node(nullptr) {}
+  Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
+         bool rg = false, DType dtype = DType::REAL,
+         DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
 
   TensorPtr get_ptr() { return shared_from_this(); }
-
   Tensor allocate_like(const Tensor &orig);
-  void validate() const;
 
   Tensor add(Tensor &a, Tensor &b);
   Tensor mul(Tensor &a, Tensor &b);

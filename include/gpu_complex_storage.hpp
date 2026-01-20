@@ -21,12 +21,16 @@
 #include <list>
 
 namespace Weed {
-struct GpuStorage : Storage {
+struct GpuComplexStorage : Storage {
   BufferPtr buffer;
   GpuDevicePtr gpu;
 
-  GpuStorage() : buffer(nullptr) { device = DeviceTag::GPU; }
+  GpuComplexStorage(vecCapIntGpu n, int64_t did) : buffer(nullptr) {
+    device = DeviceTag::GPU;
+    dtype = DType::COMPLEX;
+    size = n;
+  }
 
-  ~GpuStorage() {}
+  ~GpuComplexStorage() {}
 };
 } // namespace Weed
