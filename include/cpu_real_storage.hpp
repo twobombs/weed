@@ -15,7 +15,7 @@
 
 namespace Weed {
 struct CpuRealStorage : Storage {
-  Real1Ptr data;
+  RealPtr data;
 
   CpuRealStorage(vecCapIntGpu n) : data(Alloc(n)) {
     device = DeviceTag::CPU;

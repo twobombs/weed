@@ -23,6 +23,7 @@ endif (PACK_DEBIAN)
 add_library (weed STATIC
     src/common/functions.cpp
     src/common/parallel_for.cpp
+    src/add.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
 if (ENABLE_PTHREAD AND ENABLE_ASYNC)

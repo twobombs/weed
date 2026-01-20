@@ -3168,7 +3168,7 @@ inline half operator/(half x, half y) {
 
 /// Output operator.
 ///	This uses the built-in functionality for streaming out floating-point
-///numbers.
+/// numbers.
 /// \param out output stream to write into
 /// \param arg half expression to write
 /// \return reference to output stream
@@ -3184,7 +3184,7 @@ operator<<(std::basic_ostream<charT, traits> &out, half arg) {
 
 /// Input operator.
 ///	This uses the built-in functionality for streaming in floating-point
-///numbers, specifically double precision
+/// numbers, specifically double precision
 /// floating
 /// point numbers (unless overridden with [HALF_ARITHMETIC_TYPE](\ref
 /// HALF_ARITHMETIC_TYPE)). So the input string is first rounded to double
@@ -4151,7 +4151,7 @@ inline half pow(half x, half y) {
 
 /// Compute sine and cosine simultaneously.
 ///	This returns the same results as sin() and cos() but is faster than
-///calling each function individually.
+/// calling each function individually.
 ///
 /// This function is exact to rounding for all rounding modes.
 /// \param arg function argument

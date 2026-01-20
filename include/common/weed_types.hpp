@@ -149,8 +149,8 @@ typedef std::function<void(const vecCapInt &, const unsigned &cpu)>
 
 struct Storage;
 
-typedef std::unique_ptr<real1[]> RealPtr;
-typedef std::unique_ptr<complex[]> ComplexPtr;
+typedef std::unique_ptr<real1[], void (*)(real1 *)> RealPtr;
+typedef std::unique_ptr<complex[], void (*)(real1 *)> ComplexPtr;
 typedef std::shared_ptr<Storage> StoragePtr;
 
 typedef std::function<void(void)> DispatchFn;

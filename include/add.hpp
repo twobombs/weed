@@ -23,11 +23,12 @@ extern AddKernel add_kernel;
 
 void add(const Tensor &a, const Tensor &b, Tensor &out) {
   switch (out.storage->device) {
-  case DeviceTag::CPU:
-    add_kernel.cpu(a, b, out);
-    break;
   case DeviceTag::OpenCL:
     add_kernel.opencl(a, b, out);
+    break;
+  case DeviceTag::CPU:
+  default:
+    add_kernel.cpu(a, b, out);
     break;
   }
 }
