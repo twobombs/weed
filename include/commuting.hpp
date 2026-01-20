@@ -14,6 +14,16 @@
 #include "commuting_operation.hpp"
 #include "tensor.hpp"
 
+#define _DEVICE_SWITCH(cpu, gpu, a, b)                                         \
+  switch (out.storage->device) {                                               \
+  case DeviceTag::GPU:                                                         \
+    gpu(a, b, out);                                                            \
+    break;                                                                     \
+  case DeviceTag::CPU:                                                         \
+  default:                                                                     \
+    cpu(a, b, out);                                                            \
+  }
+
 namespace Weed {
 struct CommutingKernel {
   CommutingOperation op;
@@ -35,50 +45,15 @@ struct CommutingKernel {
           "Cannot combine complex tensors into real1 tensor!");
     }
     if (isAComplex && isBComplex) {
-      switch (out.storage->device) {
-      case DeviceTag::GPU:
-        gpu_complex(a, b, out);
-        break;
-      case DeviceTag::CPU:
-      default:
-        cpu_complex(a, b, out);
-      }
+      _DEVICE_SWITCH(cpu_complex, gpu_complex, a, b);
     } else if (isAComplex) {
-      switch (out.storage->device) {
-      case DeviceTag::GPU:
-        gpu_mixed(a, b, out);
-        break;
-      case DeviceTag::CPU:
-      default:
-        cpu_mixed(a, b, out);
-      }
+      _DEVICE_SWITCH(cpu_mixed, gpu_mixed, a, b);
     } else if (isBComplex) {
-      switch (out.storage->device) {
-      case DeviceTag::GPU:
-        gpu_mixed(b, a, out);
-        break;
-      case DeviceTag::CPU:
-      default:
-        cpu_mixed(b, a, out);
-      }
+      _DEVICE_SWITCH(cpu_mixed, gpu_mixed, b, a);
     } else if (isOutComplex) {
-      switch (out.storage->device) {
-      case DeviceTag::GPU:
-        gpu_promote(a, b, out);
-        break;
-      case DeviceTag::CPU:
-      default:
-        cpu_promote(a, b, out);
-      }
+      _DEVICE_SWITCH(cpu_promote, gpu_promote, a, b);
     } else {
-      switch (out.storage->device) {
-      case DeviceTag::GPU:
-        gpu_real(a, b, out);
-        break;
-      case DeviceTag::CPU:
-      default:
-        cpu_real(a, b, out);
-      }
+      _DEVICE_SWITCH(cpu_real, gpu_real, a, b);
     }
   }
 };
