@@ -29,6 +29,7 @@ struct GpuComplexStorage : Storage {
     device = DeviceTag::GPU;
     dtype = DType::COMPLEX;
     size = n;
+    gpu = OCLEngine::Instance().GetWeedDevice(did);
   }
 
   ~GpuComplexStorage() {}

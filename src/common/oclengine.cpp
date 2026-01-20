@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "oclengine.hpp"
+#include "gpu_device.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -90,6 +91,17 @@ void OCLEngine::SetDeviceContextPtrVector(std::vector<DeviceContextPtr> vec,
 
 void OCLEngine::SetDefaultDeviceContext(DeviceContextPtr dcp) {
   default_device_context = dcp;
+}
+
+GpuDevicePtr OCLEngine::GetWeedDevice(int64_t did)
+{
+  if (did < 0) {
+    did = GetDefaultDeviceID();
+  }
+  if (weed_gpu_devices.find(did) == weed_gpu_devices.end()) {
+    weed_gpu_devices[did] = std::make_shared<GpuDevice>(did);
+  }
+  return weed_gpu_devices[did];
 }
 
 cl::Program OCLEngine::MakeProgram(bool buildFromSource, std::string path,

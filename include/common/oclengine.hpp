@@ -53,6 +53,9 @@ typedef std::vector<cl::Event> EventVec;
 typedef std::shared_ptr<EventVec> EventVecPtr;
 typedef std::shared_ptr<cl::Buffer> BufferPtr;
 
+struct GpuDevice;
+typedef std::shared_ptr<GpuDevice> GpuDevicePtr;
+
 struct OCLKernelHandle {
   OCLAPI oclapi;
   std::string kernelname;
@@ -313,6 +316,8 @@ public:
   /// preferred device.
   void SetDefaultDeviceContext(DeviceContextPtr dcp);
 
+  GpuDevicePtr GetWeedDevice(int64_t did = -1);
+
   size_t GetActiveAllocSize(const int64_t &dev) {
     if (dev > ((int64_t)activeAllocSizes.size())) {
       throw std::invalid_argument(
@@ -384,6 +389,7 @@ private:
   std::mutex allocMutex;
   std::vector<DeviceContextPtr> all_device_contexts;
   DeviceContextPtr default_device_context;
+  std::map<int64_t, GpuDevicePtr> weed_gpu_devices;
 
   OCLEngine(); // Private so that it can  not be called
 

@@ -34,18 +34,16 @@ struct GpuDevice {
   std::vector<PoolItemPtr> poolItems;
 
   GpuDevice(int64_t did = -1)
-    : callbackError(CL_SUCCESS)
-    , totalOclAllocSize(0U)
-    , deviceID(did)
-  {
+      : callbackError(CL_SUCCESS), totalOclAllocSize(0U), deviceID(did) {
     const size_t deviceCount = OCLEngine::Instance().GetDeviceCount();
 
     if (!deviceCount) {
-        throw std::runtime_error("GpuDevice::GpuDevice(): No available devices.");
+      throw std::runtime_error("GpuDevice::GpuDevice(): No available devices.");
     }
 
     if (did > ((int64_t)deviceCount)) {
-        throw std::runtime_error("GpuDevice::GpuDevice(): Requested device doesn't exist.");
+      throw std::runtime_error(
+          "GpuDevice::GpuDevice(): Requested device doesn't exist.");
     }
 
     clFinish();
@@ -58,7 +56,6 @@ struct GpuDevice {
 
   BufferPtr MakeBuffer(cl_mem_flags flags, size_t size,
                        void *host_ptr = nullptr);
-
   void clFinish(bool doHard = false);
   void tryOcl(std::string message, std::function<int()> oclCall);
   void PopQueue(bool isDispatch);
@@ -87,10 +84,10 @@ struct GpuDevice {
     }
     totalOclAllocSize += size;
   }
+
   void SubtractAlloc(size_t size) {
     OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
     totalOclAllocSize -= size;
   }
 };
-typedef std::shared_ptr<GpuDevice> GpuDevicePtr;
 } // namespace Weed
