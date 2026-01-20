@@ -72,17 +72,23 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
 
   Weed::add(a, b, out);
 
-  if (a.requires_grad || b.requires_grad) {
-    out.grad_node =
-        std::make_shared<Node>(std::vector<const Tensor *>{&a, &b}, [=]() {
-          if (a.requires_grad) {
-            add_inplace(a.grad, out.grad);
-          }
-          if (b.requires_grad) {
-            add_inplace(b.grad, out.grad);
-          }
-        });
+  if (!a.requires_grad && !b.requires_grad) {
+    return out;
   }
+
+  std::vector<const Tensor *> parents;
+  if (a.requires_grad) {
+    parents.push_back(&a);
+  }
+  if (b.requires_grad) {
+    parents.push_back(&b);
+  }
+
+  out.grad_node = std::make_shared<Node>(parents, [=]() {
+    for (const Tensor *in : parents) {
+      add_inplace(in->grad, out.grad);
+    }
+  });
 
   return out;
 }
