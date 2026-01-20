@@ -292,6 +292,7 @@ install (FILES
     include/cpu_real_storage.hpp
     include/device_tag.hpp
     include/dtype.hpp
+    include/gpu_storage.hpp
     include/matmul.hpp
     include/module.hpp
     include/mul.hpp
