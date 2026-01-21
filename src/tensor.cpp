@@ -20,7 +20,7 @@
 #include "gpu_complex_storage.hpp"
 #include "gpu_real_storage.hpp"
 
-#define SWITCH_DEVICE_FOR_STORAGE(GpuType, CpuType)                            \
+#define PICK_DEVICE_STORAGE(GpuType, CpuType)                                  \
   switch (dtag) {                                                              \
   case DeviceTag::GPU:                                                         \
     storage = std::make_shared<GpuType>(size, did);                            \
@@ -74,10 +74,10 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
 
   switch (dtype) {
   case DType::COMPLEX:
-    SWITCH_DEVICE_FOR_STORAGE(GpuComplexStorage, CpuComplexStorage);
+    PICK_DEVICE_STORAGE(GpuComplexStorage, CpuComplexStorage);
   case DType::REAL:
   default:
-    SWITCH_DEVICE_FOR_STORAGE(GpuRealStorage, CpuRealStorage);
+    PICK_DEVICE_STORAGE(GpuRealStorage, CpuRealStorage);
   }
 }
 
