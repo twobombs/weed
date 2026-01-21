@@ -24,7 +24,7 @@ void mul(const Tensor &a, const Tensor &b, Tensor &out) {
   mul_kernel.commuting(a, b, out);
 }
 
-void mul_inplace(const StoragePtr a, StoragePtr out) {
+void mul_inplace(const TensorPtr a, TensorPtr out) {
   mul_kernel.commuting_inplace(a, out);
 }
 } // namespace Weed

@@ -12,9 +12,9 @@
 #include "tensor.hpp"
 #include "node.hpp"
 
-#include "relu.hpp"
 #include "add.hpp"
 #include "mul.hpp"
+#include "relu.hpp"
 
 #include "cpu_complex_storage.hpp"
 #include "cpu_real_storage.hpp"
@@ -100,11 +100,12 @@ Tensor Tensor::relu(Tensor &a) {
   out.requires_grad = true;
 
   out.grad_node =
-    std::make_shared<Node>(std::vector<TensorPtr>{a.get_ptr()}, [out](std::vector<TensorPtr> parents) {
-      for (TensorPtr in : parents) {
-        relu_grad(in->grad, *(in.get()), out.grad);
-      }
-    });
+      std::make_shared<Node>(std::vector<TensorPtr>{a.get_ptr()},
+                             [out](std::vector<TensorPtr> parents) {
+                               for (TensorPtr in : parents) {
+                                 relu_grad(in->grad, *(in.get()), out.grad);
+                               }
+                             });
 
   return out;
 }

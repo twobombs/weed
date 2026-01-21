@@ -26,7 +26,7 @@
   }
 
 #define _DEVICE_SWITCH_INPLACE(cpu, gpu, a, out)                               \
-  switch (out->device) {                                                       \
+  switch (out->storage->device) {                                              \
   case DeviceTag::GPU:                                                         \
     gpu(a, out);                                                               \
     break;                                                                     \
@@ -45,12 +45,12 @@ struct CommutingKernel {
   void (*gpu_complex)(const Tensor &, const Tensor &, Tensor &);
   void (*gpu_mixed)(const Tensor &, const Tensor &, Tensor &);
 
-  void (*cpu_real_inplace)(StoragePtr, const StoragePtr);
-  void (*cpu_complex_inplace)(StoragePtr, const StoragePtr);
-  void (*cpu_mixed_inplace)(StoragePtr, const StoragePtr);
-  void (*gpu_real_inplace)(StoragePtr, const StoragePtr);
-  void (*gpu_complex_inplace)(StoragePtr, const StoragePtr);
-  void (*gpu_mixed_inplace)(StoragePtr, const StoragePtr);
+  void (*cpu_real_inplace)(TensorPtr, const TensorPtr);
+  void (*cpu_complex_inplace)(TensorPtr, const TensorPtr);
+  void (*cpu_mixed_inplace)(TensorPtr, const TensorPtr);
+  void (*gpu_real_inplace)(TensorPtr, const TensorPtr);
+  void (*gpu_complex_inplace)(TensorPtr, const TensorPtr);
+  void (*gpu_mixed_inplace)(TensorPtr, const TensorPtr);
 
   void commuting(const Tensor &a, const Tensor &b, Tensor &out) {
     const bool isAComplex = a.storage->dtype == DType::COMPLEX;
@@ -74,9 +74,9 @@ struct CommutingKernel {
     }
   }
 
-  void commuting_inplace(StoragePtr a, const StoragePtr b) {
-    const bool isAComplex = a->dtype == DType::COMPLEX;
-    const bool isBComplex = b->dtype == DType::COMPLEX;
+  void commuting_inplace(TensorPtr a, const TensorPtr b) {
+    const bool isAComplex = a->storage->dtype == DType::COMPLEX;
+    const bool isBComplex = b->storage->dtype == DType::COMPLEX;
     if (isAComplex != isBComplex) {
       throw std::runtime_error("Output tensor dtype mismatch!");
     }

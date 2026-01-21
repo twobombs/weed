@@ -16,11 +16,11 @@
 #include "gpu_complex_storage.hpp"
 #include "gpu_real_storage.hpp"
 
-#define CAST_TENOSR_STORAGE(out, in, type, ptr)                                \
+#define CAST_STORAGE(out, in, type, ptr)                                       \
   type *out = static_cast<ptr *>(in.storage.get())->data.get() + in.offset
 
-#define CAST_STORAGE(out, in, type, ptr)                                       \
-  type *out = static_cast<ptr *>(in.get())->data.get()
+#define CAST_PTR_STORAGE(out, in, type, ptr)                                   \
+  type *out = static_cast<ptr *>(in->storage.get())->data.get() + in->offset
 
 #define KERNEL_SWITCH()                                                        \
   ParallelFunc fn;                                                             \
@@ -36,7 +36,7 @@
       po[i] = pa[i] + pb[i];                                                   \
     };                                                                         \
   }                                                                            \
-  size_t n = out.storage->size;                                                \
+  size_t n = out.get_size();                                                   \
   pfControl.par_for(0, n, fn)
 
 #define KERNEL_SWITCH_INPLACE()                                                \
@@ -49,7 +49,7 @@
   default:                                                                     \
     fn = [&](const vecCapIntGpu &i, const unsigned &cpu) { pa[i] += pb[i]; };  \
   }                                                                            \
-  size_t n = b->size;                                                          \
+  size_t n = b->get_size();                                                    \
   pfControl.par_for(0, n, fn)
 
 #define DISPATCH_GPU_KERNEL(type, type2, api_add, api_mul)                     \
@@ -83,10 +83,12 @@
   default:                                                                     \
     api_call = OCLAPI::api_add;                                                \
   }                                                                            \
-  const vecCapIntGpu args[3U]{0U, 0U, 0U};                                     \
-  std::shared_ptr<type> a_storage = std::dynamic_pointer_cast<type>(a);        \
-  std::shared_ptr<type2> b_storage = std::dynamic_pointer_cast<type2>(b);      \
-  a_storage->gpu->RequestKernel(api_call, args, a->size,                       \
+  const vecCapIntGpu args[3U]{a->offset, b->offset, 0};                        \
+  std::shared_ptr<type> a_storage =                                            \
+      std::dynamic_pointer_cast<type>(a->storage);                             \
+  std::shared_ptr<type2> b_storage =                                           \
+      std::dynamic_pointer_cast<type2>(b->storage);                            \
+  a_storage->gpu->RequestKernel(api_call, args, a->get_size(),                 \
                                 {a_storage->buffer, b_storage->buffer})
 
 namespace Weed {
@@ -94,23 +96,23 @@ ParallelFor pfControl = ParallelFor();
 
 struct commuting_kernel : CommutingKernel {
   void cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-    CAST_TENOSR_STORAGE(pa, a, real1, CpuRealStorage);
-    CAST_TENOSR_STORAGE(pb, b, real1, CpuRealStorage);
-    CAST_TENOSR_STORAGE(po, out, real1, CpuRealStorage);
+    CAST_STORAGE(pa, a, real1, CpuRealStorage);
+    CAST_STORAGE(pb, b, real1, CpuRealStorage);
+    CAST_STORAGE(po, out, real1, CpuRealStorage);
 
     KERNEL_SWITCH();
   }
   void cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
-    CAST_TENOSR_STORAGE(pa, a, complex, CpuComplexStorage);
-    CAST_TENOSR_STORAGE(pb, b, complex, CpuComplexStorage);
-    CAST_TENOSR_STORAGE(po, out, complex, CpuComplexStorage);
+    CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+    CAST_STORAGE(pb, b, complex, CpuComplexStorage);
+    CAST_STORAGE(po, out, complex, CpuComplexStorage);
 
     KERNEL_SWITCH();
   }
   void cpu_mixed(const Tensor &a, const Tensor &b, Tensor &out) {
-    CAST_TENOSR_STORAGE(pa, a, complex, CpuComplexStorage);
-    CAST_TENOSR_STORAGE(pb, b, real1, CpuRealStorage);
-    CAST_TENOSR_STORAGE(po, out, complex, CpuComplexStorage);
+    CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+    CAST_STORAGE(pb, b, real1, CpuRealStorage);
+    CAST_STORAGE(po, out, complex, CpuComplexStorage);
 
     KERNEL_SWITCH();
   }
@@ -127,29 +129,29 @@ struct commuting_kernel : CommutingKernel {
                         OCL_API_MUL_MIXED);
   }
 
-  void cpu_real_inplace(StoragePtr a, const StoragePtr b) {
-    CAST_STORAGE(pa, a, real1, CpuRealStorage);
-    CAST_STORAGE(pb, b, real1, CpuRealStorage);
+  void cpu_real_inplace(TensorPtr a, const TensorPtr b) {
+    CAST_PTR_STORAGE(pa, a, real1, CpuRealStorage);
+    CAST_PTR_STORAGE(pb, b, real1, CpuRealStorage);
 
     KERNEL_SWITCH_INPLACE();
   }
-  void cpu_complex_inplace(StoragePtr a, const StoragePtr b) {
-    CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-    CAST_STORAGE(pb, b, complex, CpuComplexStorage);
+  void cpu_complex_inplace(TensorPtr a, const TensorPtr b) {
+    CAST_PTR_STORAGE(pa, a, complex, CpuComplexStorage);
+    CAST_PTR_STORAGE(pb, b, complex, CpuComplexStorage);
 
     KERNEL_SWITCH_INPLACE();
   }
-  void gpu_real_inplace(StoragePtr a, const StoragePtr b) {
+  void gpu_real_inplace(TensorPtr a, const TensorPtr b) {
     DISPATCH_INPLACE_GPU_KERNEL(GpuRealStorage, GpuRealStorage,
                                 OCL_API_ADD_REAL_INPLACE,
                                 OCL_API_MUL_REAL_INPLACE);
   }
-  void gpu_complex_inplace(StoragePtr a, const StoragePtr b) {
+  void gpu_complex_inplace(TensorPtr a, const TensorPtr b) {
     DISPATCH_INPLACE_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage,
                                 OCL_API_ADD_COMPLEX_INPLACE,
                                 OCL_API_MUL_COMPLEX_INPLACE);
   }
-  void gpu_mixed_inplace(StoragePtr a, const StoragePtr b) {
+  void gpu_mixed_inplace(TensorPtr a, const TensorPtr b) {
     DISPATCH_INPLACE_GPU_KERNEL(GpuComplexStorage, GpuRealStorage,
                                 OCL_API_ADD_MIXED_INPLACE,
                                 OCL_API_MUL_MIXED_INPLACE);
