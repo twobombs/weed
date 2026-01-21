@@ -33,9 +33,6 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
   bool requires_grad;
   NodePtr grad_node;
 
-  Tensor()
-      : storage(nullptr), grad(nullptr), shape(), stride(), offset(0U),
-        requires_grad(false), grad_node(nullptr) {}
   Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
          bool rg = false, DType dtype = DType::REAL,
          DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);

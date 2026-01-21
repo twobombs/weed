@@ -22,20 +22,23 @@
 
 namespace Weed {
 Tensor Tensor::allocate_like(const Tensor &orig) {
-  Tensor out;
-  vecCapIntGpu size = 0U;
-  for (size_t i = 0U; i < shape.size(); ++i) {
-    size += (orig.shape[i] - 1U) * orig.stride[i];
+  const StoragePtr storage_ptr = orig.storage;
+  const DeviceTag dtag = storage->device;
+  const DType dt = storage_ptr->dtype;
+  int64_t did = -1;
+  if (dtag == DeviceTag::GPU) {
+    switch (dt) {
+    case DType::COMPLEX:
+      did = std::dynamic_pointer_cast<GpuComplexStorage>(storage_ptr)
+                ->gpu->deviceID;
+      break;
+    case DType::REAL:
+    default:
+      did =
+          std::dynamic_pointer_cast<GpuRealStorage>(storage_ptr)->gpu->deviceID;
+    }
   }
-  switch (orig.storage->dtype) {
-  case DType::COMPLEX:
-    out.storage = std::make_shared<CpuComplexStorage>(size);
-  case DType::REAL:
-  default:
-    out.storage = std::make_shared<CpuRealStorage>(size);
-  }
-
-  return out;
+  return Tensor(orig.shape, orig.stride, false, dt, dtag, did);
 }
 
 Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
@@ -57,6 +60,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
     switch (dtag) {
     case DeviceTag::GPU:
       storage = std::make_shared<GpuComplexStorage>(size, did);
+      break;
     case DeviceTag::CPU:
     default:
       storage = std::make_shared<CpuComplexStorage>(size);
@@ -65,6 +69,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
     switch (dtag) {
     case DeviceTag::GPU:
       storage = std::make_shared<GpuRealStorage>(size, did);
+      break;
     case DeviceTag::CPU:
     default:
       storage = std::make_shared<CpuRealStorage>(size);

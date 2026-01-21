@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   return num_failed;
 }
 
-TensorTestFixture::TensorTestFixture() {
+TensorTestFixture::TensorTestFixture() : tensor({}, {}) {
   // uint32_t rngSeed = Catch::getCurrentContext().getConfig()->rngSeed();
 
   std::cout << ">>> '" << Catch::getResultCapture().getCurrentTestName()
