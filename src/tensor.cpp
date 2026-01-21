@@ -71,6 +71,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
   switch (dtype) {
   case DType::COMPLEX:
     PICK_DEVICE_STORAGE(GpuComplexStorage, CpuComplexStorage);
+    break;
   case DType::REAL:
   default:
     PICK_DEVICE_STORAGE(GpuRealStorage, CpuRealStorage);
