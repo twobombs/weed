@@ -100,9 +100,9 @@ Tensor Tensor::relu(Tensor &a) {
   out.requires_grad = true;
 
   out.grad_node =
-    std::make_shared<Node>(std::vector<TensorPtr>{a.get_ptr()}, [a, out](std::vector<TensorPtr> parents) {
+    std::make_shared<Node>(std::vector<TensorPtr>{a.get_ptr()}, [out](std::vector<TensorPtr> parents) {
       for (TensorPtr in : parents) {
-        relu_grad(in->grad, a, out.grad);
+        relu_grad(in->grad, *(in.get()), out.grad);
       }
     });
 
