@@ -59,8 +59,8 @@ Tensor Tensor::allocate_like(const Tensor &orig, const DType &dt) {
 
 Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
                bool rg, DType dtype, DeviceTag dtag, int64_t did)
-    : grad(nullptr), shape(shp), stride(strd), offset(0U), requires_grad(rg),
-      grad_node(nullptr) {
+    : shape(shp), stride(strd), offset(0U), requires_grad(rg),
+      grad_node(nullptr), grad(nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
         "Tensor shape vector must have same length as stride vector!");

@@ -24,7 +24,6 @@ typedef std::shared_ptr<Tensor> TensorPtr;
 
 struct Tensor : public std::enable_shared_from_this<Tensor> {
   StoragePtr storage;
-  TensorPtr grad;
 
   std::vector<vecCapIntGpu> shape;
   std::vector<vecCapIntGpu> stride;
@@ -32,6 +31,7 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
 
   bool requires_grad;
   NodePtr grad_node;
+  TensorPtr grad;
 
   Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
          bool rg = false, DType dtype = DType::REAL,
