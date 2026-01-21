@@ -38,6 +38,16 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
          DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
 
   TensorPtr get_ptr() { return shared_from_this(); }
+
+  vecCapIntGpu get_size() const {
+    vecCapIntGpu size = 0U;
+    for (size_t i = 0U; i < shape.size(); ++i) {
+      size += (shape[i] - 1U) * stride[i];
+    }
+
+    return size;
+  }
+
   Tensor allocate_like(const Tensor &orig, const DType &dt);
 
   Tensor add(Tensor &a, Tensor &b);

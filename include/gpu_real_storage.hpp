@@ -45,4 +45,5 @@ struct GpuRealStorage : RealStorage {
     return gpu->MakeBuffer(CL_MEM_READ_WRITE, sizeof(real1) * n);
   }
 };
+typedef std::shared_ptr<GpuRealStorage> GpuRealStoragePtr;
 } // namespace Weed

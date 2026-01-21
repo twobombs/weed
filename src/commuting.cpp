@@ -13,6 +13,8 @@
 #include "common/parallel_for.hpp"
 #include "cpu_complex_storage.hpp"
 #include "cpu_real_storage.hpp"
+#include "gpu_complex_storage.hpp"
+#include "gpu_real_storage.hpp"
 
 #define CAST_TENOSR_STORAGE(out, in, type, ptr)                                \
   type *out = static_cast<ptr *>(in.storage.get())->data.get() + in.offset
@@ -72,7 +74,13 @@ struct commuting_kernel : CommutingKernel {
 
     KERNEL_SWITCH();
   }
-  void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {}
+  void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+    const vecCapIntGpu args[2U] { a.offset, b.offset };
+    GpuRealStoragePtr a_storage = std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
+    GpuRealStoragePtr b_storage = std::dynamic_pointer_cast<GpuRealStorage>(b.storage);
+    GpuRealStoragePtr o_storage = std::dynamic_pointer_cast<GpuRealStorage>(out.storage);
+    a_storage->gpu->Dispatch(OCLAPI::OCL_API_ADD_REAL, args, a.get_size(), { a_storage->buffer, b_storage->buffer, o_storage->buffer });
+  }
   void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {}
   void gpu_mixed(const Tensor &a, const Tensor &b, Tensor &out) {}
 

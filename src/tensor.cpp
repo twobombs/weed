@@ -67,10 +67,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
         "Tensor shape vector must have same length as stride vector!");
   }
 
-  vecCapIntGpu size = 0U;
-  for (size_t i = 0U; i < shape.size(); ++i) {
-    size += (shape[i] - 1U) * stride[i];
-  }
+  const vecCapIntGpu size = get_size();
 
   switch (dtype) {
   case DType::COMPLEX:
