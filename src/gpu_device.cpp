@@ -239,15 +239,15 @@ PoolItemPtr GpuDevice::GetFreePoolItem()
   return poolItems[wait_queue_items.size()];
 }
 
-void GpuDevice::Dispatch(OCLAPI api_call, const vecCapIntGpu* bciArgs, const size_t nwi, std::vector<BufferPtr> buffers) {
+void GpuDevice::RequestKernel(OCLAPI api_call, const vecCapIntGpu* bciArgs, const size_t nwi, std::vector<BufferPtr> buffers) {
   EventVecPtr waitVec = ResetWaitEvents();
   PoolItemPtr poolItem = GetFreePoolItem();
+  cl::Event writeArgsEvent;
+  DISPATCH_TEMP_WRITE(waitVec, *(poolItem->vciBuffer), sizeof(vecCapIntGpu) * VCI_ARG_LEN, bciArgs, writeArgsEvent);
   size_t ngs = (nwi > 32U) ? 32U : nwi;
   while (((nwi / ngs) * ngs) != nwi) {
     --ngs;
   }
-  cl::Event writeArgsEvent;
-  DISPATCH_TEMP_WRITE(waitVec, *(poolItem->vciBuffer), sizeof(vecCapIntGpu) * VCI_ARG_LEN, bciArgs, writeArgsEvent);
   buffers.push_back(poolItem->vciBuffer);
   QueueCall(api_call, nwi, ngs, buffers);
 }

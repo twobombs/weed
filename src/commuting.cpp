@@ -79,7 +79,7 @@ struct commuting_kernel : CommutingKernel {
     GpuRealStoragePtr a_storage = std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
     GpuRealStoragePtr b_storage = std::dynamic_pointer_cast<GpuRealStorage>(b.storage);
     GpuRealStoragePtr o_storage = std::dynamic_pointer_cast<GpuRealStorage>(out.storage);
-    a_storage->gpu->Dispatch(OCLAPI::OCL_API_ADD_REAL, args, a.get_size(), { a_storage->buffer, b_storage->buffer, o_storage->buffer });
+    a_storage->gpu->RequestKernel(OCLAPI::OCL_API_ADD_REAL, args, a.get_size(), { a_storage->buffer, b_storage->buffer, o_storage->buffer });
   }
   void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {}
   void gpu_mixed(const Tensor &a, const Tensor &b, Tensor &out) {}

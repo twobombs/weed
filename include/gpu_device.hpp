@@ -121,6 +121,6 @@ struct GpuDevice {
 
   PoolItemPtr GetFreePoolItem();
 
-  void Dispatch(OCLAPI api_call, const vecCapIntGpu* bciArgs, const size_t nwi, std::vector<BufferPtr> buffers);
+  void RequestKernel(OCLAPI api_call, const vecCapIntGpu* bciArgs, const size_t nwi, std::vector<BufferPtr> buffers);
 };
 } // namespace Weed
