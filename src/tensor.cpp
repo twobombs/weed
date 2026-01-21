@@ -13,6 +13,7 @@
 #include "node.hpp"
 
 #include "add.hpp"
+#include "matmul.hpp"
 #include "mul.hpp"
 #include "relu.hpp"
 
@@ -55,6 +56,23 @@ Tensor Tensor::allocate_like(const Tensor &orig, const DType &dt) {
     }
   }
   return Tensor(orig.shape, orig.stride, false, dt, dtag, did);
+}
+
+Tensor Tensor::allocate_like(const std::vector<vecCapIntGpu> &shape, const std::vector<vecCapIntGpu> &stride, const Tensor &orig, const DType &dt) {
+  const StoragePtr storage_ptr = orig.storage;
+  const DeviceTag dtag = storage_ptr->device;
+  int64_t did = -1;
+  if (dtag == DeviceTag::GPU) {
+    switch (dt) {
+    case DType::COMPLEX:
+      did = static_cast<GpuComplexStorage *>(storage_ptr.get())->gpu->deviceID;
+      break;
+    case DType::REAL:
+    default:
+      did = static_cast<GpuRealStorage *>(storage_ptr.get())->gpu->deviceID;
+    }
+  }
+  return Tensor(shape, stride, false, dt, dtag, did);
 }
 
 Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
@@ -149,6 +167,34 @@ Tensor Tensor::mul(Tensor &a, Tensor &b) {
       [out](std::vector<TensorPtr> parents) {
         for (TensorPtr in : parents) {
           mul_inplace(*(in->grad.get()), *(out.grad.get()));
+        }
+      });
+
+  return out;
+}
+
+Tensor Tensor::matmul(Tensor &a, Tensor &b) {
+  if ((a.shape.size() != 2U) || (b.shape.size() != 2U)) {
+    throw std::invalid_argument("Tensor::matmul is only for matrices with 2 indices!");
+  }
+
+  const std::vector<vecCapIntGpu> shp = { a.shape[0U], b.shape[1U] };
+  const std::vector<vecCapIntGpu> str = { 1U, a.shape[0U] };
+  Tensor out = allocate_like(shp, str, a, get_dtype_by_presidence(a, b));
+
+  Weed::matmul(a, b, out);
+
+  if (!a.requires_grad && !b.requires_grad) {
+    return out;
+  }
+
+  out.requires_grad = true;
+
+  out.grad_node = std::make_shared<Node>(
+      filterParents({a.get_ptr(), b.get_ptr()}),
+      [out](std::vector<TensorPtr> parents) {
+        for (TensorPtr in : parents) {
+          // TODO
         }
       });
 

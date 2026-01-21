@@ -24,6 +24,7 @@ add_library (weed STATIC
     src/common/functions.cpp
     src/common/parallel_for.cpp
     src/commuting.cpp
+    src/matmul.cpp
     src/relu.cpp
     src/tensor.cpp
     )

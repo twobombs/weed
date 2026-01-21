@@ -15,20 +15,20 @@
 
 namespace Weed {
 struct MatMulKernel {
-  void (*cpu)(const Tensor &, const Tensor &, Tensor &);
-  void (*opencl)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_real)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_complex)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_mixed_c_left)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_mixed_c_right)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_real)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_complex)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_mixed_c_left)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_mixed_c_right)(const Tensor &, const Tensor &, Tensor &);
+  void (*matmul)(const Tensor &, const Tensor &, Tensor &);
 };
 
-extern MatMulKernel matmul_kernel;
+MatMulKernel matmul_kernel;
 
 void matmul(const Tensor &a, const Tensor &b, Tensor &out) {
-  switch (out.storage->device) {
-  case DeviceTag::CPU:
-    matmul_kernel.cpu(a, b, out);
-    break;
-  case DeviceTag::OpenCL:
-    matmul_kernel.opencl(a, b, out);
-    break;
-  }
+  matmul_kernel.matmul(a, b, out);
 }
 } // namespace Weed
