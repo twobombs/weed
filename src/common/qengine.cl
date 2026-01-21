@@ -40,32 +40,58 @@ inline cmplx polar_unit(const real1 theta) {
 }
 
 #define ID get_global_id(0)
-#define OFFSET_A veCapIntArgs[0]
-#define OFFSET_B veCapIntArgs[1]
-#define OFFSET_OUT veCapIntArgs[2]
+#define OFFSET_A vecCapIntArgs[0]
+#define OFFSET_B vecCapIntArgs[1]
+#define OFFSET_OUT vecCapIntArgs[2]
 
-void kernel add_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel add_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = a[ID + OFFSET_A] + b[ID + OFFSET_B];
 }
-void kernel add_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel add_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = a[ID + OFFSET_A] + b[ID + OFFSET_B];
 }
-void kernel add_mixed(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel add_mixed(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = a[ID + OFFSET_A] + (cmplx)(b[ID + OFFSET_B], 0);
 }
 
-void kernel mul_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel add_real_inplace(global real1* a, global real1* b, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] +=  b[ID + OFFSET_B];
+}
+void kernel add_complex_inplace(global cmplx* a, global cmplx* b, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] += b[ID + OFFSET_B];
+}
+void kernel add_mixed_inplace(global cmplx* a, global real1* b, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] += (cmplx)(b[ID + OFFSET_B], 0);
+}
+
+void kernel mul_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = a[ID + OFFSET_A] * b[ID + OFFSET_B];
 }
-void kernel mul_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel mul_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = zmul(a[ID + OFFSET_A], b[ID + OFFSET_B]);
 }
-void kernel mul_mixed(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* veCapIntArgs)
+void kernel mul_mixed(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     out[ID + OFFSET_OUT] = b[ID + OFFSET_B] * a[ID + OFFSET_A];
+}
+
+void kernel mul_real_inplace(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] *= b[ID + OFFSET_B];
+}
+void kernel mul_complex_inplace(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] = zmul(a[ID + OFFSET_A], b[ID + OFFSET_B]);
+}
+void kernel mul_mixed_inplace(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    a[ID + OFFSET_A] = b[ID + OFFSET_B] * a[ID + OFFSET_A];
 }
