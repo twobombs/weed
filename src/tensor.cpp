@@ -232,12 +232,12 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
 
   out.grad_node = std::make_shared<Node>(
       std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
-      [shp, str, dt, out](std::vector<TensorPtr> parents) {
+      [dt, out](std::vector<TensorPtr> parents) {
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
         if (a.requires_grad) {
           Tensor bt = transpose(b);
-          Tensor tmp = Tensor::allocate_like(shp, str, b, dt, false);
+          Tensor tmp = Tensor::allocate_like(a, dt, false);
           Tensor &a_grad = *(a.grad.get());
           a_grad.upcast(dt);
           Weed::matmul(*(out.grad.get()), bt, tmp);
@@ -245,8 +245,8 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
         }
         if (b.requires_grad) {
           Tensor at = transpose(a);
-          Tensor tmp = Tensor::allocate_like(shp, str, a, dt, false);
-          Tensor &b_grad = *(a.grad.get());
+          Tensor tmp = Tensor::allocate_like(b, dt, false);
+          Tensor &b_grad = *(b.grad.get());
           b_grad.upcast(dt);
           Weed::matmul(at, *(out.grad.get()), tmp);
           Weed::add_inplace(b_grad, tmp);
