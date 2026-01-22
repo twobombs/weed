@@ -109,6 +109,21 @@ std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
   return filtered;
 }
 
+Tensor Tensor::transpose(Tensor &a) {
+  if (a.shape.size() != 2U) {
+    throw std::invalid_argument(
+        "Tensor::tranpose is (currently) only for matrices with 2 indices!");
+  }
+
+  // Shallow copy (keeps storage and gradient)
+  Tensor out = a.copy();
+  // Change tensor view:
+  std::swap(out.shape[0U], out.shape[1U]);
+  std::swap(out.stride[0U], out.stride[1U]);
+
+  return out;
+}
+
 Tensor Tensor::relu(Tensor &a) {
   Tensor out = allocate_like(a, a.storage->dtype);
 
@@ -164,7 +179,8 @@ Tensor Tensor::mul(Tensor &a, Tensor &b) {
 
   out.requires_grad = true;
 
-  out.grad_node = std::make_shared<Node>(std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
+  out.grad_node = std::make_shared<Node>(
+      std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
       [out](std::vector<TensorPtr> parents) {
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
@@ -197,13 +213,20 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
 
   out.requires_grad = true;
 
-  out.grad_node =
-      std::make_shared<Node>(filterParents({a.get_ptr(), b.get_ptr()}),
-                             [out](std::vector<TensorPtr> parents) {
-                               for (TensorPtr in : parents) {
-                                 // TODO
-                               }
-                             });
+  out.grad_node = std::make_shared<Node>(
+      std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
+      [out](std::vector<TensorPtr> parents) {
+        Tensor &a = *(parents[0U].get());
+        Tensor &b = *(parents[1U].get());
+        if (a.requires_grad) {
+          Tensor bt = transpose(b);
+          add_inplace(*(a.grad.get()), matmul(*(out.grad.get()), bt));
+        }
+        if (b.requires_grad) {
+          Tensor at = transpose(a);
+          add_inplace(*(b.grad.get()), matmul(at, *(out.grad.get())));
+        }
+      });
 
   return out;
 }

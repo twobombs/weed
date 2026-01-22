@@ -33,6 +33,9 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
   NodePtr grad_node;
   TensorPtr grad;
 
+  Tensor()
+      : storage(nullptr), shape(), stride(), offset(0U), requires_grad(false),
+        grad_node(nullptr), grad(nullptr) {}
   Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
          bool rg = false, DType dtype = DType::REAL,
          DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
@@ -48,10 +51,27 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
     return size;
   }
 
+  // Shallow copy:
+  Tensor copy() {
+    Tensor cp;
+    // A tensor is a view on storage:
+    cp.storage = storage;
+    cp.shape = shape;
+    cp.stride = stride;
+    cp.offset = offset;
+    cp.requires_grad = requires_grad;
+    cp.grad_node = grad_node;
+    cp.grad = grad;
+
+    return cp;
+  }
+
   static Tensor allocate_like(const Tensor &orig, const DType &dt);
   static Tensor allocate_like(const std::vector<vecCapIntGpu> &shape,
                               const std::vector<vecCapIntGpu> &stride,
                               const Tensor &orig, const DType &dt);
+
+  static Tensor transpose(Tensor &a);
 
   static Tensor relu(Tensor &a);
   static Tensor add(Tensor &a, Tensor &b);
