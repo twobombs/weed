@@ -30,16 +30,17 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
   std::vector<vecCapIntGpu> stride;
   vecCapIntGpu offset;
 
-  bool requires_grad;
   NodePtr grad_node;
   TensorPtr grad;
 
   Tensor()
-      : storage(nullptr), shape(), stride(), offset(0U), requires_grad(false),
-        grad_node(nullptr), grad(nullptr) {}
+      : storage(nullptr), shape(), stride(), offset(0U), grad_node(nullptr),
+        grad(nullptr) {}
   Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
          bool rg = false, DType dtype = DType::REAL,
          DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
+
+  bool requires_grad() { return !!grad; }
 
   TensorPtr get_ptr() { return shared_from_this(); }
 
@@ -63,7 +64,6 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
     cp.shape = shape;
     cp.stride = stride;
     cp.offset = offset;
-    cp.requires_grad = requires_grad;
     cp.grad_node = grad_node;
     cp.grad = grad;
 

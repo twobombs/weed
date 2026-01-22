@@ -76,8 +76,9 @@ Tensor Tensor::allocate_like(const std::vector<vecCapIntGpu> &shape,
 
 Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
                bool rg, DType dtype, DeviceTag dtag, int64_t did)
-    : shape(shp), stride(strd), offset(0U), requires_grad(rg),
-      grad_node(nullptr), grad(nullptr) {
+    : shape(shp), stride(strd), offset(0U), grad_node(nullptr),
+      grad(rg ? std::make_shared<Tensor>(shape, stride, false, dtype, dtag, did)
+              : nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
         "Tensor shape vector must have same length as stride vector!");
@@ -94,8 +95,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
     PICK_DEVICE_STORAGE(GpuRealStorage, CpuRealStorage);
   }
 
-  if (requires_grad) {
-    grad = std::make_shared<Tensor>(shape, stride, false, dtype, dtag, did);
+  if (rg) {
     grad->storage->FillZeros();
   }
 }
@@ -103,7 +103,7 @@ Tensor::Tensor(std::vector<vecCapIntGpu> shp, std::vector<vecCapIntGpu> strd,
 std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
   std::vector<TensorPtr> filtered;
   for (TensorPtr p : parents) {
-    if (p->requires_grad) {
+    if (p->requires_grad()) {
       filtered.push_back(p);
     }
   }
@@ -112,7 +112,7 @@ std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
 }
 
 void Tensor::backward(Tensor &loss) {
-  if (!loss.requires_grad) {
+  if (!loss.requires_grad()) {
     return;
   }
 
@@ -159,7 +159,7 @@ Tensor Tensor::transpose(Tensor &a) {
 }
 
 Tensor Tensor::relu(Tensor &a) {
-  const bool rg = a.requires_grad;
+  const bool rg = a.requires_grad();
   Tensor out = allocate_like(a, a.storage->dtype, rg);
 
   Weed::relu(a, out);
@@ -186,7 +186,7 @@ void Tensor::make_relu_node(Tensor &a, Tensor &out) {
 }
 
 Tensor Tensor::add(Tensor &a, Tensor &b) {
-  const bool rg = a.requires_grad || b.requires_grad;
+  const bool rg = a.requires_grad() || b.requires_grad();
   DType dt = get_dtype_by_presidence(a, b);
   Tensor out = allocate_like(a, dt, rg);
 
@@ -214,7 +214,7 @@ void Tensor::make_add_node(Tensor &a, Tensor &b, Tensor &out) {
 }
 
 Tensor Tensor::mul(Tensor &a, Tensor &b) {
-  const bool rg = a.requires_grad || b.requires_grad;
+  const bool rg = a.requires_grad() || b.requires_grad();
   DType dt = get_dtype_by_presidence(a, b);
   Tensor out = allocate_like(a, dt, rg);
 
@@ -235,14 +235,14 @@ void Tensor::make_mul_node(Tensor &a, Tensor &b, Tensor &out) {
         const DType &dt = out_grad.storage->dtype;
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
-        if (a.requires_grad) {
+        if (a.requires_grad()) {
           Tensor tmp = Tensor::allocate_like(b, dt, false);
           Tensor &a_grad = *(a.grad.get());
           a_grad.upcast(dt);
           Weed::mul(out_grad, b, tmp);
           Weed::add_inplace(a_grad, tmp);
         }
-        if (b.requires_grad) {
+        if (b.requires_grad()) {
           Tensor tmp = Tensor::allocate_like(a, dt, false);
           Tensor &b_grad = *(b.grad.get());
           b_grad.upcast(dt);
@@ -260,7 +260,7 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
 
   const std::vector<vecCapIntGpu> shp = {a.shape[0U], b.shape[1U]};
   const std::vector<vecCapIntGpu> str = {1U, a.shape[0U]};
-  const bool rg = a.requires_grad || b.requires_grad;
+  const bool rg = a.requires_grad() || b.requires_grad();
   DType dt = get_dtype_by_presidence(a, b);
   Tensor out = allocate_like(shp, str, a, dt, rg);
 
@@ -281,7 +281,7 @@ void Tensor::make_matmul_node(Tensor &a, Tensor &b, Tensor &out) {
         const DType &dt = out_grad.storage->dtype;
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
-        if (a.requires_grad) {
+        if (a.requires_grad()) {
           Tensor bt = transpose(b);
           Tensor tmp = Tensor::allocate_like(a, dt, false);
           Tensor &a_grad = *(a.grad.get());
@@ -289,7 +289,7 @@ void Tensor::make_matmul_node(Tensor &a, Tensor &b, Tensor &out) {
           Weed::matmul(*(out.grad.get()), bt, tmp);
           Weed::add_inplace(a_grad, tmp);
         }
-        if (b.requires_grad) {
+        if (b.requires_grad()) {
           Tensor at = transpose(a);
           Tensor tmp = Tensor::allocate_like(b, dt, false);
           Tensor &b_grad = *(b.grad.get());
