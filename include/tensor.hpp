@@ -43,7 +43,7 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
 
   TensorPtr get_ptr() { return shared_from_this(); }
 
-  vecCapIntGpu get_size() const {
+  virtual vecCapIntGpu get_size() const {
     if (shape.empty()) {
       return 0U;
     }
@@ -72,6 +72,14 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
 
   void upcast(DType dt) { storage = storage->Upcast(dt); }
 
+  static DType get_dtype_by_presidence(const Tensor &left,
+                                       const Tensor &right) {
+    if (right.storage->dtype == DType::COMPLEX) {
+      return DType::COMPLEX;
+    }
+    return left.storage->dtype;
+  }
+
   static Tensor allocate_like(const Tensor &orig, const DType &dt,
                               const bool &rg);
   static Tensor allocate_like(const std::vector<vecCapIntGpu> &shape,
@@ -84,9 +92,16 @@ struct Tensor : public std::enable_shared_from_this<Tensor> {
   static Tensor transpose(Tensor &a);
 
   static Tensor relu(Tensor &a);
+  static void make_relu_node(Tensor &a, Tensor &out);
+
   static Tensor add(Tensor &a, Tensor &b);
+  static void make_add_node(Tensor &a, Tensor &b, Tensor &out);
+
   static Tensor mul(Tensor &a, Tensor &b);
+  static void make_mul_node(Tensor &a, Tensor &b, Tensor &out);
+
   static Tensor matmul(Tensor &a, Tensor &b);
+  static void make_matmul_node(Tensor &a, Tensor &b, Tensor &out);
 };
 
 inline Tensor operator+(Tensor &left, Tensor &right) {

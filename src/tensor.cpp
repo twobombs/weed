@@ -36,13 +36,6 @@
   break
 
 namespace Weed {
-inline DType get_dtype_by_presidence(const Tensor &left, const Tensor &right) {
-  if (right.storage->dtype == DType::COMPLEX) {
-    return DType::COMPLEX;
-  }
-  return left.storage->dtype;
-}
-
 Tensor Tensor::allocate_like(const Tensor &orig, const DType &dt,
                              const bool &rg) {
   const StoragePtr storage_ptr = orig.storage;
@@ -171,19 +164,25 @@ Tensor Tensor::relu(Tensor &a) {
 
   Weed::relu(a, out);
 
-  if (!rg) {
-    return out;
+  if (rg) {
+    make_relu_node(a, out);
   }
 
+  return out;
+}
+
+void Tensor::make_relu_node(Tensor &a, Tensor &out) {
   out.grad_node = std::make_shared<Node>(
       std::vector<TensorPtr>{a.get_ptr()},
       [out](std::vector<TensorPtr> parents) {
+        Tensor &out_grad = *(out.grad.get());
+        const DType &dt = out_grad.storage->dtype;
         for (TensorPtr in : parents) {
-          Weed::relu_grad(*(in->grad.get()), *(in.get()), *(out.grad.get()));
+          Tensor &in_grad = *(in->grad.get());
+          in_grad.upcast(dt);
+          Weed::relu_grad(in_grad, *(in.get()), out_grad);
         }
       });
-
-  return out;
 }
 
 Tensor Tensor::add(Tensor &a, Tensor &b) {
@@ -193,22 +192,25 @@ Tensor Tensor::add(Tensor &a, Tensor &b) {
 
   Weed::add(a, b, out);
 
-  if (!rg) {
-    return out;
+  if (rg) {
+    make_add_node(a, b, out);
   }
 
+  return out;
+}
+
+void Tensor::make_add_node(Tensor &a, Tensor &b, Tensor &out) {
   out.grad_node =
       std::make_shared<Node>(filterParents({a.get_ptr(), b.get_ptr()}),
-                             [dt, out](std::vector<TensorPtr> parents) {
+                             [out](std::vector<TensorPtr> parents) {
                                Tensor &out_grad = *(out.grad.get());
+                               const DType &dt = out_grad.storage->dtype;
                                for (TensorPtr in : parents) {
                                  Tensor &in_grad = *(in->grad.get());
                                  in_grad.upcast(dt);
                                  Weed::add_inplace(in_grad, out_grad);
                                }
                              });
-
-  return out;
 }
 
 Tensor Tensor::mul(Tensor &a, Tensor &b) {
@@ -218,32 +220,36 @@ Tensor Tensor::mul(Tensor &a, Tensor &b) {
 
   Weed::mul(a, b, out);
 
-  if (!rg) {
-    return out;
+  if (rg) {
+    make_mul_node(a, b, out);
   }
 
+  return out;
+}
+
+void Tensor::make_mul_node(Tensor &a, Tensor &b, Tensor &out) {
   out.grad_node = std::make_shared<Node>(
       std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
-      [dt, out](std::vector<TensorPtr> parents) {
+      [out](std::vector<TensorPtr> parents) {
+        Tensor &out_grad = *(out.grad.get());
+        const DType &dt = out_grad.storage->dtype;
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
         if (a.requires_grad) {
           Tensor tmp = Tensor::allocate_like(b, dt, false);
           Tensor &a_grad = *(a.grad.get());
           a_grad.upcast(dt);
-          Weed::mul(*(out.grad.get()), b, tmp);
+          Weed::mul(out_grad, b, tmp);
           Weed::add_inplace(a_grad, tmp);
         }
         if (b.requires_grad) {
           Tensor tmp = Tensor::allocate_like(a, dt, false);
           Tensor &b_grad = *(b.grad.get());
           b_grad.upcast(dt);
-          Weed::mul(*(out.grad.get()), a, tmp);
+          Weed::mul(out_grad, a, tmp);
           Weed::add_inplace(b_grad, tmp);
         }
       });
-
-  return out;
 }
 
 Tensor Tensor::matmul(Tensor &a, Tensor &b) {
@@ -260,13 +266,19 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
 
   Weed::matmul(a, b, out);
 
-  if (!rg) {
-    return out;
+  if (rg) {
+    make_matmul_node(a, b, out);
   }
 
+  return out;
+}
+
+void Tensor::make_matmul_node(Tensor &a, Tensor &b, Tensor &out) {
   out.grad_node = std::make_shared<Node>(
       std::vector<TensorPtr>{a.get_ptr(), b.get_ptr()},
-      [dt, out](std::vector<TensorPtr> parents) {
+      [out](std::vector<TensorPtr> parents) {
+        Tensor &out_grad = *(out.grad.get());
+        const DType &dt = out_grad.storage->dtype;
         Tensor &a = *(parents[0U].get());
         Tensor &b = *(parents[1U].get());
         if (a.requires_grad) {
@@ -286,7 +298,5 @@ Tensor Tensor::matmul(Tensor &a, Tensor &b) {
           Weed::add_inplace(b_grad, tmp);
         }
       });
-
-  return out;
 }
 } // namespace Weed
