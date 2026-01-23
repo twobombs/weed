@@ -121,8 +121,3 @@ int main(int argc, char *argv[]) {
 
   return num_failed;
 }
-
-TensorTestFixture::TensorTestFixture() : tensor({}, {}) {
-  std::cout << ">>> '" << Catch::getResultCapture().getCurrentTestName()
-            << "':" << std::endl;
-}

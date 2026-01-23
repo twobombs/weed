@@ -30,21 +30,4 @@ extern int benchmarkSamples;
 extern int benchmarkDepth;
 extern Weed::DeviceTag TEST_DTAG;
 
-/* Declare the stream-to-probability prior to including catch.hpp. */
-namespace Weed {
-// TODO: Output functions
-} // namespace Weed
-
 #include "catch.hpp"
-
-/*
- * A fixture to create a unique QInterface test, of the appropriate type, for
- * each executing test case.
- */
-class TensorTestFixture {
-protected:
-  Weed::Tensor tensor;
-
-public:
-  TensorTestFixture();
-};
