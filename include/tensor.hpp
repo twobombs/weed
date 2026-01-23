@@ -113,4 +113,10 @@ inline TensorPtr operator+(TensorPtr left, TensorPtr right) {
 inline TensorPtr operator*(TensorPtr left, TensorPtr right) {
   return Tensor::mul(left, right);
 }
+inline TensorPtr operator>>(TensorPtr left, TensorPtr right) {
+  return Tensor::matmul(left, right);
+}
+inline TensorPtr operator<<(TensorPtr right, TensorPtr left) {
+  return Tensor::matmul(left, right);
+}
 } // namespace Weed
