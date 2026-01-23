@@ -15,20 +15,18 @@
 
 namespace Weed {
 struct ReluKernel {
-  void (*cpu)(const Tensor &, Tensor &);
-  void (*gpu)(const Tensor &, Tensor &);
-  void (*relu)(const Tensor &, Tensor &);
-  void (*cpu_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*cpu_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*relu_grad)(Tensor &, const Tensor &, const Tensor &);
+  void cpu(const Tensor &, Tensor &);
+  void gpu(const Tensor &, Tensor &);
+  void relu(const Tensor &, Tensor &);
+  void cpu_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void gpu_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void cpu_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void gpu_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void relu_grad(Tensor &, const Tensor &, const Tensor &);
 };
 
-ReluKernel relu_kernel;
+extern ReluKernel relu_kernel;
 
-void relu(const Tensor &a, Tensor &out) { relu_kernel.relu(a, out); }
-void relu_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
-  relu_kernel.relu_grad(din, in, dout);
-}
+void relu(const Tensor &a, Tensor &out);
+void relu_grad(Tensor &din, const Tensor &in, const Tensor &dout);
 } // namespace Weed

@@ -231,4 +231,6 @@ void ParallelFor::par_for_inc(const vecCapIntGpu begin,
   }
 }
 #endif
+
+ParallelFor pfControl;
 } // namespace Weed

@@ -16,10 +16,10 @@
 namespace Weed {
 struct CommutingKernel {
   void (*cpu_real)(const Tensor &, const Tensor &, Tensor &);
-  void (*cpu_complex)(const Tensor &, const Tensor &, Tensor &);
-  void (*cpu_mixed)(const Tensor &, const Tensor &, Tensor &);
   void (*gpu_real)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_complex)(const Tensor &, const Tensor &, Tensor &);
   void (*gpu_complex)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_mixed)(const Tensor &, const Tensor &, Tensor &);
   void (*gpu_mixed)(const Tensor &, const Tensor &, Tensor &);
   void commuting(const Tensor &a, const Tensor &b, Tensor &out);
 };

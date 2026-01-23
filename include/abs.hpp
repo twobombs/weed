@@ -15,26 +15,24 @@
 
 namespace Weed {
 struct AbsKernel {
-  void (*cpu_real)(const Tensor &, Tensor &);
-  void (*gpu_real)(const Tensor &, Tensor &);
-  void (*cpu_complex)(const Tensor &, Tensor &);
-  void (*gpu_complex)(const Tensor &, Tensor &);
-  void (*abs)(const Tensor &, Tensor &);
-  void (*cpu_real_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_real_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*cpu_real_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_real_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*cpu_complex_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_complex_grad_real)(Tensor &, const Tensor &, const Tensor &);
-  void (*cpu_complex_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*gpu_complex_grad_complex)(Tensor &, const Tensor &, const Tensor &);
-  void (*abs_grad)(Tensor &, const Tensor &, const Tensor &);
+  void cpu_real(const Tensor &, Tensor &);
+  void gpu_real(const Tensor &, Tensor &);
+  void cpu_complex(const Tensor &, Tensor &);
+  void gpu_complex(const Tensor &, Tensor &);
+  void abs(const Tensor &, Tensor &);
+  void cpu_real_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void gpu_real_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void cpu_real_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void gpu_real_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void cpu_complex_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void gpu_complex_grad_real(Tensor &, const Tensor &, const Tensor &);
+  void cpu_complex_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void gpu_complex_grad_complex(Tensor &, const Tensor &, const Tensor &);
+  void abs_grad(Tensor &, const Tensor &, const Tensor &);
 };
 
-AbsKernel abs_kernel;
+extern AbsKernel abs_kernel;
 
-void abs(const Tensor &a, Tensor &out) { abs_kernel.abs(a, out); }
-void abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
-  abs_kernel.abs_grad(din, in, dout);
-}
+void abs(const Tensor &a, Tensor &out);
+void abs_grad(Tensor &din, const Tensor &in, const Tensor &dout);
 } // namespace Weed

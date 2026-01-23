@@ -62,8 +62,6 @@
   }
 
 namespace Weed {
-ParallelFor pfControl = ParallelFor();
-
 struct matmul_kernel : MatMulKernel {
   void cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
     CPU_BY_TYPE(real1, CpuRealStorage, real1, CpuRealStorage, real1,

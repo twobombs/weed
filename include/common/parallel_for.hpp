@@ -92,4 +92,5 @@ public:
                               const vecLenInt &highStart, ParallelFunc fn);
 };
 
+extern ParallelFor pfControl;
 } // namespace Weed

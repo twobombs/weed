@@ -66,8 +66,6 @@
       {a_storage->buffer, b_storage->buffer, o_storage->buffer})
 
 namespace Weed {
-ParallelFor pfControl = ParallelFor();
-
 void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CAST_STORAGE(pa, a, real1, CpuRealStorage);
   CAST_STORAGE(pb, b, real1, CpuRealStorage);
@@ -154,11 +152,11 @@ void CommutingKernel::commuting(const Tensor &a, const Tensor &b, Tensor &out) {
   }
 }
 
-CommutingKernel add_kernel = {cpu_real_add, cpu_complex_add, cpu_mixed_add,
-                              gpu_real_add, gpu_complex_add, gpu_mixed_add};
+CommutingKernel add_kernel = {cpu_real_add,    gpu_real_add,  cpu_complex_add,
+                              gpu_complex_add, cpu_mixed_add, gpu_mixed_add};
 
-CommutingKernel mul_kernel = {cpu_real_mul, cpu_complex_mul, cpu_mixed_mul,
-                              gpu_real_mul, gpu_complex_mul, gpu_mixed_mul};
+CommutingKernel mul_kernel = {cpu_real_mul,    gpu_real_mul,  cpu_complex_mul,
+                              gpu_complex_mul, cpu_mixed_mul, gpu_mixed_mul};
 
 void add(const Tensor &a, const Tensor &b, Tensor &out) {
   add_kernel.commuting(a, b, out);
