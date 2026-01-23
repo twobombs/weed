@@ -192,16 +192,22 @@ void GpuDevice::DispatchQueue() {
   }
 
   // Dispatch the primary kernel, to apply the gate.
+  auto wic = !item.workItemCount2
+                 ? cl::NDRange(item.workItemCount)
+                 : cl::NDRange(item.workItemCount, item.workItemCount2);
+  auto lgs = !item.localGroupSize2
+                 ? cl::NDRange(item.localGroupSize)
+                 : cl::NDRange(item.localGroupSize, item.localGroupSize2);
   EventVecPtr kernelWaitVec = ResetWaitEvents(false);
   cl_int error = CL_SUCCESS;
   device_context->EmplaceEvent([&](cl::Event &event) {
     event.setCallback(CL_COMPLETE, _PopQueue, this);
     error = queue.enqueueNDRangeKernel(
-        ocl.call, cl::NullRange,          // kernel, offset
-        cl::NDRange(item.workItemCount),  // global number of work items
-        cl::NDRange(item.localGroupSize), // local number (per group)
-        kernelWaitVec.get(),              // vector of events to wait for
-        &event);                          // handle to wait for the kernel
+        ocl.call, cl::NullRange, // kernel, offset
+        wic,                     // global number of work items
+        lgs,                     // local number (per group)
+        kernelWaitVec.get(),     // vector of events to wait for
+        &event);                 // handle to wait for the kernel
   });
   if (error != CL_SUCCESS) {
     // We're fatally blocked, since we can't make any blocking calls like
@@ -265,8 +271,8 @@ inline size_t pick_group_size(const size_t &nwi) {
 }
 
 void GpuDevice::RequestKernel(OCLAPI api_call, const vecCapIntGpu *vciArgs,
-                              const size_t nwi,
-                              std::vector<BufferPtr> buffers) {
+                              const size_t nwi, std::vector<BufferPtr> buffers,
+                              const size_t nwi2) {
   EventVecPtr waitVec = ResetWaitEvents();
   PoolItemPtr poolItem = GetFreePoolItem();
   cl::Event writeArgsEvent;
@@ -274,8 +280,9 @@ void GpuDevice::RequestKernel(OCLAPI api_call, const vecCapIntGpu *vciArgs,
                       sizeof(vecCapIntGpu) * VCI_ARG_LEN, vciArgs,
                       writeArgsEvent);
   const size_t ngs = pick_group_size(nwi);
+  const size_t ngs2 = (!nwi2) ? 0U : pick_group_size(nwi2);
   buffers.push_back(poolItem->vciBuffer);
-  QueueCall(api_call, nwi, ngs, buffers);
+  QueueCall(api_call, nwi, ngs, buffers, nwi2, ngs2);
 }
 
 void GpuDevice::ClearRealBuffer(BufferPtr buffer, const size_t nwi) {

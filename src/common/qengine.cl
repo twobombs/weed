@@ -156,44 +156,44 @@ void kernel mul_mixed(global cmplx* a, global real1* b, global cmplx* out, const
 void kernel matmul_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     real1 sum = ZERO_R1;
-    for (vecCapIntGpu k = 0; k < S_K; ++k) {
-        vecCapIntGPu a_idx = (O_A + i_X * I_A + k * J_A);
-        vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
+    for (vecCapIntGpu k = 0; k < K; ++k) {
+        const vecCapIntGpu a_idx = (O_A + i_X * I_A + k * J_A);
+        const vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
         sum += a[a_idx] * b[b_idx];
     }
-    vecCapIntGPu o_idx = (O_C + i_X * I_C + i_Y * J_C);
+    const vecCapIntGpu o_idx = (O_C + i_X * I_C + i_Y * J_C);
     out[o_idx] = sum;
 }
 void kernel matmul_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     cmplx sum = ZERO_R1;
-    for (vecCapIntGpu k = 0; k < S_K; ++k) {
-        vecCapIntGPu a_idx = (O_A + i_X * I_A + k * J_A);
-        vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
+    for (vecCapIntGpu k = 0; k < K; ++k) {
+        const vecCapIntGpu a_idx = (O_A + i_X * I_A + k * J_A);
+        const vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
         sum += zmul(a[a_idx], b[b_idx]);
     }
-    vecCapIntGPu o_idx = (O_C + i_X * I_C + i_Y * J_C);
+    const vecCapIntGpu o_idx = (O_C + i_X * I_C + i_Y * J_C);
     out[o_idx] = sum;
 }
 void kernel matmul_mixed_c_left(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     cmplx sum = ZERO_R1;
-    for (vecCapIntGpu k = 0; k < S_K; ++k) {
-        vecCapIntGPu a_idx = (O_A + i_X * I_A + k * J_A);
-        vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
+    for (vecCapIntGpu k = 0; k < K; ++k) {
+        const vecCapIntGpu a_idx = (O_A + i_X * I_A + k * J_A);
+        const vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
         sum += b[b_idx] * a[a_idx];
     }
-    vecCapIntGPu o_idx = (O_C + i_X * I_C + i_Y * J_C);
+    const vecCapIntGpu o_idx = (O_C + i_X * I_C + i_Y * J_C);
     out[o_idx] = sum;
 }
 void kernel matmul_mixed_c_right(global real1* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
 {
     cmplx sum = ZERO_R1;
-    for (vecCapIntGpu k = 0; k < S_K; ++k) {
-        vecCapIntGPu a_idx = (O_A + i_X * I_A + k * J_A);
-        vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
+    for (vecCapIntGpu k = 0; k < K; ++k) {
+        const vecCapIntGpu a_idx = (O_A + i_X * I_A + k * J_A);
+        const vecCapIntGpu b_idx = (O_B + k * I_B + i_Y * J_B);
         sum += a[a_idx] * b[b_idx];
     }
-    vecCapIntGPu o_idx = (O_C + i_X * I_C + i_Y * J_C);
+    const vecCapIntGpu o_idx = (O_C + i_X * I_C + i_Y * J_C);
     out[o_idx] = sum;
 }

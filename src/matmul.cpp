@@ -30,11 +30,11 @@
     for (vecCapIntGpu j = 0; j < d.N; ++j) {                                   \
       stype sum = ZERO_R1;                                                     \
       for (vecCapIntGpu k = 0; k < d.K; ++k) {                                 \
-        auto a_idx = (d.A_o + i * d.A_s0 + k * d.A_s1);                        \
-        auto b_idx = (d.B_o + k * d.B_s0 + j * d.B_s1);                        \
+        const auto a_idx = (d.A_o + i * d.A_s0 + k * d.A_s1);                  \
+        const auto b_idx = (d.B_o + k * d.B_s0 + j * d.B_s1);                  \
         sum += pa[a_idx] * pb[b_idx];                                          \
       }                                                                        \
-      auto o_idx = (d.O_o + i * d.O_s0 + j * d.O_s1);                          \
+      const auto o_idx = (d.O_o + i * d.O_s0 + j * d.O_s1);                    \
       po[o_idx] = sum;                                                         \
     }                                                                          \
   })
@@ -48,7 +48,7 @@
   ostorage o_storage = std::dynamic_pointer_cast<otype>(out.storage);          \
   a_storage->gpu->RequestKernel(                                               \
       OCLAPI::call, args, d.M,                                                 \
-      {a_storage->buffer, b_storage->buffer, o_storage->buffer})
+      {a_storage->buffer, b_storage->buffer, o_storage->buffer}, d.N)
 
 #define DEVICE_SWITCH(cpu, gpu)                                                \
   switch (out.storage->device) {                                               \

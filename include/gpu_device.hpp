@@ -106,20 +106,22 @@ struct GpuDevice {
   }
 
   void QueueCall(OCLAPI api_call, size_t workItemCount, size_t localGroupSize,
-                 std::vector<BufferPtr> args, size_t localBuffSize = 0U,
+                 std::vector<BufferPtr> args, size_t wic2 = 0U,
+                 size_t lgs2 = 0U, size_t localBuffSize = 0U,
                  size_t deallocSize = 0U) {
     if (localBuffSize > device_context->GetLocalSize()) {
       throw bad_alloc(
           "Local memory limits exceeded in QEngineOCL::QueueCall()");
     }
     AddQueueItem(QueueItem(api_call, workItemCount, localGroupSize, deallocSize,
-                           args, localBuffSize));
+                           args, wic2, lgs2, localBuffSize));
   }
 
   PoolItemPtr GetFreePoolItem();
 
   void RequestKernel(OCLAPI api_call, const vecCapIntGpu *vciArgs,
-                     const size_t nwi, std::vector<BufferPtr> buffers);
+                     const size_t nwi, std::vector<BufferPtr> buffers,
+                     const size_t nwi2 = 0);
 
   void ClearRealBuffer(BufferPtr buffer, const size_t nwi);
   void FillOnesReal(BufferPtr buffer, const size_t nwi);
