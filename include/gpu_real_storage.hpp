@@ -55,7 +55,8 @@ struct GpuRealStorage : RealStorage {
       return get_ptr();
     }
 
-    GpuComplexStoragePtr n = std::make_shared<GpuComplexStorage>(size, gpu->deviceID);
+    GpuComplexStoragePtr n =
+        std::make_shared<GpuComplexStorage>(size, gpu->deviceID);
     gpu->UpcastRealBuffer(buffer, n->buffer, size);
 
     return n;
