@@ -12,9 +12,8 @@
 #include "scalar.hpp"
 
 #include "abs.hpp"
-#include "add.hpp"
+#include "commuting.hpp"
 #include "matmul.hpp"
-#include "mul.hpp"
 #include "relu.hpp"
 
 namespace Weed {

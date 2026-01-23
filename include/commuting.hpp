@@ -11,21 +11,22 @@
 
 #pragma once
 
-#include "commuting_operation.hpp"
-#include "storage.hpp"
 #include "tensor.hpp"
 
 namespace Weed {
 struct CommutingKernel {
-  CommutingOperation op;
-  void cpu_real(const Tensor &, const Tensor &, Tensor &);
-  void cpu_complex(const Tensor &, const Tensor &, Tensor &);
-  void cpu_mixed(const Tensor &, const Tensor &, Tensor &);
-  void gpu_real(const Tensor &, const Tensor &, Tensor &);
-  void gpu_complex(const Tensor &, const Tensor &, Tensor &);
-  void gpu_mixed(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_real)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_complex)(const Tensor &, const Tensor &, Tensor &);
+  void (*cpu_mixed)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_real)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_complex)(const Tensor &, const Tensor &, Tensor &);
+  void (*gpu_mixed)(const Tensor &, const Tensor &, Tensor &);
   void commuting(const Tensor &a, const Tensor &b, Tensor &out);
 };
 
-extern CommutingKernel commuting_kernel;
+extern CommutingKernel add_kernel;
+extern CommutingKernel mul_kernel;
+
+void add(const Tensor &a, const Tensor &b, Tensor &out);
+void mul(const Tensor &a, const Tensor &b, Tensor &out);
 } // namespace Weed

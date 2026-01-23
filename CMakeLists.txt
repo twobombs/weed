@@ -288,7 +288,6 @@ install (FILES
 # Install weed library headers
 install (FILES
     include/abs.hpp
-    include/add.hpp
     include/complex_scalar.hpp
     include/complex_storage.hpp
     include/cpu_complex_storage.hpp
@@ -300,7 +299,6 @@ install (FILES
     include/gpu_real_storage.hpp
     include/matmul.hpp
     include/module.hpp
-    include/mul.hpp
     include/node.hpp
     include/parameter.hpp
     include/queue_item.hpp

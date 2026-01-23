@@ -14,9 +14,8 @@
 #include "real_scalar.hpp"
 
 #include "abs.hpp"
-#include "add.hpp"
+#include "commuting.hpp"
 #include "matmul.hpp"
-#include "mul.hpp"
 #include "relu.hpp"
 
 #include "cpu_complex_storage.hpp"

@@ -29,36 +29,25 @@
     cpu(a, b, out);                                                            \
   }
 
-#define KERNEL_SWITCH()                                                        \
+#define ADD_KERNEL()                                                           \
   const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];                         \
   const vecCapIntGpu I_b = (vecCapIntGpu)b.stride[0U];                         \
   const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];                       \
-  ParallelFunc fn;                                                             \
-  switch (op) {                                                                \
-  case CommutingOperation::MUL:                                                \
-    fn = [&](const vecCapIntGpu &i, const unsigned &cpu) {                     \
-      po[i * I_o] = pa[i * I_a] * pb[i * I_b];                                 \
-    };                                                                         \
-    break;                                                                     \
-  case CommutingOperation::ADD:                                                \
-  default:                                                                     \
-    fn = [&](const vecCapIntGpu &i, const unsigned &cpu) {                     \
-      po[i * I_o] = pa[i * I_a] + pb[i * I_b];                                 \
-    };                                                                         \
-  }                                                                            \
   const size_t n = out.get_size();                                             \
-  pfControl.par_for(0, n, fn)
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {    \
+    po[i * I_o] = pa[i * I_a] + pb[i * I_b];                                   \
+  })
 
-#define DISPATCH_GPU_KERNEL(type, type2, api_add, api_mul)                     \
-  OCLAPI api_call;                                                             \
-  switch (op) {                                                                \
-  case CommutingOperation::MUL:                                                \
-    api_call = api_mul;                                                        \
-    break;                                                                     \
-  case CommutingOperation::ADD:                                                \
-  default:                                                                     \
-    api_call = api_add;                                                        \
-  }                                                                            \
+#define MUL_KERNEL()                                                           \
+  const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];                         \
+  const vecCapIntGpu I_b = (vecCapIntGpu)b.stride[0U];                         \
+  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];                       \
+  const size_t n = out.get_size();                                             \
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {    \
+    po[i * I_o] = pa[i * I_a] * pb[i * I_b];                                   \
+  })
+
+#define DISPATCH_GPU_KERNEL(type, type2, api_call)                             \
   const vecCapIntGpu args[7U]{(vecCapIntGpu)(a.offset),                        \
                               (vecCapIntGpu)(a.stride[0U]),                    \
                               (vecCapIntGpu)(b.offset),                        \
@@ -79,41 +68,70 @@
 namespace Weed {
 ParallelFor pfControl = ParallelFor();
 
-void CommutingKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CAST_STORAGE(pa, a, real1, CpuRealStorage);
   CAST_STORAGE(pb, b, real1, CpuRealStorage);
   CAST_STORAGE(po, out, real1, CpuRealStorage);
 
-  KERNEL_SWITCH();
+  ADD_KERNEL();
 }
-void CommutingKernel::cpu_complex(const Tensor &a, const Tensor &b,
-                                  Tensor &out) {
+void cpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CAST_STORAGE(pa, a, complex, CpuComplexStorage);
   CAST_STORAGE(pb, b, complex, CpuComplexStorage);
   CAST_STORAGE(po, out, complex, CpuComplexStorage);
 
-  KERNEL_SWITCH();
+  ADD_KERNEL();
 }
-void CommutingKernel::cpu_mixed(const Tensor &a, const Tensor &b, Tensor &out) {
+void cpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CAST_STORAGE(pa, a, complex, CpuComplexStorage);
   CAST_STORAGE(pb, b, real1, CpuRealStorage);
   CAST_STORAGE(po, out, complex, CpuComplexStorage);
 
-  KERNEL_SWITCH();
+  ADD_KERNEL();
 }
-void CommutingKernel::gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-  DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, OCL_API_ADD_REAL,
-                      OCL_API_MUL_REAL);
+void gpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, OCL_API_ADD_REAL);
 }
-void CommutingKernel::gpu_complex(const Tensor &a, const Tensor &b,
-                                  Tensor &out) {
-  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage, OCL_API_ADD_COMPLEX,
+void gpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage,
+                      OCL_API_ADD_COMPLEX);
+}
+void gpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuRealStorage, OCL_API_ADD_MIXED);
+}
+
+void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  CAST_STORAGE(pa, a, real1, CpuRealStorage);
+  CAST_STORAGE(pb, b, real1, CpuRealStorage);
+  CAST_STORAGE(po, out, real1, CpuRealStorage);
+
+  MUL_KERNEL();
+}
+void cpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+  CAST_STORAGE(pb, b, complex, CpuComplexStorage);
+  CAST_STORAGE(po, out, complex, CpuComplexStorage);
+
+  MUL_KERNEL();
+}
+void cpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+  CAST_STORAGE(pb, b, real1, CpuRealStorage);
+  CAST_STORAGE(po, out, complex, CpuComplexStorage);
+
+  MUL_KERNEL();
+}
+void gpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, OCL_API_MUL_REAL);
+}
+void gpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage,
                       OCL_API_MUL_COMPLEX);
 }
-void CommutingKernel::gpu_mixed(const Tensor &a, const Tensor &b, Tensor &out) {
-  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuRealStorage, OCL_API_ADD_MIXED,
-                      OCL_API_MUL_MIXED);
+void gpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuRealStorage, OCL_API_MUL_MIXED);
 }
+
 void CommutingKernel::commuting(const Tensor &a, const Tensor &b, Tensor &out) {
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
@@ -134,5 +152,18 @@ void CommutingKernel::commuting(const Tensor &a, const Tensor &b, Tensor &out) {
   } else {
     DEVICE_SWITCH(cpu_real, gpu_real, a, b, out);
   }
+}
+
+CommutingKernel add_kernel = {cpu_real_add, cpu_complex_add, cpu_mixed_add,
+                              gpu_real_add, gpu_complex_add, gpu_mixed_add};
+
+CommutingKernel mul_kernel = {cpu_real_mul, cpu_complex_mul, cpu_mixed_mul,
+                              gpu_real_mul, gpu_complex_mul, gpu_mixed_mul};
+
+void add(const Tensor &a, const Tensor &b, Tensor &out) {
+  add_kernel.commuting(a, b, out);
+}
+void mul(const Tensor &a, const Tensor &b, Tensor &out) {
+  mul_kernel.commuting(a, b, out);
 }
 } // namespace Weed
