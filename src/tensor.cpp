@@ -308,9 +308,7 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
 
 void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->grad_node = std::make_shared<Node>(
-      filterParents({
-          a,
-      }),
+      filterParents({a, b}),
       [out](std::vector<TensorPtr> parents) {
         TensorPtr out_grad = out->grad;
         const DType &dt = out_grad->storage->dtype;

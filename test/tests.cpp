@@ -119,12 +119,24 @@ TEST_CASE("test_complex") {
   REQUIRE(test);
 }
 
-TEST_CASE("test_scalar_grad") {
+TEST_CASE("test_scalar_add") {
+  TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
+  TensorPtr z = x + y;
+  Tensor::backward(z);
+
+  REQUIRE(GET_REAL(z) == (ONE_R1 * 5));
+  REQUIRE(GET_REAL(x->grad) == ONE_R1);
+  REQUIRE(GET_REAL(y->grad) == ONE_R1);
+}
+
+TEST_CASE("test_scalar_mul") {
   TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
   TensorPtr y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
   TensorPtr z = x * y;
   Tensor::backward(z);
 
+  REQUIRE(GET_REAL(z) == (ONE_R1 * 6));
   REQUIRE(GET_REAL(x->grad) == (ONE_R1 * 3));
   REQUIRE(GET_REAL(y->grad) == (ONE_R1 * 2));
 }
