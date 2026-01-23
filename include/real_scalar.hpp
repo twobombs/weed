@@ -27,7 +27,7 @@ struct RealScalar : public Scalar {
   }
 
   real1 get_item() const {
-    return (*static_cast<RealStorage *>(storage.get()))[0U];
+    return (*static_cast<RealStorage *>(storage.get()))[offset];
   }
 };
 

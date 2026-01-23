@@ -27,7 +27,7 @@ struct ComplexScalar : public Scalar {
   }
 
   complex get_item() const {
-    return (*static_cast<ComplexStorage *>(storage.get()))[0U];
+    return (*static_cast<ComplexStorage *>(storage.get()))[offset];
   }
 };
 

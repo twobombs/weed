@@ -25,6 +25,8 @@
 
 #include <unordered_set>
 
+#include <iostream>
+
 #define PICK_DEVICE_STORAGE(GpuType, CpuType)                                  \
   switch (dtag) {                                                              \
   case DeviceTag::GPU:                                                         \
@@ -159,7 +161,7 @@ TensorPtr Tensor::operator[](vecCapInt idx) {
   }
 
   TensorPtr v = copy();
-  v->offset += idx * v->stride.back();
+  v->offset += idx * stride.back();
   v->shape.pop_back();
   v->stride.pop_back();
 
