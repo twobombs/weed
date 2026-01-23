@@ -59,7 +59,7 @@ void kernel clear_buffer_real(global real1* a)
 }
 void kernel fill_ones_real(global real1* a)
 {
-    a[i_X] = ZERO_R1;
+    a[i_X] = ONE_R1;
 }
 void kernel fill_ones_complex(global cmplx* a)
 {
