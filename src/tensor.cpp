@@ -9,8 +9,9 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
+#include "complex_scalar.hpp"
 #include "node.hpp"
-#include "scalar.hpp"
+#include "real_scalar.hpp"
 
 #include "abs.hpp"
 #include "add.hpp"
@@ -107,7 +108,14 @@ Tensor Tensor::operator[](vecCapInt idx) {
   }
 
   if (v.shape.empty()) {
-    return Scalar(v);
+    switch (v.storage->dtype) {
+    case DType::COMPLEX:
+      return ComplexScalar(v);
+    case DType::REAL:
+      return RealScalar(v);
+    default:
+      return Scalar(v);
+    }
   }
 
   return v;

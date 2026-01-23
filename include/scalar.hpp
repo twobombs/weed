@@ -14,10 +14,6 @@
 #include "tensor.hpp"
 
 namespace Weed {
-struct Scalar;
-
-typedef std::shared_ptr<Scalar> ScalarPtr;
-
 struct Scalar : public Tensor {
   Scalar(real1 v, bool rg, DeviceTag dtag, int64_t did = -1)
       : Tensor(std::vector<vecCapInt>{ONE_VCI},
@@ -27,6 +23,10 @@ struct Scalar : public Tensor {
                std::vector<vecCapInt>{ZERO_VCI}, rg, DType::COMPLEX, dtag,
                did) {}
   Scalar(Tensor orig) {
+    if (orig.get_size() != ONE_VCI) {
+      throw std::invalid_argument(
+          "Cannot construct scalar from Tensor with get_size() != 1!");
+    }
     shape = std::vector<vecCapInt>{ONE_VCI};
     stride = std::vector<vecCapInt>{ZERO_VCI};
     offset = orig.offset;
@@ -64,6 +64,8 @@ struct Scalar : public Tensor {
   static Tensor add(Scalar &a, Tensor &b);
   static Tensor mul(Scalar &a, Tensor &b);
 };
+
+typedef std::shared_ptr<Scalar> ScalarPtr;
 
 inline Scalar operator+(Scalar &left, Scalar &right) {
   return Scalar::add(left, right);

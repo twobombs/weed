@@ -299,6 +299,7 @@ install (FILES
 install (FILES
     include/abs.hpp
     include/add.hpp
+    include/complex_scalar.hpp
     include/complex_storage.hpp
     include/cpu_complex_storage.hpp
     include/cpu_real_storage.hpp
@@ -313,6 +314,7 @@ install (FILES
     include/node.hpp
     include/parameter.hpp
     include/queue_item.hpp
+    include/real_scalar.hpp
     include/real_storage.hpp
     include/relu.hpp
     include/scalar.hpp

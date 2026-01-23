@@ -44,8 +44,13 @@ struct relu_kernel : ReluKernel {
     });
   }
   void gpu(const Tensor &a, Tensor &out) {
-    const vecCapIntGpu args[7U]{
-        (vecCapIntGpu)(a.offset), (vecCapIntGpu)(a.stride[0U]), (vecCapIntGpu)(out.offset), (vecCapIntGpu)(out.stride[0U]), 0U, 0U, 0U};
+    const vecCapIntGpu args[7U]{(vecCapIntGpu)(a.offset),
+                                (vecCapIntGpu)(a.stride[0U]),
+                                (vecCapIntGpu)(out.offset),
+                                (vecCapIntGpu)(out.stride[0U]),
+                                0U,
+                                0U,
+                                0U};
     GpuRealStoragePtr a_storage =
         std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
     GpuRealStoragePtr o_storage =
@@ -81,9 +86,13 @@ struct relu_kernel : ReluKernel {
     });
   }
   void gpu_grad_real(Tensor &din, const Tensor &in, const Tensor &dout) {
-    const vecCapIntGpu args[7U]{
-        (vecCapIntGpu)(din.offset), (vecCapIntGpu)(din.stride[0U]), (vecCapIntGpu)(in.offset), (vecCapIntGpu)(in.stride[0U]),
-        (vecCapIntGpu)(dout.offset), (vecCapIntGpu)(dout.stride[0U]), 0U};
+    const vecCapIntGpu args[7U]{(vecCapIntGpu)(din.offset),
+                                (vecCapIntGpu)(din.stride[0U]),
+                                (vecCapIntGpu)(in.offset),
+                                (vecCapIntGpu)(in.stride[0U]),
+                                (vecCapIntGpu)(dout.offset),
+                                (vecCapIntGpu)(dout.stride[0U]),
+                                0U};
     GpuRealStoragePtr a_storage =
         std::dynamic_pointer_cast<GpuRealStorage>(din.storage);
     GpuRealStoragePtr b_storage =
@@ -107,9 +116,13 @@ struct relu_kernel : ReluKernel {
     });
   }
   void gpu_grad_complex(Tensor &din, const Tensor &in, const Tensor &dout) {
-    const vecCapIntGpu args[7U]{
-        (vecCapIntGpu)(din.offset),  (vecCapIntGpu)(din.stride[0U]), (vecCapIntGpu)(in.offset), (vecCapIntGpu)(in.stride[0U]),
-        (vecCapIntGpu)(dout.offset), (vecCapIntGpu)(dout.stride[0U]), 0U};
+    const vecCapIntGpu args[7U]{(vecCapIntGpu)(din.offset),
+                                (vecCapIntGpu)(din.stride[0U]),
+                                (vecCapIntGpu)(in.offset),
+                                (vecCapIntGpu)(in.stride[0U]),
+                                (vecCapIntGpu)(dout.offset),
+                                (vecCapIntGpu)(dout.stride[0U]),
+                                0U};
     GpuComplexStoragePtr a_storage =
         std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
     GpuRealStoragePtr b_storage =

@@ -16,6 +16,8 @@
 
 #include "tests.hpp"
 
+#include "real_scalar.hpp"
+
 using namespace Weed;
 
 #define EPSILON 0.01f
@@ -114,14 +116,12 @@ TEST_CASE_METHOD(TensorTestFixture, "test_complex") {
   REQUIRE(test);
 }
 
-#if 0
 TEST_CASE("test_scalar_grad") {
-  Tensor x = Scalar(2.0, requires_grad=true);
-  Tensor y = Scalar(3.0, requires_grad=true);
+  Tensor x = RealScalar(2.0, true);
+  Tensor y = RealScalar(3.0, true);
   Tensor z = x * y;
-  backward(z);
+  Tensor::backward(z);
 
-  REQUIRE(x.grad == 3.0);
-  REQUIRE(y.grad == 2.0);
+  REQUIRE(*(static_cast<RealScalar *>(x.grad.get())) == RealScalar(ONE_R1 * 3));
+  REQUIRE(*(static_cast<RealScalar *>(y.grad.get())) == RealScalar(ONE_R1 * 2));
 }
-#endif
