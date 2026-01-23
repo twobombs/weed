@@ -34,4 +34,5 @@ struct CpuComplexStorage : ComplexStorage {
 
   StoragePtr Upcast(DType dt) { return get_ptr(); };
 };
+typedef std::shared_ptr<CpuComplexStorage> CpuComplexStoragePtr;
 } // namespace Weed

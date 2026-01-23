@@ -40,11 +40,11 @@ struct CpuRealStorage : RealStorage {
       return get_ptr();
     }
 
-    CpuComplexStorage n(size);
-    std::transform(data.get(), data.get() + size, n.data.get(),
+    CpuComplexStoragePtr n = std::make_shared<CpuComplexStorage>(size);
+    std::transform(data.get(), data.get() + size, n->data.get(),
                    [](real1 v) { return complex(v, ZERO_R1); });
 
-    return n.get_ptr();
+    return n;
   }
 };
 } // namespace Weed
