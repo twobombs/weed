@@ -26,18 +26,19 @@
   CAST_STORAGE(pb, b, rtype, rstorage);                                        \
   CAST_STORAGE(po, out, otype, ostorage);                                      \
                                                                                \
-  pfControl.par_for(0, d.M, [&](const vecCapIntGpu &i, const unsigned &cpu) {  \
-    for (vecCapIntGpu j = 0; j < d.N; ++j) {                                   \
-      stype sum = ZERO_R1;                                                     \
-      for (vecCapIntGpu k = 0; k < d.K; ++k) {                                 \
-        const auto a_idx = (d.A_o + i * d.A_s0 + k * d.A_s1);                  \
-        const auto b_idx = (d.B_o + k * d.B_s0 + j * d.B_s1);                  \
-        sum += pa[a_idx] * pb[b_idx];                                          \
-      }                                                                        \
-      const auto o_idx = (d.O_o + i * d.O_s0 + j * d.O_s1);                    \
-      po[o_idx] = sum;                                                         \
-    }                                                                          \
-  })
+  pfControl.par_for(0, (d.M) * (d.N),                                          \
+                    [&](const vecCapIntGpu &l, const unsigned &cpu) {          \
+                      const vecCapIntGpu i = l / d.N;                          \
+                      const vecCapIntGpu j = l % d.N;                          \
+                      stype sum = ZERO_R1;                                     \
+                      for (vecCapIntGpu k = 0; k < d.K; ++k) {                 \
+                        const auto a_idx = (d.A_o + i * d.A_s0 + k * d.A_s1);  \
+                        const auto b_idx = (d.B_o + k * d.B_s0 + j * d.B_s1);  \
+                        sum += pa[a_idx] * pb[b_idx];                          \
+                      }                                                        \
+                      const auto o_idx = (d.O_o + i * d.O_s0 + j * d.O_s1);    \
+                      po[o_idx] = sum;                                         \
+                    })
 
 #define GPU_BY_TYPE(ltype, lstorage, rtype, rstorage, otype, ostorage, call)   \
   MatrixDim d = get_dim(a, b, out);                                            \
