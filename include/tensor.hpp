@@ -38,13 +38,13 @@ struct Tensor {
         grad_node(nullptr), grad(nullptr) {}
   Tensor(std::vector<vecCapInt> shp, std::vector<vecCapInt> strd,
          bool rg = false, DType dtype = DType::REAL,
-         DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
+         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(std::vector<real1> val, std::vector<vecCapInt> shp,
          std::vector<vecCapInt> strd, bool rg = false,
-         DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
+         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(std::vector<complex> val, std::vector<vecCapInt> shp,
          std::vector<vecCapInt> strd, bool rg = false,
-         DeviceTag dtag = DeviceTag::CPU, int64_t did = -1);
+         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
 
   bool requires_grad() { return !!grad; }
 
@@ -96,7 +96,7 @@ struct Tensor {
     return left->storage->dtype;
   }
 
-  static bool all_same_device(const std::vector<TensorPtr>&);
+  static bool all_same_device(const std::vector<TensorPtr> &);
 
   static TensorPtr allocate_like(const TensorPtr orig, const DType &dt,
                                  const bool &rg);

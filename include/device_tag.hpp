@@ -11,6 +11,17 @@
 
 #pragma once
 
+#include "config.h"
+
 namespace Weed {
-enum DeviceTag { CPU = 1, GPU = 2, Qrack = 3, DEFAULT_DEVICE = CPU };
+enum DeviceTag {
+  CPU = 1,
+  GPU = 2,
+  Qrack = 3,
+#if ENABLE_OPENCL || ENABLE_CUDA
+  DEFAULT_DEVICE = GPU
+#else
+  DEFAULT_DEVICE = CPU
+#endif
+};
 } // namespace Weed
