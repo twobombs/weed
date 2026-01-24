@@ -117,8 +117,9 @@ struct Tensor {
     stride.assign(shape.size(), 0);
 
     if (requires_grad()) {
-      grad->shape = shape;
-      grad->stride.assign(shape.size(), 0);
+      // This must be reduced along broadcast dimensions
+      // uring the backward() step.
+      grad = allocate_like(a, a->storage->dtype, false);
     }
   }
 
