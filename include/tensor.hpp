@@ -133,13 +133,25 @@ struct Tensor {
 
   static TensorPtr matmul(TensorPtr a, TensorPtr b);
   static void make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out);
+
+  static TensorPtr sub(TensorPtr a, TensorPtr b);
+  static void make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out);
+
+  static TensorPtr div(TensorPtr a, TensorPtr b);
+  static void make_div_node(TensorPtr a, TensorPtr b, TensorPtr out);
 };
 
 inline TensorPtr operator+(TensorPtr left, TensorPtr right) {
   return Tensor::add(left, right);
 }
+inline TensorPtr operator-(TensorPtr left, TensorPtr right) {
+  return Tensor::sub(left, right);
+}
 inline TensorPtr operator*(TensorPtr left, TensorPtr right) {
   return Tensor::mul(left, right);
+}
+inline TensorPtr operator/(TensorPtr left, TensorPtr right) {
+  return Tensor::div(left, right);
 }
 inline TensorPtr operator>>(TensorPtr left, TensorPtr right) {
   return Tensor::matmul(left, right);

@@ -14,6 +14,17 @@ inline cmplx zmul(const cmplx lhs, const cmplx rhs)
     return (cmplx)((lhs.x * rhs.x) - (lhs.y * rhs.y), (lhs.x * rhs.y) + (lhs.y * rhs.x));
 }
 
+// "zdiv" contributed by Elara, an OpenAI custom GPT
+inline cmplx zdiv(const cmplx lhs, const cmplx rhs)
+{
+    const real1 inv = (real1)1 / ((rhs.x * rhs.x) + (rhs.y * rhs.y));
+
+    return (cmplx)(
+        ((lhs.x * rhs.x) + (lhs.y * rhs.y)) * inv,
+        ((lhs.y * rhs.x) - (lhs.x * rhs.y)) * inv
+    );
+}
+
 inline cmplx2 zmatrixmul(const real1 nrm, const cmplx4 lhs, const cmplx2 rhs)
 {
     return nrm *
@@ -196,4 +207,38 @@ void kernel matmul_mixed_c_right(global real1* a, global cmplx* b, global cmplx*
     }
     const vecCapIntGpu o_idx = (O_C + i_X * I_C + i_Y * J_C);
     out[o_idx] = sum;
+}
+
+void kernel sub_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = a[i_X * I_A + O_A] - b[i_X * I_B + O_B];
+}
+void kernel sub_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = a[i_X * I_A + O_A] - b[i_X * I_B + O_B];
+}
+void kernel sub_mixed_c_left(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = a[i_X * I_A + O_A] - (cmplx)(b[i_X * I_B + O_B], ZERO_R1);
+}
+void kernel sub_mixed_c_right(global real1* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = (cmplx)(a[i_X * I_A + O_A], ZERO_R1) - b[i_X * I_B + O_B];
+}
+
+void kernel div_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = a[i_X * I_A + O_A] / b[i_X * I_B + O_B];
+}
+void kernel div_complex(global cmplx* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = zdiv(a[i_X * I_A + O_A], b[i_X * I_B + O_B]);
+}
+void kernel div_mixed_c_left(global cmplx* a, global real1* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = a[i_X * I_A + O_A] / b[i_X * I_B + O_B];
+}
+void kernel div_mixed_c_right(global real1* a, global cmplx* b, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs)
+{
+    out[i_X * I_C + O_C] = zdiv((cmplx)(a[i_X * I_A + O_A], ZERO_R1), b[i_X * I_B + O_B]);
 }

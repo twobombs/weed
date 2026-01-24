@@ -122,6 +122,48 @@ TEST_CASE("test_mixed_scalar_add") {
   REQUIRE_CMPLX(GET_COMPLEX(y->grad), ONE_R1);
 }
 
+TEST_CASE("test_real_scalar_sub") {
+  TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
+  TensorPtr z = x - y;
+  Tensor::backward(z);
+
+  REQUIRE(GET_REAL(z) == -ONE_R1);
+  REQUIRE(GET_REAL(x->grad) == ONE_R1);
+  REQUIRE(GET_REAL(y->grad) == -ONE_R1);
+}
+
+TEST_CASE("test_complex_scalar_sub") {
+  TensorPtr x = std::make_shared<ComplexScalar>(complex(2.0), true, TEST_DTAG);
+  TensorPtr y = std::make_shared<ComplexScalar>(complex(3.0), true, TEST_DTAG);
+  TensorPtr z = x - y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), -ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
+}
+
+TEST_CASE("test_mixed_scalar_sub") {
+  TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<ComplexScalar>(complex(3.0), true, TEST_DTAG);
+  TensorPtr z = x - y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), -ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
+
+  x = std::make_shared<ComplexScalar>(complex(2.0), true, TEST_DTAG);
+  y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
+  z = x - y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), -ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), ONE_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
+}
+
 TEST_CASE("test_real_scalar_mul") {
   TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
   TensorPtr y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
@@ -153,6 +195,48 @@ TEST_CASE("test_mixed_scalar_mul") {
   REQUIRE_CMPLX(GET_COMPLEX(z), (ONE_R1 * 6));
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 * 3));
   REQUIRE_CMPLX(GET_COMPLEX(y->grad), (ONE_R1 * 2));
+}
+
+TEST_CASE("test_real_scalar_div") {
+  TensorPtr x = std::make_shared<RealScalar>(4.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr z = x / y;
+  Tensor::backward(z);
+
+  REQUIRE(GET_REAL(z) == (ONE_R1 * 2));
+  REQUIRE(GET_REAL(x->grad) == (ONE_R1 / 2));
+  REQUIRE(GET_REAL(y->grad) == -ONE_R1);
+}
+
+TEST_CASE("test_complex_scalar_div") {
+  TensorPtr x = std::make_shared<ComplexScalar>(complex(4.0), true, TEST_DTAG);
+  TensorPtr y = std::make_shared<ComplexScalar>(complex(2.0), true, TEST_DTAG);
+  TensorPtr z = x / y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), (ONE_R1 * 2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 / 2));
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
+}
+
+TEST_CASE("test_mixed_scalar_div") {
+  TensorPtr x = std::make_shared<RealScalar>(4.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<ComplexScalar>(complex(2.0), true, TEST_DTAG);
+  TensorPtr z = x / y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), (ONE_R1 * 2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 / 2));
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
+
+  x = std::make_shared<ComplexScalar>(complex(4.0), true, TEST_DTAG);
+  y = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  z = x / y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), (ONE_R1 * 2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 / 2));
+  REQUIRE_CMPLX(GET_COMPLEX(y->grad), -ONE_R1);
 }
 
 TEST_CASE("test_real_broadcast_mul") {

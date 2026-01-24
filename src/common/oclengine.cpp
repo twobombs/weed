@@ -88,7 +88,15 @@ const std::vector<OCLKernelHandle> OCLEngine::kernelHandles{
     OCLKernelHandle(OCL_API_MATMUL_REAL, "matmul_real"),
     OCLKernelHandle(OCL_API_MATMUL_COMPLEX, "matmul_complex"),
     OCLKernelHandle(OCL_API_MATMUL_MIXED_C_LEFT, "matmul_mixed_c_left"),
-    OCLKernelHandle(OCL_API_MATMUL_MIXED_C_RIGHT, "matmul_mixed_c_right")
+    OCLKernelHandle(OCL_API_MATMUL_MIXED_C_RIGHT, "matmul_mixed_c_right"),
+    OCLKernelHandle(OCL_API_SUB_REAL, "sub_real"),
+    OCLKernelHandle(OCL_API_SUB_COMPLEX, "sub_complex"),
+    OCLKernelHandle(OCL_API_SUB_MIXED_C_LEFT, "sub_mixed_c_left"),
+    OCLKernelHandle(OCL_API_SUB_MIXED_C_RIGHT, "sub_mixed_c_right"),
+    OCLKernelHandle(OCL_API_DIV_REAL, "div_real"),
+    OCLKernelHandle(OCL_API_DIV_COMPLEX, "div_complex"),
+    OCLKernelHandle(OCL_API_DIV_MIXED_C_LEFT, "div_mixed_c_left"),
+    OCLKernelHandle(OCL_API_DIV_MIXED_C_RIGHT, "div_mixed_c_right")
 };
 // clang-format on
 

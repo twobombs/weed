@@ -15,8 +15,10 @@
 
 #include "abs.hpp"
 #include "commuting.hpp"
+#include "div.hpp"
 #include "matmul.hpp"
 #include "relu.hpp"
+#include "sub.hpp"
 
 #include "cpu_complex_storage.hpp"
 #include "cpu_real_storage.hpp"
@@ -447,6 +449,99 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           Weed::matmul(*(at.get()), *(out->grad.get()), *(tmp.get()));
           TensorPtr n_out = Tensor::allocate_like(tmp, dt, false);
           Weed::add(*(b_grad.get()), *(tmp.get()), *(n_out.get()));
+          b->grad = n_out;
+        }
+      });
+}
+
+TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
+  if (!all_same_device({a, b})) {
+    throw std::invalid_argument(
+        "Cannot mix Tensor devices in Tensor::div(a, b)!");
+  }
+
+  const bool rg = a->requires_grad() || b->requires_grad();
+  DType dt = get_dtype_by_presidence(a, b);
+  TensorPtr out = allocate_like(a, dt, rg);
+  if (b->get_size() == ONE_VCI) {
+    b->match_shape(a);
+  }
+
+  Weed::sub(*(a.get()), *(b.get()), *(out.get()));
+
+  if (rg) {
+    make_sub_node(a, b, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
+  out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
+    TensorPtr out_grad = out->grad;
+    const DType &dt = out_grad->storage->dtype;
+    if (a->requires_grad()) {
+      TensorPtr a_grad = a->grad;
+      a_grad->upcast(dt);
+      TensorPtr n_out = Tensor::allocate_like(b, dt, false);
+      Weed::add(*(a_grad.get()), *(out_grad.get()), *(n_out.get()));
+      a->grad = n_out;
+    }
+    if (b->requires_grad()) {
+      TensorPtr b_grad = b->grad;
+      b_grad->upcast(dt);
+      TensorPtr n_out = Tensor::allocate_like(a, dt, false);
+      Weed::sub(*(b_grad.get()), *(out_grad.get()), *(n_out.get()));
+      b->grad = n_out;
+    }
+  });
+}
+
+TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
+  if (!all_same_device({a, b})) {
+    throw std::invalid_argument(
+        "Cannot mix Tensor devices in Tensor::div(a, b)!");
+  }
+
+  const bool rg = a->requires_grad() || b->requires_grad();
+  DType dt = get_dtype_by_presidence(a, b);
+  TensorPtr out = allocate_like(a, dt, rg);
+  if (b->get_size() == ONE_VCI) {
+    b->match_shape(a);
+  }
+
+  Weed::div(*(a.get()), *(b.get()), *(out.get()));
+
+  if (rg) {
+    make_div_node(a, b, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
+  out->grad_node = std::make_shared<Node>(
+      filterParents(std::vector<TensorPtr>{a, b}), [a, b, out]() {
+        TensorPtr out_grad = out->grad;
+        const DType &dt = out_grad->storage->dtype;
+        if (a->requires_grad()) {
+          TensorPtr a_grad = a->grad;
+          a_grad->upcast(dt);
+          TensorPtr tmp = Tensor::allocate_like(b, dt, false);
+          Weed::div(*(out_grad.get()), *(b.get()), *(tmp.get()));
+          TensorPtr n_out = Tensor::allocate_like(tmp, dt, false);
+          Weed::add(*(a_grad.get()), *(tmp.get()), *(n_out.get()));
+          a->grad = n_out;
+        }
+        if (b->requires_grad()) {
+          TensorPtr b_grad = b->grad;
+          b_grad->upcast(dt);
+          TensorPtr b_sqr = Tensor::allocate_like(b, b->storage->dtype, false);
+          Weed::mul(*(b.get()), *(b.get()), *(b_sqr.get()));
+          TensorPtr tmp = Tensor::allocate_like(a, dt, false);
+          Weed::div(*(a.get()), *(b_sqr.get()), *(tmp.get()));
+          TensorPtr n_out = Tensor::allocate_like(tmp, dt, false);
+          Weed::sub(*(b_grad.get()), *(tmp.get()), *(n_out.get()));
           b->grad = n_out;
         }
       });

@@ -25,8 +25,10 @@ add_library (weed STATIC
     src/common/parallel_for.cpp
     src/abs.cpp
     src/commuting.cpp
+    src/div.cpp
     src/matmul.cpp
     src/relu.cpp
+    src/sub.cpp
     src/tensor.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -292,6 +294,7 @@ install (FILES
     include/cpu_complex_storage.hpp
     include/cpu_real_storage.hpp
     include/device_tag.hpp
+    include/div.hpp
     include/dtype.hpp
     include/gpu_device.hpp
     include/gpu_complex_storage.hpp
@@ -307,6 +310,7 @@ install (FILES
     include/scalar.hpp
     include/sgd.hpp
     include/storage.hpp
+    includes/sub.hpp
     include/tensor.hpp
     include/zero_grad.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed
