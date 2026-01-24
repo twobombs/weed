@@ -114,9 +114,12 @@ struct Tensor {
     if (requires_grad()) {
       // This must be reduced along broadcast dimensions
       // uring the backward() step.
-      // grad = allocate_like(a, a->storage->dtype, false);
+      grad = allocate_like(a, storage->dtype, false);
+      grad->storage->FillZeros();
     }
   }
+
+  void reduce_grad_broadcast();
 
   /**
    * Select a sub-tensor from the position in the outermost tensor index

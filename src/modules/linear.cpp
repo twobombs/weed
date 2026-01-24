@@ -37,10 +37,9 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
                DType dtype, DeviceTag device, int64_t device_id)
     : in_features(in_f), out_features(out_f) {
   // weight is stored as W^T
-  weight = std::make_shared<Parameter>(
-      std::vector<vecCapIntGpu>{in_f, out_f},
-      std::vector<vecCapIntGpu>{1, in_f},
-      dtype, device, device_id);
+  weight = std::make_shared<Parameter>(std::vector<vecCapIntGpu>{in_f, out_f},
+                                       std::vector<vecCapIntGpu>{1, in_f},
+                                       dtype, device, device_id);
 
   FILL_STORAGE(0.5, weight->storage);
 

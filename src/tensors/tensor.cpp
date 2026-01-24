@@ -16,6 +16,7 @@
 #include "ops/in_place.hpp"
 #include "ops/matmul.hpp"
 #include "ops/mean.hpp"
+#include "ops/reduce.hpp"
 #include "ops/relu.hpp"
 #include "ops/sub.hpp"
 #include "tensors/complex_scalar.hpp"
@@ -216,6 +217,26 @@ std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
   return filtered;
 }
 
+void Tensor::reduce_grad_broadcast() {
+  if ((stride.size() < 2) || !requires_grad()) {
+    return;
+  }
+
+  for (int64_t i = stride.size() - 1U; i >= 0; --i) {
+    if (stride[i]) {
+      continue;
+    }
+
+    std::vector<vecCapIntGpu> sh = grad->shape;
+    std::vector<vecCapIntGpu> st = grad->stride;
+    sh.erase(sh.begin() + i);
+    st.erase(st.begin() + i);
+    TensorPtr tmp = allocate_like(sh, st, grad, grad->storage->dtype, false);
+    Weed::reduce(i, *(grad.get()), *(tmp.get()));
+    grad = tmp;
+  }
+}
+
 void Tensor::backward(TensorPtr loss) {
   if (!loss->requires_grad()) {
     return;
@@ -378,11 +399,13 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       TensorPtr a_grad = a->grad;
       a_grad->upcast(dt);
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
+      a->reduce_grad_broadcast();
     }
     if (b->requires_grad()) {
       TensorPtr b_grad = b->grad;
       b_grad->upcast(dt);
       Weed::add_in_place(*(b_grad.get()), *(out_grad.get()));
+      b->reduce_grad_broadcast();
     }
   });
 }
@@ -426,6 +449,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           a_grad->upcast(dt);
           Weed::mul(*(out_grad.get()), *(b.get()), *(tmp.get()));
           Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
+          a->reduce_grad_broadcast();
         }
         if (b->requires_grad()) {
           TensorPtr tmp = Tensor::allocate_like(a, dt, false);
@@ -433,6 +457,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           b_grad->upcast(dt);
           Weed::mul(*(out_grad.get()), *(a.get()), *(tmp.get()));
           Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
+          b->reduce_grad_broadcast();
         }
       });
 }
@@ -523,11 +548,13 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       TensorPtr a_grad = a->grad;
       a_grad->upcast(dt);
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
+      a->reduce_grad_broadcast();
     }
     if (b->requires_grad()) {
       TensorPtr b_grad = b->grad;
       b_grad->upcast(dt);
       Weed::sub_in_place(*(b_grad.get()), *(out_grad.get()));
+      b->reduce_grad_broadcast();
     }
   });
 }
@@ -571,6 +598,7 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           TensorPtr tmp = Tensor::allocate_like(b, dt, false);
           Weed::div(*(out_grad.get()), *(b.get()), *(tmp.get()));
           Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
+          a->reduce_grad_broadcast();
         }
         if (b->requires_grad()) {
           TensorPtr b_grad = b->grad;
@@ -580,6 +608,7 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           TensorPtr tmp = Tensor::allocate_like(a, dt, false);
           Weed::div(*(a.get()), *(b_sqr.get()), *(tmp.get()));
           Weed::sub_in_place(*(b_grad.get()), *(tmp.get()));
+          b->reduce_grad_broadcast();
         }
       });
 }

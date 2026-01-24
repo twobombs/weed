@@ -1,0 +1,120 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// (C) Daniel Strano and the Qrack contributors 2026. All rights reserved.
+//
+// Weed is for minimalist AI/ML inference and backprogation in the style of
+// Qrack.
+//
+// Licensed under the GNU Lesser General Public License V3.
+// See LICENSE.md in the project root or
+// https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
+
+#include "ops/reduce.hpp"
+#include "common/parallel_for.hpp"
+#include "storage/all_storage.hpp"
+
+#define REDUCE_KERNEL(type)                                                    \
+  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];                       \
+  const size_t n = out.get_size();                                             \
+  const int64_t id = index;                                                    \
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &o, const unsigned &cpu) {    \
+    vecCapIntGpu base = a.offset;                                              \
+    vecCapIntGpu tmp = o;                                                      \
+                                                                               \
+    for (int64_t d = a.shape.size() - 1; d >= 0; --d) {                        \
+      if (d == id) {                                                           \
+        continue;                                                              \
+      }                                                                        \
+                                                                               \
+      vecCapIntGpu dim = a.shape[d];                                           \
+      vecCapIntGpu i_d = tmp % dim;                                            \
+      tmp /= dim;                                                              \
+                                                                               \
+      base += i_d * a.stride[d];                                               \
+    }                                                                          \
+                                                                               \
+    type sum = ZERO_R1;                                                        \
+    for (vecCapIntGpu j = 0U; j < a.shape[id]; ++j) {                          \
+      sum += pa[base + j * a.stride[id]];                                      \
+    }                                                                          \
+    po[out.offset + o * I_o] = sum;                                            \
+  });
+
+#define DISPATCH_GPU_KERNEL(type, api_call)                                    \
+  const vecCapIntGpu args[10U]{(vecCapIntGpu)(a.offset),                       \
+                               (vecCapIntGpu)(a.stride[0U]),                   \
+                               (vecCapIntGpu)(out.offset),                     \
+                               (vecCapIntGpu)(out.stride[0U]),                 \
+                               0U,                                             \
+                               0U,                                             \
+                               0U,                                             \
+                               0U,                                             \
+                               0U,                                             \
+                               0U};                                            \
+  std::shared_ptr<type> a_storage =                                            \
+      std::dynamic_pointer_cast<type>(a.storage);                              \
+  std::shared_ptr<type> o_storage =                                            \
+      std::dynamic_pointer_cast<type>(out.storage);                            \
+  a_storage->gpu->RequestKernel(api_call, args, out.get_size(),                \
+                                {a_storage->buffer, o_storage->buffer})
+
+#define DEVICE_SWITCH(cpu, gpu)                                                \
+  switch (out.storage->device) {                                               \
+  case DeviceTag::GPU:                                                         \
+    gpu(index, a, out);                                                        \
+    break;                                                                     \
+  case DeviceTag::CPU:                                                         \
+  default:                                                                     \
+    cpu(index, a, out);                                                        \
+  }
+
+namespace Weed {
+void ReduceKernel::cpu_real(const size_t &index, const Tensor &a, Tensor &out) {
+  CAST_STORAGE(pa, a, real1, CpuRealStorage);
+  CAST_STORAGE(po, out, real1, CpuRealStorage);
+
+  REDUCE_KERNEL(real1);
+}
+void ReduceKernel::cpu_complex(const size_t &index, const Tensor &a,
+                               Tensor &out) {
+  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+  CAST_STORAGE(po, out, complex, CpuComplexStorage);
+
+  REDUCE_KERNEL(complex);
+}
+
+#if ENABLE_GPU
+void ReduceKernel::gpu_real(const size_t &index, const Tensor &a, Tensor &out) {
+  // DISPATCH_GPU_KERNEL(GpuRealStorage, OCL_API_REDUCE_REAL);
+}
+void ReduceKernel::gpu_complex(const size_t &index, const Tensor &a,
+                               Tensor &out) {
+  // DISPATCH_GPU_KERNEL(GpuComplexStorage, OCL_API_REDUCE_COMPLEX);
+}
+#endif
+
+void ReduceKernel::reduce(const size_t &index, const Tensor &a, Tensor &out) {
+  if (a.storage->dtype != out.storage->dtype) {
+    throw std::invalid_argument("Output tensor dtype mismatch!");
+  }
+  if (a.storage->dtype == DType::COMPLEX) {
+#if ENABLE_GPU
+    DEVICE_SWITCH(cpu_complex, gpu_complex);
+#else
+    cpu_complex(index, a, out);
+#endif
+  } else {
+#if ENABLE_GPU
+    DEVICE_SWITCH(cpu_real, gpu_real);
+#else
+    cpu_real(index, a, out);
+#endif
+  }
+}
+
+ReduceKernel reduce_kernel;
+
+void reduce(const size_t &index, const Tensor &a, Tensor &out) {
+  reduce_kernel.reduce(index, a, out);
+}
+} // namespace Weed
