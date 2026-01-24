@@ -108,13 +108,8 @@ struct Tensor {
    * For broadcast, make this scalar match the shape of a target Tensor
    */
   void match_shape(const TensorPtr a) {
-    // This tensor must be a scalar or singleton
-    if (get_size() != ONE_VCI) {
-      throw std::invalid_argument("match_shape only valid for scalars!");
-    }
-
     shape = a->shape;
-    stride.assign(shape.size(), 0);
+    stride.resize(shape.size());
 
     if (requires_grad()) {
       // This must be reduced along broadcast dimensions
