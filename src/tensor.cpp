@@ -306,7 +306,7 @@ void Tensor::make_relu_node(TensorPtr a, TensorPtr out) {
 
 TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   if (!all_same_device({a, b})) {
-    throw std::invalid_argument("Cannot mix Tensor device in Tensor::add(a, b)!");
+    throw std::invalid_argument("Cannot mix Tensor devices in Tensor::add(a, b)!");
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
@@ -345,7 +345,7 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 
 TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   if (!all_same_device({a, b})) {
-    throw std::invalid_argument("Cannot mix Tensor device in Tensor::mul(a, b)!");
+    throw std::invalid_argument("Cannot mix Tensor devices in Tensor::mul(a, b)!");
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
@@ -398,7 +398,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 
 TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
   if (!all_same_device({a, b})) {
-    throw std::invalid_argument("Cannot mix Tensor device in Tensor::matmul(a, b)!");
+    throw std::invalid_argument("Cannot mix Tensor devices in Tensor::matmul(a, b)!");
   }
 
   if ((a->shape.size() != 2U) || (b->shape.size() != 2U)) {
