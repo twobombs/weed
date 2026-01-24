@@ -74,6 +74,16 @@ struct Tensor {
     return cp;
   }
 
+  void copy(TensorPtr cp) {
+    // A tensor is a view on storage:
+    storage = cp->storage;
+    shape = cp->shape;
+    stride = cp->stride;
+    offset = cp->offset;
+    grad_node = cp->grad_node;
+    grad = cp->grad;
+  }
+
   void upcast(DType dt) { storage = storage->Upcast(dt); }
 
   void match_shape(const TensorPtr a) {

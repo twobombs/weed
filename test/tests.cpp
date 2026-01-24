@@ -18,6 +18,8 @@
 
 #include "complex_scalar.hpp"
 #include "real_scalar.hpp"
+#include "sgd.hpp"
+#include "zero_grad.hpp"
 
 using namespace Weed;
 

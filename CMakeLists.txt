@@ -305,8 +305,10 @@ install (FILES
     include/real_storage.hpp
     include/relu.hpp
     include/scalar.hpp
+    include/sgd.hpp
     include/storage.hpp
     include/tensor.hpp
+    include/zero_grad.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed
     )
 
