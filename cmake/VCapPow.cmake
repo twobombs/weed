@@ -1,4 +1,4 @@
-set(VCAPPOW "7" CACHE STRING "Log2 of maximum qubit capacity of a single QInterface (must be at least 5, equivalent to >= 32 qubits)")
+set(VCAPPOW "6" CACHE STRING "Log-2 of maximum qubit capacity of a single Tensor (must be at least 5, equivalent to >= 32 qubits)")
 
 if (VCAPPOW LESS 5)
     message(FATAL_ERROR "VCAPPOW must be at least 5, equivalent to >= 32 qubits!")
