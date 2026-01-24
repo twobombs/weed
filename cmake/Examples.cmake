@@ -1,8 +1,8 @@
-add_executable (quantum_associative_memory
-    examples/quantum_associative_memory.cpp
+add_executable (xor
+    examples/xor.cpp
     )
-set_target_properties(quantum_associative_memory PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples")
-target_link_libraries (quantum_associative_memory ${QRACK_LIBS})
+set_target_properties(xor PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples")
+target_link_libraries (xor ${WEED_LIBS})
 
 set(EXAMPLE_COMPILE_OPTS ${TEST_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
-target_compile_options (quantum_associative_memory PUBLIC ${EXAMPLE_COMPILE_OPTS})
+target_compile_options (xor PUBLIC ${EXAMPLE_COMPILE_OPTS})

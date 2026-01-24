@@ -9,12 +9,17 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#include "tensors/tensor.hpp"
+#pragma once
 
-#include <iostream> // For cout
+#include "tensors/parameter.hpp"
 
-using namespace Weed;
-
-int main() {
-  // TODO
-}
+namespace Weed {
+/**
+ * Composable module with forward function and parameters for autograd
+ * optimization
+ */
+struct Module {
+  virtual TensorPtr forward(const TensorPtr) = 0;
+  virtual std::vector<ParameterPtr> parameters() = 0;
+};
+} // namespace Weed

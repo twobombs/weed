@@ -13,13 +13,14 @@
 
 #include "ops/commuting.hpp"
 #include "ops/in_place.hpp"
+#include "tensors/parameter.hpp"
 #include "tensors/real_scalar.hpp"
 
 namespace Weed {
 /**
  * Stochastic gradient descent (SGD) optimization step
  */
-inline void sgd_step(const std::vector<TensorPtr> &params, real1 lr) {
+inline void sgd_step(const std::vector<ParameterPtr> &params, real1 lr) {
   if (params.empty()) {
     return;
   }

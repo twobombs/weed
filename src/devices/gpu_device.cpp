@@ -300,6 +300,32 @@ void GpuDevice::FillOnesComplex(BufferPtr buffer, const size_t nwi) {
   QueueCall(OCLAPI::OCL_API_FILL_ONES_COMPLEX, nwi, ngs,
             std::vector<BufferPtr>{buffer});
 }
+void GpuDevice::FillValueReal(BufferPtr buffer, const size_t nwi,
+                              const real1 v) {
+  complex cmplxArgs[CMPLX_ARG_LEN] = {(complex)v};
+  EventVecPtr waitVec = ResetWaitEvents();
+  PoolItemPtr poolItem = GetFreePoolItem();
+  cl::Event writeArgsEvent;
+  DISPATCH_TEMP_WRITE(waitVec, *(poolItem->complexBuffer),
+                      sizeof(complex) * CMPLX_ARG_LEN, cmplxArgs,
+                      writeArgsEvent);
+  const size_t ngs = pick_group_size(nwi);
+  QueueCall(OCLAPI::OCL_API_FILL_VALUE_REAL, nwi, ngs,
+            std::vector<BufferPtr>{buffer, poolItem->complexBuffer});
+}
+void GpuDevice::FillValueComplex(BufferPtr buffer, const size_t nwi,
+                                 const complex v) {
+  complex cmplxArgs[CMPLX_ARG_LEN] = {v};
+  EventVecPtr waitVec = ResetWaitEvents();
+  PoolItemPtr poolItem = GetFreePoolItem();
+  cl::Event writeArgsEvent;
+  DISPATCH_TEMP_WRITE(waitVec, *(poolItem->complexBuffer),
+                      sizeof(complex) * CMPLX_ARG_LEN, cmplxArgs,
+                      writeArgsEvent);
+  const size_t ngs = pick_group_size(nwi);
+  QueueCall(OCLAPI::OCL_API_FILL_VALUE_COMPLEX, nwi, ngs,
+            std::vector<BufferPtr>{buffer, poolItem->complexBuffer});
+}
 void GpuDevice::UpcastRealBuffer(BufferPtr buffer_in, BufferPtr buffer_out,
                                  const size_t nwi) {
   const size_t ngs = pick_group_size(nwi);

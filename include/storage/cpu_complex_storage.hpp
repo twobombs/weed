@@ -30,12 +30,19 @@ struct CpuComplexStorage : ComplexStorage {
 
   ~CpuComplexStorage() {}
 
-  complex operator[](vecCapInt idx) { return data.get()[(size_t)idx]; }
+  complex operator[](vecCapInt idx) override { return data.get()[(size_t)idx]; }
 
-  void FillZeros() { std::fill(data.get(), data.get() + size, ZERO_CMPLX); }
-  void FillOnes() { std::fill(data.get(), data.get() + size, ONE_CMPLX); }
+  void FillZeros() override {
+    std::fill(data.get(), data.get() + size, ZERO_CMPLX);
+  }
+  void FillOnes() override {
+    std::fill(data.get(), data.get() + size, ONE_CMPLX);
+  }
+  void FillValue(complex v) override {
+    std::fill(data.get(), data.get() + size, v);
+  }
 
-  StoragePtr Upcast(DType dt) { return get_ptr(); };
+  StoragePtr Upcast(DType dt) override { return get_ptr(); };
 };
 typedef std::shared_ptr<CpuComplexStorage> CpuComplexStoragePtr;
 } // namespace Weed

@@ -23,6 +23,7 @@ endif (PACK_DEBIAN)
 add_library (weed STATIC
     src/common/functions.cpp
     src/common/parallel_for.cpp
+    src/modules/linear.cpp
     src/ops/abs.cpp
     src/ops/commuting.cpp
     src/ops/div.cpp
@@ -296,6 +297,8 @@ install (FILES
     include/devices/gpu_device.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
+    include/modules/linear.hpp
+    include/modules/module.hpp
     include/ops/abs.hpp
     include/ops/div.hpp
     include/ops/in_place.hpp
@@ -316,7 +319,6 @@ install (FILES
     include/tensors/real_scalar.hpp
     include/tensors/scalar.hpp
     include/tensors/tensor.hpp
-    include/module.hpp
     include/queue_item.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed
     )

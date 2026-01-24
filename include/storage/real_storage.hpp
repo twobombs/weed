@@ -27,6 +27,11 @@ struct RealStorage : Storage {
    */
   virtual real1 operator[](vecCapInt idx) = 0;
 
+  /**
+   * Fill the entire Storage with specified real value
+   */
+  virtual void FillValue(real1 v) = 0;
+
 #if defined(__APPLE__)
   static real1 *_aligned_state_vec_alloc(vecCapIntGpu allocSize) {
     void *toRet;

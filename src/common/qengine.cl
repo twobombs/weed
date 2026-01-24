@@ -79,6 +79,14 @@ void kernel fill_ones_complex(global cmplx* a)
 {
     a[i_X] = (cmplx)(ONE_R1, ZERO_R1);
 }
+void kernel fill_value_real(global real1* a, constant real1* v)
+{
+    a[i_X] = *v;
+}
+void kernel fill_value_complex(global cmplx* a, constant cmplx* v)
+{
+    a[i_X] = *v;
+}
 void kernel real_to_complex_buffer(global real1* a, global cmplx* b)
 {
     b[i_X] = (cmplx)(a[i_X], ZERO_R1);

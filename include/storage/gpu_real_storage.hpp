@@ -48,12 +48,13 @@ struct GpuRealStorage : RealStorage {
 
   ~GpuRealStorage() {}
 
-  int64_t get_device_id() { return gpu->deviceID; }
+  int64_t get_device_id() override { return gpu->deviceID; }
 
-  void FillZeros() { gpu->ClearRealBuffer(buffer, size); }
-  void FillOnes() { gpu->FillOnesReal(buffer, size); }
+  void FillZeros() override { gpu->ClearRealBuffer(buffer, size); }
+  void FillOnes() override { gpu->FillOnesReal(buffer, size); }
+  void FillValue(real1 v) override { gpu->FillValueReal(buffer, size, v); }
 
-  StoragePtr Upcast(DType dt) {
+  StoragePtr Upcast(DType dt) override {
     if (dt == DType::REAL) {
       return get_ptr();
     }

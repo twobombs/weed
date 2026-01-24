@@ -28,6 +28,11 @@ struct ComplexStorage : Storage {
    */
   virtual complex operator[](vecCapInt idx) = 0;
 
+  /**
+   * Fill the entire Storage with specified complex value
+   */
+  virtual void FillValue(complex v) = 0;
+
 #if defined(__APPLE__)
   static complex *_aligned_state_vec_alloc(vecCapIntGpu allocSize) {
     void *toRet;

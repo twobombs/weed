@@ -33,12 +33,17 @@ struct CpuRealStorage : RealStorage {
 
   ~CpuRealStorage() {}
 
-  real1 operator[](vecCapInt idx) { return data.get()[(size_t)idx]; }
+  real1 operator[](vecCapInt idx) override { return data.get()[(size_t)idx]; }
 
-  void FillZeros() { std::fill(data.get(), data.get() + size, ZERO_R1); }
-  void FillOnes() { std::fill(data.get(), data.get() + size, ONE_R1); }
+  void FillZeros() override {
+    std::fill(data.get(), data.get() + size, ZERO_R1);
+  }
+  void FillOnes() override { std::fill(data.get(), data.get() + size, ONE_R1); }
+  void FillValue(real1 v) override {
+    std::fill(data.get(), data.get() + size, v);
+  }
 
-  StoragePtr Upcast(DType dt) {
+  StoragePtr Upcast(DType dt) override {
     if (dt == DType::REAL) {
       return get_ptr();
     }

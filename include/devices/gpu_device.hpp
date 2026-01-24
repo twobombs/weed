@@ -231,6 +231,14 @@ struct GpuDevice {
    */
   void FillOnesComplex(BufferPtr buffer, const size_t nwi);
   /**
+   * Fill a buffer of Weed:real1 elements with specified value
+   */
+  void FillValueReal(BufferPtr buffer, const size_t nwi, const real1 v);
+  /**
+   * Fill a buffer of Weed:complex elements with specified value
+   */
+  void FillValueComplex(BufferPtr buffer, const size_t nwi, const complex v);
+  /**
    * Up-cast a real1 buffer to a (double-stride) complex buffer with the same
    * values
    */

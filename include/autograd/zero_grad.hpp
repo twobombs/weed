@@ -18,7 +18,7 @@ namespace Weed {
  * Zeros gradients on specified specified params (between learning cycles of
  * back-propagation and optimization)
  */
-inline void zero_grad(const std::vector<TensorPtr> &params) {
+inline void zero_grad(const std::vector<ParameterPtr> &params) {
   for (auto &p : params) {
     if (p->grad) {
       p->grad->storage->FillZeros();

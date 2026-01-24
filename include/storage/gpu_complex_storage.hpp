@@ -50,10 +50,11 @@ struct GpuComplexStorage : ComplexStorage {
   /**
    * Which GPU device are we on? (Migration happens automatically as necessary.)
    */
-  int64_t get_device_id() { return gpu->deviceID; }
+  int64_t get_device_id() override { return gpu->deviceID; }
 
-  void FillZeros() { gpu->ClearRealBuffer(buffer, size << 1U); }
-  void FillOnes() { gpu->FillOnesComplex(buffer, size); }
+  void FillZeros() override { gpu->ClearRealBuffer(buffer, size << 1U); }
+  void FillOnes() override { gpu->FillOnesComplex(buffer, size); }
+  void FillValue(complex v) override { gpu->FillValueComplex(buffer, size, v); }
 
   StoragePtr Upcast(DType dt) { return get_ptr(); };
 
