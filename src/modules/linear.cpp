@@ -36,13 +36,11 @@ namespace Weed {
 Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
                DType dtype, DeviceTag device, int64_t device_id)
     : in_features(in_f), out_features(out_f) {
-  // Weight: (out_features, in_features)
+  // weight is stored as W^T
   weight = std::make_shared<Parameter>(
-      std::vector<vecCapIntGpu>{out_f, in_f},
-      std::vector<vecCapIntGpu>{in_f, 1}, // row-major
+      std::vector<vecCapIntGpu>{in_f, out_f},
+      std::vector<vecCapIntGpu>{1, in_f},
       dtype, device, device_id);
-
-  // Simple initialization (good enough to start)
 
   FILL_STORAGE(0.5, weight->storage);
 
@@ -61,13 +59,12 @@ TensorPtr Linear::forward(const TensorPtr x) {
   // W: (out_features, in_features)
   // We want: x @ W^T → (B, out_features)
 
-  TensorPtr wt = Tensor::transpose(weight); // view: (in_features, out_features)
-  TensorPtr y = Tensor::matmul(x, wt);
+  TensorPtr y = x >> weight;
 
   if (bias) {
     // bias shape: (out_features)
     // broadcast over batch dimension via stride
-    y = Tensor::add(y, bias);
+    y = y + bias;
   }
 
   return y;
@@ -77,6 +74,7 @@ std::vector<ParameterPtr> Linear::parameters() {
   if (bias) {
     return {weight, bias};
   }
+
   return {weight};
 }
 } // namespace Weed
