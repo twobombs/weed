@@ -34,6 +34,17 @@ inline cmplx2 zmatrixmul(const real1 nrm, const cmplx4 lhs, const cmplx2 rhs)
             (lhs.hi.x * rhs.y) + (lhs.hi.y * rhs.x) + (lhs.hi.z * rhs.w) + (lhs.hi.w * rhs.z)));
 }
 
+inline cmplx zpow_real(const cmplx z, const real1 p)
+{
+    const real1 r = hypot(z.x, z.y);
+    const real1 theta = atan2(z.y, z.x);
+
+    const real1 rp = pow(r, p);
+    const real1 pt = p * theta;
+
+    return rp * sin((cmplx)(pt + SineShift, pt));
+}
+
 inline real1 arg(const cmplx cmp)
 {
     if (cmp.x == ZERO_R1 && cmp.y == ZERO_R1)
@@ -366,8 +377,5 @@ void kernel pow_real(global real1* a, global real1* out, constant vecCapIntGpu* 
 }
 void kernel pow_complex(global cmplx* a, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* p)
 {
-    const real1 pp = *p;
-    const cmplx c = a[i_X * I_A + O_A];
-    const real1 angle = SineShift * pp;
-    out[i_X * I_B] = (cmplx)(pow(c.x, pp), ZERO_R1) + (pow(c.y, pp) * sin((cmplx)(angle + SineShift, angle)));
+    out[i_X * I_B] = zpow_real(a[i_X * I_A + O_A], *p);
 }
