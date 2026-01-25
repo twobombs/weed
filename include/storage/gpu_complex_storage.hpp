@@ -45,8 +45,6 @@ struct GpuComplexStorage : ComplexStorage {
     array.reset();
   }
 
-  ~GpuComplexStorage() {}
-
   /**
    * Which GPU device are we on? (Migration happens automatically as necessary.)
    */

@@ -44,8 +44,6 @@ struct Storage : public std::enable_shared_from_this<Storage> {
     }
   }
 
-  virtual ~Storage() {}
-
   /**
    * Get a shared pointer to this Storage
    */

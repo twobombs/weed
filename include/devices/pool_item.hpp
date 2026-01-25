@@ -46,8 +46,6 @@ struct PoolItem {
     vciBuffer = MakeBuffer(context, sizeof(vecCapIntGpu) * VCI_ARG_LEN);
   }
 
-  ~PoolItem() {}
-
   BufferPtr MakeBuffer(const cl::Context &context, size_t size) {
     cl_int error;
     BufferPtr toRet = std::unique_ptr<cl::Buffer>(new cl::Buffer(

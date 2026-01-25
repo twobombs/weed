@@ -64,7 +64,6 @@ struct GpuDevice {
     context = device_context->context;
     queue = device_context->queue;
   }
-  ~GpuDevice() {}
 
   /**
    * Create a buffer on this device context

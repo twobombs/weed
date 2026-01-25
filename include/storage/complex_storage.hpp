@@ -21,8 +21,6 @@ struct ComplexStorage : Storage {
   ComplexStorage(DeviceTag dtg, vecCapInt n)
       : Storage(dtg, DType::COMPLEX, n) {}
 
-  virtual ~ComplexStorage() {}
-
   /**
    * Get the complex element at the position
    */

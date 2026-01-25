@@ -20,8 +20,6 @@ namespace Weed {
 struct RealStorage : Storage {
   RealStorage(DeviceTag dtg, vecCapInt n) : Storage(dtg, DType::REAL, n) {}
 
-  virtual ~RealStorage() {}
-
   /**
    * Get the complex element at the position
    */

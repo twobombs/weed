@@ -46,8 +46,6 @@ struct GpuRealStorage : RealStorage {
     array.reset();
   }
 
-  ~GpuRealStorage() {}
-
   int64_t get_device_id() override { return gpu->deviceID; }
 
   void FillZeros() override { gpu->ClearRealBuffer(buffer, size); }

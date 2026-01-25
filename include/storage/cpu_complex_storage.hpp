@@ -28,8 +28,6 @@ struct CpuComplexStorage : ComplexStorage {
     std::copy(i.begin(), i.end(), data.get());
   }
 
-  ~CpuComplexStorage() {}
-
   complex operator[](vecCapInt idx) override { return data.get()[(size_t)idx]; }
 
   void FillZeros() override {
