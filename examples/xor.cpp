@@ -9,6 +9,7 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
+#include "autograd/bci_loss.hpp"
 #include "autograd/sgd.hpp"
 #include "autograd/zero_grad.hpp"
 #include "modules/linear.hpp"
@@ -38,8 +39,9 @@ int main() {
   real1 loss_r = ONE_R1;
 
   while ((epoch <= 1000) && (loss_r > 0.01)) {
-    TensorPtr y_pred = l2.forward(Tensor::relu(l1.forward(x)));
-    TensorPtr loss = Tensor::mean((y_pred - y) * (y_pred - y));
+    TensorPtr y_pred =
+        Tensor::sigmoid(l2.forward(Tensor::sigmoid(l1.forward(x))));
+    TensorPtr loss = bci_loss(y_pred, y);
 
     Tensor::backward(loss);
     sgd_step(params, 0.1);

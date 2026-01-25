@@ -294,6 +294,7 @@ install (FILES
 
 # Install weed library headers
 install (FILES
+    include/autograd/bci_loss.hpp
     include/autograd/node.hpp
     include/autograd/sgd.hpp
     include/autograd/zero_grad.hpp
