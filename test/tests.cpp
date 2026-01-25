@@ -111,6 +111,26 @@ TEST_CASE("test_complex_scalar_abs") {
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), -ONE_R1);
 }
 
+TEST_CASE("test_real_scalar_pow") {
+  TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(3.0, false, TEST_DTAG);
+  TensorPtr z = x ^ y;
+  Tensor::backward(z);
+
+  REQUIRE(GET_REAL(z) == (ONE_R1 * 8));
+  REQUIRE(GET_REAL(x->grad) == (ONE_R1 * 12));
+}
+
+TEST_CASE("test_complex_scalar_pow") {
+  TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(3.0, false, TEST_DTAG);
+  TensorPtr z = x ^ y;
+  Tensor::backward(z);
+
+  REQUIRE_CMPLX(GET_COMPLEX(z), (ONE_R1 * 8));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 * 12));
+}
+
 TEST_CASE("test_real_scalar_add") {
   TensorPtr x = std::make_shared<RealScalar>(2.0, true, TEST_DTAG);
   TensorPtr y = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);

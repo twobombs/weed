@@ -260,4 +260,7 @@ inline TensorPtr operator>>(TensorPtr left, TensorPtr right) {
 inline TensorPtr operator<<(TensorPtr right, TensorPtr left) {
   return Tensor::matmul(left, right);
 }
+inline TensorPtr operator^(TensorPtr base, TensorPtr power) {
+  return Tensor::pow(base, power);
+}
 } // namespace Weed
