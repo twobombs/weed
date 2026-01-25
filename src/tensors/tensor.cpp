@@ -664,6 +664,39 @@ void Tensor::make_pow_node(TensorPtr x, TensorPtr p, TensorPtr y) {
   });
 }
 
+TensorPtr Tensor::exp(TensorPtr a, real1 b) {
+  const bool rg = a->requires_grad();
+  TensorPtr out = allocate_like(a, a->storage->dtype, rg);
+
+  Weed::exp(*(a.get()), b, *(out.get()));
+
+  if (rg) {
+    RealScalarPtr y = std::make_shared<RealScalar>(
+        std::log(b), false, a->storage->device, a->storage->get_device_id());
+    make_exp_node(a, y, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_exp_node(TensorPtr x, TensorPtr log_b, TensorPtr y) {
+  y->grad_node =
+      std::make_shared<Node>(std::vector<TensorPtr>{x}, [x, log_b, y]() {
+        TensorPtr dx = x->grad;
+        TensorPtr dy = y->grad;
+
+        dx->upcast(y->storage->dtype);
+
+        TensorPtr dy_v = Tensor::allocate_like(dy, dy->storage->dtype, false);
+        Weed::mul(*(dy.get()), *(log_b.get()), *(dy_v.get()));
+
+        TensorPtr r = Tensor::allocate_like(dy_v, dy_v->storage->dtype, false);
+        Weed::mul(*(dy_v.get()), *(y.get()), *(r.get()));
+
+        Weed::add_in_place(*(dx.get()), *(r.get()));
+      });
+}
+
 TensorPtr Tensor::log(TensorPtr a, real1 b) {
   const bool rg = a->requires_grad();
   TensorPtr out = allocate_like(a, a->storage->dtype, rg);
@@ -692,7 +725,7 @@ void Tensor::make_log_node(TensorPtr x, TensorPtr inv_log_b, TensorPtr y) {
         Weed::mul(*(dy.get()), *(inv_log_b.get()), *(dy_v.get()));
 
         TensorPtr r = Tensor::allocate_like(dy_v, dy_v->storage->dtype, false);
-        Weed::div(*(dy_v.get()), *(x.get()), *(r.get()));
+        Weed::div(*(dy_v.get()), *(y.get()), *(r.get()));
 
         Weed::add_in_place(*(dx.get()), *(r.get()));
       });

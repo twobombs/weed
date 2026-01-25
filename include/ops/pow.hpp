@@ -32,6 +32,10 @@ extern PowKernel log_kernel;
  */
 void pow(const Tensor &a, const real1 &p, Tensor &out);
 /**
+ * Element-wise exponential
+ */
+void exp(const Tensor &a, const real1 &p, Tensor &out);
+/**
  * Element-wise logarithm
  */
 void log(const Tensor &a, const real1 &b, Tensor &out);

@@ -45,6 +45,11 @@ inline cmplx zpow_real(const cmplx z, const real1 p)
     return rp * sin((cmplx)(pt + SineShift, pt));
 }
 
+inline cmplx zexp(const cmplx z)
+{
+    return exp(z.x) * sin((cmplx)(z.y + SineShift, z.y));
+}
+
 inline cmplx zlog(const cmplx z)
 {
     const real1 r = hypot(z.x, z.y);
@@ -387,7 +392,14 @@ void kernel pow_complex(global cmplx* a, global cmplx* out, constant vecCapIntGp
 {
     out[i_X * I_B] = zpow_real(a[i_X * I_A + O_A], *p);
 }
-
+void kernel exp_real(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* log_b)
+{
+    out[i_X * I_B] = exp(a[i_X * I_A + O_A] * (*log_b));
+}
+void kernel exp_complex(global cmplx* a, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs, constant real1*log_b)
+{
+    out[i_X * I_B] = zexp(a[i_X * I_A + O_A] * (*log_b));
+}
 void kernel log_real(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* inv_log_b)
 {
     out[i_X * I_B] = log(a[i_X * I_A + O_A]) * (*inv_log_b);

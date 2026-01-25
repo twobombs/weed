@@ -244,6 +244,12 @@ struct Tensor {
   /**
    * Element-wise logarithm
    */
+  static TensorPtr exp(TensorPtr a, real1 b = E_R1);
+  static void make_exp_node(TensorPtr a, TensorPtr log_b, TensorPtr out);
+
+  /**
+   * Element-wise logarithm
+   */
   static TensorPtr log(TensorPtr a, real1 b = E_R1);
   static void make_log_node(TensorPtr a, TensorPtr inv_log_b, TensorPtr out);
 };
@@ -268,5 +274,8 @@ inline TensorPtr operator<<(TensorPtr right, TensorPtr left) {
 }
 inline TensorPtr operator^(TensorPtr base, real1 power) {
   return Tensor::pow(base, power);
+}
+inline TensorPtr operator^(real1 base, TensorPtr power) {
+  return Tensor::exp(power, base);
 }
 } // namespace Weed

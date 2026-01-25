@@ -41,6 +41,17 @@ static void cpu_real_pow(const Tensor &a, const real1 &p, Tensor &out) {
     po[i * I_o] = std::pow(pa[i * I_a], p);
   });
 }
+static void cpu_real_exp(const Tensor &a, const real1 &b, Tensor &out) {
+  const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];
+  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];
+  CAST_STORAGE(pa, a, real1, CpuRealStorage);
+  CAST_STORAGE(po, out, real1, CpuRealStorage);
+  const real1 log_b = std::log(b);
+  size_t n = out.storage->size;
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
+    po[i * I_o] = std::exp(pa[i * I_a] * log_b);
+  });
+}
 static void cpu_real_log(const Tensor &a, const real1 &b, Tensor &out) {
   const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];
   const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];
@@ -60,6 +71,17 @@ static void cpu_complex_pow(const Tensor &a, const real1 &p, Tensor &out) {
   size_t n = out.storage->size;
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     po[i * I_o] = std::pow(pa[i * I_a], p);
+  });
+}
+static void cpu_complex_exp(const Tensor &a, const real1 &b, Tensor &out) {
+  const vecCapIntGpu I_a = (vecCapIntGpu)(a.stride[0U]);
+  const vecCapIntGpu I_o = (vecCapIntGpu)(out.stride[0U]);
+  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
+  CAST_STORAGE(po, out, complex, CpuComplexStorage);
+  const real1 log_b = std::log(b);
+  size_t n = out.storage->size;
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
+    po[i * I_o] = std::exp(pa[i * I_a] * log_b);
   });
 }
 static void cpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
@@ -84,6 +106,16 @@ static void gpu_real_pow(const Tensor &a, const real1 &p, Tensor &out) {
   a_storage->gpu->RequestKernel(OCLAPI::OCL_API_POW_REAL, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer}, 0U, &v);
 }
+static void gpu_real_exp(const Tensor &a, const real1 &b, Tensor &out) {
+  GPU_ARGS();
+  GpuRealStoragePtr a_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
+  GpuRealStoragePtr o_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(out.storage);
+  const complex v = complex(std::log(b));
+  a_storage->gpu->RequestKernel(OCLAPI::OCL_API_EXP_REAL, args, a.get_size(),
+                                {a_storage->buffer, o_storage->buffer}, 0U, &v);
+}
 static void gpu_real_log(const Tensor &a, const real1 &b, Tensor &out) {
   GPU_ARGS();
   GpuRealStoragePtr a_storage =
@@ -102,6 +134,16 @@ static void gpu_complex_pow(const Tensor &a, const real1 &p, Tensor &out) {
       std::dynamic_pointer_cast<GpuComplexStorage>(out.storage);
   const complex v = complex(p);
   a_storage->gpu->RequestKernel(OCLAPI::OCL_API_POW_COMPLEX, args, a.get_size(),
+                                {a_storage->buffer, o_storage->buffer}, 0U, &v);
+}
+static void gpu_complex_exp(const Tensor &a, const real1 &b, Tensor &out) {
+  GPU_ARGS();
+  GpuComplexStoragePtr a_storage =
+      std::dynamic_pointer_cast<GpuComplexStorage>(a.storage);
+  GpuComplexStoragePtr o_storage =
+      std::dynamic_pointer_cast<GpuComplexStorage>(out.storage);
+  const complex v = complex(std::log(b));
+  a_storage->gpu->RequestKernel(OCLAPI::OCL_API_EXP_COMPLEX, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer}, 0U, &v);
 }
 static void gpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
@@ -146,6 +188,12 @@ PowKernel pow_kernel = {cpu_real_pow, cpu_complex_pow,
 #endif
 };
 
+PowKernel exp_kernel = {cpu_real_exp, cpu_complex_exp,
+#if ENABLE_GPU
+                        gpu_real_exp, gpu_complex_exp
+#endif
+};
+
 PowKernel log_kernel = {cpu_real_log, cpu_complex_log,
 #if ENABLE_GPU
                         gpu_real_log, gpu_complex_log
@@ -155,7 +203,10 @@ PowKernel log_kernel = {cpu_real_log, cpu_complex_log,
 void pow(const Tensor &a, const real1 &p, Tensor &out) {
   pow_kernel.pow(a, p, out);
 }
-void log(const Tensor &a, const real1 &p, Tensor &out) {
-  log_kernel.pow(a, p, out);
+void exp(const Tensor &a, const real1 &b, Tensor &out) {
+  exp_kernel.pow(a, b, out);
+}
+void log(const Tensor &a, const real1 &b, Tensor &out) {
+  log_kernel.pow(a, b, out);
 }
 } // namespace Weed

@@ -129,6 +129,22 @@ TEST_CASE("test_complex_scalar_pow") {
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), (ONE_R1 * 12));
 }
 
+TEST_CASE("test_real_scalar_exp") {
+  TensorPtr x = std::make_shared<RealScalar>(3.0, true, TEST_DTAG);
+  TensorPtr y = 2.0 ^ x;
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == (ONE_R1 * 8));
+}
+
+TEST_CASE("test_complex_scalar_exp") {
+  TensorPtr x = std::make_shared<ComplexScalar>(complex(3.0), true, TEST_DTAG);
+  TensorPtr y = 2.0 ^ x;
+  Tensor::backward(y);
+
+  REQUIRE_CMPLX(GET_COMPLEX(y), (ONE_R1 * 8));
+}
+
 TEST_CASE("test_real_scalar_log") {
   TensorPtr x = std::make_shared<RealScalar>(8.0, true, TEST_DTAG);
   TensorPtr y = Tensor::log(x, 2.0);

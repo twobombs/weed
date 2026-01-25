@@ -112,6 +112,8 @@ const std::vector<OCLKernelHandle> OCLEngine::kernelHandles{
     OCLKernelHandle(OCL_API_SUB_IN_PLACE_MIXED, "sub_in_place_mixed"),
     OCLKernelHandle(OCL_API_POW_REAL, "pow_real"),
     OCLKernelHandle(OCL_API_POW_COMPLEX, "pow_complex"),
+    OCLKernelHandle(OCL_API_EXP_REAL, "exp_real"),
+    OCLKernelHandle(OCL_API_EXP_COMPLEX, "exp_complex"),
     OCLKernelHandle(OCL_API_LOG_REAL, "log_real"),
     OCLKernelHandle(OCL_API_LOG_COMPLEX, "log_complex")
 };
