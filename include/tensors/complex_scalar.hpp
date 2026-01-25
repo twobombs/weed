@@ -18,6 +18,12 @@ namespace Weed {
 /**
  * Tensor with only 1 element of complex-number value (with broadcast on tensor
  * operations)
+ *
+ * No new properties are ever added beyond Weed::Tensor in any of Weed::Scalar,
+ * Weed::RealScalar, or Weed::ComplexScalar, so it is always possible (though
+ * not semantically "safe") to static_cast a Weed::Tensor* based on its offset
+ * property to the scalar element to which the Tensor.offset points, based on
+ * Tensor.storage->dtype.
  */
 struct ComplexScalar : public Scalar {
   ComplexScalar(complex v, bool rg = false, DeviceTag dtag = DeviceTag::CPU,
