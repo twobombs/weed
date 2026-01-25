@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+#define GET_REAL(ptr) static_cast<RealScalar *>((ptr).get())->get_item()
+
 #define INIT_DEVICE_STORAGE(val, GpuType, CpuType)                             \
   switch (dtag) {                                                              \
   case DeviceTag::GPU:                                                         \
@@ -70,19 +72,8 @@ TensorPtr Tensor::allocate_like(const std::vector<vecCapInt> &shape,
                                 const bool &rg) {
   const StoragePtr storage_ptr = orig->storage;
   const DeviceTag dtag = storage_ptr->device;
-  int64_t did = -1;
-#if ENABLE_GPU
-  if (dtag == DeviceTag::GPU) {
-    switch (dt) {
-    case DType::COMPLEX:
-      did = static_cast<GpuComplexStorage *>(storage_ptr.get())->gpu->deviceID;
-      break;
-    case DType::REAL:
-    default:
-      did = static_cast<GpuRealStorage *>(storage_ptr.get())->gpu->deviceID;
-    }
-  }
-#endif
+  int64_t did = storage_ptr->get_device_id();
+
   return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did);
 }
 
@@ -638,26 +629,16 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       });
 }
 
-TensorPtr Tensor::pow(TensorPtr a, TensorPtr p) {
-  if ((p->storage->dtype != DType::REAL) || (p->get_size() != ONE_VCI)) {
-    throw std::invalid_argument("p must be a RealScalar Tensor::pow(a, p)!");
-  }
-  if (p->requires_grad()) {
-    throw std::invalid_argument(
-        "Cannot calculate gradient of RealScalar p in Tensor::pow(a, p)!");
-  }
-
-  RealScalarPtr y = std::make_shared<RealScalar>(p);
-
-  y->match_shape(a);
-
+TensorPtr Tensor::pow(TensorPtr a, real1 p) {
   const bool rg = a->requires_grad();
   TensorPtr out = allocate_like(a, a->storage->dtype, rg);
 
-  Weed::pow(*(a.get()), *(y.get()), *(out.get()));
+  Weed::pow(*(a.get()), p, *(out.get()));
 
   if (rg) {
-    make_pow_node(a, p, out);
+    RealScalarPtr y = std::make_shared<RealScalar>(p, false, a->storage->device,
+                                                   a->storage->get_device_id());
+    make_pow_node(a, y, out);
   }
 
   return out;
@@ -681,5 +662,39 @@ void Tensor::make_pow_node(TensorPtr x, TensorPtr p, TensorPtr y) {
 
     Weed::add_in_place(*(dx.get()), *(r.get()));
   });
+}
+
+TensorPtr Tensor::log(TensorPtr a, real1 b) {
+  const bool rg = a->requires_grad();
+  TensorPtr out = allocate_like(a, a->storage->dtype, rg);
+
+  Weed::log(*(a.get()), b, *(out.get()));
+
+  if (rg) {
+    RealScalarPtr y = std::make_shared<RealScalar>(ONE_R1 / std::log(b), false,
+                                                   a->storage->device,
+                                                   a->storage->get_device_id());
+    make_log_node(a, y, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_log_node(TensorPtr x, TensorPtr inv_log_b, TensorPtr y) {
+  y->grad_node =
+      std::make_shared<Node>(std::vector<TensorPtr>{x}, [x, inv_log_b, y]() {
+        TensorPtr dx = x->grad;
+        TensorPtr dy = y->grad;
+
+        dx->upcast(y->storage->dtype);
+
+        TensorPtr dy_v = Tensor::allocate_like(dy, dy->storage->dtype, false);
+        Weed::mul(*(dy.get()), *(inv_log_b.get()), *(dy_v.get()));
+
+        TensorPtr r = Tensor::allocate_like(dy_v, dy_v->storage->dtype, false);
+        Weed::div(*(dy_v.get()), *(x.get()), *(r.get()));
+
+        Weed::add_in_place(*(dx.get()), *(r.get()));
+      });
 }
 } // namespace Weed

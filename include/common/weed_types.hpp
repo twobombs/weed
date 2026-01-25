@@ -166,6 +166,7 @@ typedef std::unique_ptr<complex[], void (*)(complex *)> ComplexPtr;
 WEED_CONST real1 PI_R1 = (real1)M_PI;
 WEED_CONST real1 SQRT2_R1 = (real1)M_SQRT2;
 WEED_CONST real1 SQRT1_2_R1 = (real1)M_SQRT1_2;
+WEED_CONST real1 E_R1 = (real1)M_E;
 
 #if (FPPOW < 5) || (FPPOW > 6)
 WEED_CONST real1 ZERO_R1 = (real1)0.0f;

@@ -11,21 +11,28 @@
 
 #pragma once
 
-#include "tensors/real_scalar.hpp"
+#include "tensors/tensor.hpp"
 
 namespace Weed {
 struct PowKernel {
-  void cpu_real(const Tensor &, const RealScalar &, Tensor &);
-  void cpu_complex(const Tensor &, const RealScalar &, Tensor &);
-  void gpu_real(const Tensor &, const RealScalar &, Tensor &);
-  void gpu_complex(const Tensor &, const RealScalar &, Tensor &);
-  void pow(const Tensor &, const RealScalar &, Tensor &);
+  void (*cpu_real)(const Tensor &, const real1 &, Tensor &);
+  void (*cpu_complex)(const Tensor &, const real1 &, Tensor &);
+#if ENABLE_GPU
+  void (*gpu_real)(const Tensor &, const real1 &, Tensor &);
+  void (*gpu_complex)(const Tensor &, const real1 &, Tensor &);
+#endif
+  void pow(const Tensor &, const real1 &, Tensor &);
 };
 
 extern PowKernel pow_kernel;
+extern PowKernel log_kernel;
 
 /**
  * Element-wise power
  */
-void pow(const Tensor &a, const RealScalar &p, Tensor &out);
+void pow(const Tensor &a, const real1 &p, Tensor &out);
+/**
+ * Element-wise logarithm
+ */
+void log(const Tensor &a, const real1 &b, Tensor &out);
 } // namespace Weed

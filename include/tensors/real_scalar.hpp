@@ -29,8 +29,8 @@ namespace Weed {
  * feature.)
  */
 struct RealScalar : public Scalar {
-  RealScalar(real1 v, bool rg = false, DeviceTag dtag = DeviceTag::CPU,
-             int64_t did = -1)
+  RealScalar(real1 v, bool rg = false,
+             DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1)
       : Scalar(v, rg, dtag, did) {}
   RealScalar(TensorPtr orig) : Scalar(orig) {
     if (orig->storage->dtype != DType::REAL) {

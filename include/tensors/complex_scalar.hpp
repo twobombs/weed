@@ -29,8 +29,8 @@ namespace Weed {
  * feature.)
  */
 struct ComplexScalar : public Scalar {
-  ComplexScalar(complex v, bool rg = false, DeviceTag dtag = DeviceTag::CPU,
-                int64_t did = -1)
+  ComplexScalar(complex v, bool rg = false,
+                DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1)
       : Scalar(v, rg, dtag, did) {}
   ComplexScalar(TensorPtr orig) : Scalar(orig) {
     if (orig->storage->dtype != DType::COMPLEX) {
