@@ -89,6 +89,10 @@ void AbsKernel::gpu_complex(const Tensor &a, Tensor &out) {
 }
 #endif
 void AbsKernel::abs(const Tensor &a, Tensor &out) {
+  if (a.get_size() != out.get_size()) {
+    throw std::invalid_argument(
+        "In Weed::abs(a, out), out size does not match input size!");
+  }
   switch (a.storage->dtype) {
   case DType::COMPLEX:
 #if ENABLE_GPU
@@ -226,6 +230,13 @@ void AbsKernel::gpu_complex_grad_complex(Tensor &din, const Tensor &in,
 }
 #endif
 void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
+  const size_t dinSize = din.get_size();
+  const size_t inSize = in.get_size();
+  const size_t doutSize = dout.get_size();
+  if ((dinSize != inSize) || (dinSize != doutSize)) {
+    throw std::invalid_argument(
+        "In Weed::abs_grad(din, in, dout), sizes do not match!");
+  }
   switch (din.storage->dtype) {
   case DType::COMPLEX:
     switch (dout.storage->dtype) {

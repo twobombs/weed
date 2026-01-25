@@ -134,6 +134,17 @@ static void gpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
 #endif
 
 void CommutingKernel::commuting(const Tensor &a, const Tensor &b, Tensor &out) {
+  const size_t aSize = a.get_broadcast_size();
+  const size_t bSize = b.get_broadcast_size();
+  const size_t outSize = out.get_broadcast_size();
+  if (aSize != bSize) {
+    throw std::invalid_argument(
+        "In Weed::commuting(a, b, out), 'a' size does not match 'b' size!");
+  }
+  if (aSize != outSize) {
+    throw std::invalid_argument(
+        "In Weed::commuting(a, b, out), out size does not match input size!");
+  }
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
   const bool isOutComplex = out.storage->dtype == DType::COMPLEX;

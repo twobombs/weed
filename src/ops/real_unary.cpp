@@ -207,6 +207,10 @@ static void gpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
 #endif
 
 void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
+  if (a.get_broadcast_size() != out.get_broadcast_size()) {
+    throw std::invalid_argument(
+        "In Weed::unary(a, out), out size does not match input size!");
+  }
   if ((a.storage->dtype == DType::COMPLEX) or
       (out.storage->dtype == DType::COMPLEX)) {
     throw std::invalid_argument("Cannot apply ReLU on complex tensors!");
@@ -227,6 +231,13 @@ void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
 
 void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
                                  const Tensor &dout) {
+  const size_t dinSize = din.get_broadcast_size();
+  const size_t inSize = in.get_broadcast_size();
+  const size_t doutSize = dout.get_broadcast_size();
+  if ((dinSize != inSize) || (dinSize != doutSize)) {
+    throw std::invalid_argument(
+        "In Weed::unary_grad(din, in, dout), sizes do not match!");
+  }
   switch (din.storage->dtype) {
   case DType::COMPLEX:
 #if ENABLE_GPU

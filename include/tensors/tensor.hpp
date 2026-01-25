@@ -70,6 +70,21 @@ struct Tensor {
   }
 
   /**
+   * How many elements are broadcast in this tensor?
+   */
+  virtual vecCapInt get_broadcast_size() const {
+    if (shape.empty()) {
+      return ZERO_VCI;
+    }
+    vecCapInt max_index = 0U;
+    for (size_t i = 0U; i < shape.size(); ++i) {
+      max_index *= shape[i];
+    }
+
+    return max_index;
+  }
+
+  /**
    * Make a shallow copy of this tensor
    */
   TensorPtr copy() {

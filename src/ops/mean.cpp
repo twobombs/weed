@@ -94,6 +94,10 @@ void MeanKernel::gpu_complex(const Tensor &a, Tensor &out) {
 }
 #endif
 void MeanKernel::mean(const Tensor &a, Tensor &out) {
+  if (out.get_size() != 1U) {
+    throw std::invalid_argument(
+        "In Weed::mean(a, out), out parameter is not a scalar!");
+  }
   switch (a.storage->dtype) {
   case DType::COMPLEX:
 #if ENABLE_GPU

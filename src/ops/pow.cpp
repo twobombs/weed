@@ -76,6 +76,12 @@ void PowKernel::gpu_complex(const Tensor &a, const RealScalar &p, Tensor &out) {
 }
 #endif
 void PowKernel::pow(const Tensor &a, const RealScalar &p, Tensor &out) {
+  const size_t aSize = a.get_broadcast_size();
+  const size_t outSize = out.get_broadcast_size();
+  if (aSize != outSize) {
+    throw std::invalid_argument(
+        "In Weed::pow(a, b, out), out size does not match input size!");
+  }
   switch (a.storage->dtype) {
   case DType::COMPLEX:
 #if ENABLE_GPU
