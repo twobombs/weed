@@ -18,6 +18,7 @@
 
 #include "autograd/sgd.hpp"
 #include "autograd/zero_grad.hpp"
+#include "storage/all_storage.hpp"
 #include "tensors/complex_scalar.hpp"
 #include "tensors/real_scalar.hpp"
 
@@ -38,6 +39,26 @@ using namespace Weed;
 
 #define GET_REAL(ptr) static_cast<RealScalar *>((ptr).get())->get_item()
 #define GET_COMPLEX(ptr) static_cast<ComplexScalar *>((ptr).get())->get_item()
+
+TEST_CASE("test_fill_value_real") {
+  TensorPtr x = std::make_shared<RealScalar>(R(1), true, DeviceTag::CPU);
+  static_cast<CpuRealStorage *>(x->storage.get())->FillValue(R(2));
+  REQUIRE(GET_REAL(x) == R(2));
+
+  x = std::make_shared<ComplexScalar>(C(1), true, DeviceTag::CPU);
+  static_cast<CpuComplexStorage *>(x->storage.get())->FillValue(R(2));
+  REQUIRE_CMPLX(GET_COMPLEX(x), R(2));
+
+#if ENABLE_GPU
+  x = std::make_shared<RealScalar>(R(1), true, DeviceTag::GPU);
+  static_cast<GpuRealStorage *>(x->storage.get())->FillValue(R(2));
+  REQUIRE(GET_REAL(x) == R(2));
+
+  x = std::make_shared<ComplexScalar>(C(1), true, DeviceTag::GPU);
+  static_cast<GpuComplexStorage *>(x->storage.get())->FillValue(R(2));
+  REQUIRE_CMPLX(GET_COMPLEX(x), R(2));
+#endif
+}
 
 TEST_CASE("test_sum_real") {
   TensorPtr x = std::make_shared<Tensor>(
