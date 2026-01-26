@@ -226,6 +226,15 @@ TEST_CASE("test_real_scalar_abs") {
 
   REQUIRE(GET_REAL(y) == R(2));
   REQUIRE(GET_REAL(x->grad) == R(-1));
+
+  x = std::make_shared<RealScalar>(R(-2), true, TEST_DTAG);
+  y = Tensor::abs(x);
+  TensorPtr z = std::make_shared<ComplexScalar>(C(2), true, TEST_DTAG);
+  TensorPtr w = y + z;
+  Tensor::backward(w);
+
+  REQUIRE_CMPLX(GET_COMPLEX(w), C(4));
+  REQUIRE(GET_REAL(x->grad) == R(-1));
 }
 
 TEST_CASE("test_real_scalar_abs_grad_complex") {
