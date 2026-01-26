@@ -36,26 +36,26 @@ inline cmplx2 zmatrixmul(const real1 nrm, const cmplx4 lhs, const cmplx2 rhs)
 
 inline cmplx zpow_real(const cmplx z, const real1 p)
 {
-    const real1 r = hypot(z.x, z.y);
-    const real1 theta = atan2(z.y, z.x);
+    const real1_f r = hypot((real1_f)z.x, (real1_f)z.y);
+    const real1_f theta = atan2((real1_f)z.y, (real1_f)z.x);
 
-    const real1 rp = pow(r, p);
-    const real1 pt = p * theta;
+    const real1_f rp = pow(r, (real1_f)p);
+    const real1_f pt = p * theta;
 
-    return rp * sin((cmplx)(pt + SineShift, pt));
+    return ((real1)rp) * sin((cmplx)((real1)(pt + SineShift), (real1)pt));
 }
 
 inline cmplx zexp(const cmplx z)
 {
-    return exp(z.x) * sin((cmplx)(z.y + SineShift, z.y));
+    return ((real1)exp((real1_f)z.x)) * sin((cmplx)(z.y + SineShift, z.y));
 }
 
 inline cmplx zlog(const cmplx z)
 {
-    const real1 r = hypot(z.x, z.y);
-    const real1 theta = atan2(z.y, z.x);
+    const real1_f r = hypot((real1_f)z.x, (real1_f)z.y);
+    const real1_f theta = atan2((real1_f)z.y, (real1_f)z.x);
 
-    return (cmplx)(log(r), theta);
+    return (cmplx)((real1)log(r), (real1)theta);
 }
 
 inline real1 arg(const cmplx cmp)
@@ -211,7 +211,7 @@ void kernel relu_grad_mixed(global cmplx* din, global real1* in, global real1* d
 
 void kernel sigmoid(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
 {
-    out[i_X * I_B] = ONE_R1 / (ONE_R1 + exp(-a[i_X * I_A + O_A]));
+    out[i_X * I_B] = ONE_R1 / (ONE_R1 + (real1)exp((real1_f)(-a[i_X * I_A + O_A])));
 }
 void kernel sigmoid_grad_real(global real1* din, global real1* in, global real1* dout, constant vecCapIntGpu* vecCapIntArgs)
 {
@@ -442,7 +442,7 @@ void kernel sub_in_place_mixed(global cmplx* a, global real1* b, constant vecCap
 
 void kernel pow_real(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* p)
 {
-    out[i_X * I_B] = pow(a[i_X * I_A + O_A], *p);
+    out[i_X * I_B] = (real1)pow((real1_f)a[i_X * I_A + O_A], (real1_f)*p);
 }
 void kernel pow_complex(global cmplx* a, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* p)
 {
@@ -450,7 +450,7 @@ void kernel pow_complex(global cmplx* a, global cmplx* out, constant vecCapIntGp
 }
 void kernel exp_real(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* log_b)
 {
-    out[i_X * I_B] = exp(a[i_X * I_A + O_A] * (*log_b));
+    out[i_X * I_B] = ((real1)exp((real1_f)(a[i_X * I_A + O_A]) * (*log_b)));
 }
 void kernel exp_complex(global cmplx* a, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* log_b)
 {
@@ -458,7 +458,7 @@ void kernel exp_complex(global cmplx* a, global cmplx* out, constant vecCapIntGp
 }
 void kernel log_real(global real1* a, global real1* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* inv_log_b)
 {
-    out[i_X * I_B] = log(a[i_X * I_A + O_A]) * (*inv_log_b);
+    out[i_X * I_B] = ((real1)log((real1_f)a[i_X * I_A + O_A])) * (*inv_log_b);
 }
 void kernel log_complex(global cmplx* a, global cmplx* out, constant vecCapIntGpu* vecCapIntArgs, constant real1* inv_log_b)
 {

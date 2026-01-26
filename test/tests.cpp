@@ -286,7 +286,7 @@ TEST_CASE("test_real_scalar_exp") {
   TensorPtr y = R(2) ^ x;
   Tensor::backward(y);
 
-  REQUIRE(GET_REAL(y) == R(8));
+  REQUIRE_FLOAT(GET_REAL(y), R(8));
   REQUIRE_FLOAT(GET_REAL(x->grad), R(8 * std::log(2)));
 }
 
