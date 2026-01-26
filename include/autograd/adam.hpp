@@ -72,9 +72,6 @@ void adam_step(Adam &opt, const std::vector<ParameterPtr> &params) {
   const real1 bias_correction2 = 1.0 - std::pow(opt.beta2, opt.t);
 
   for (auto &p : params) {
-    if (!p->grad)
-      continue;
-
     AdamState &s = opt.state[p];
     // Tensor& m = *(s.m.get());
     // Tensor& v = *(s.v.get());
