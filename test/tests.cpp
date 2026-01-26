@@ -619,3 +619,40 @@ TEST_CASE("test_mixed_matmul") {
   REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[0]), R(10));
   REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[1]), R(15));
 }
+
+TEST_CASE("test_matmul_gradient_sum_loss") {
+  using namespace Weed;
+
+  // A: 2x3 (row-major)
+  TensorPtr A = std::make_shared<Tensor>(std::vector<real1>{1, 2, 3, 4, 5, 6},
+                                         std::vector<vecCapInt>{2, 3},
+                                         std::vector<vecCapInt>{1, 2},
+                                         /*requires_grad=*/true);
+
+  // B: 3x2 (row-major)
+  TensorPtr B = std::make_shared<Tensor>(
+      std::vector<real1>{7, 8, 9, 10, 11, 12}, std::vector<vecCapInt>{3, 2},
+      std::vector<vecCapInt>{1, 3},
+      /*requires_grad=*/true);
+
+  TensorPtr C = A >> B;
+  TensorPtr L = Tensor::sum(C);
+
+  Tensor::backward(L);
+
+  RealStorage *Ag = static_cast<RealStorage *>(A->grad->storage.get());
+  REQUIRE((*Ag)[0] == R(17));
+  REQUIRE((*Ag)[1] == R(17));
+  REQUIRE((*Ag)[2] == R(19));
+  REQUIRE((*Ag)[3] == R(19));
+  REQUIRE((*Ag)[4] == R(21));
+  REQUIRE((*Ag)[5] == R(21));
+
+  RealStorage *Bg = static_cast<RealStorage *>(B->grad->storage.get());
+  REQUIRE((*Bg)[0] == R(3));
+  REQUIRE((*Bg)[1] == R(7));
+  REQUIRE((*Bg)[2] == R(11));
+  REQUIRE((*Bg)[3] == R(3));
+  REQUIRE((*Bg)[4] == R(7));
+  REQUIRE((*Bg)[5] == R(11));
+}
