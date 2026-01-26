@@ -63,35 +63,6 @@ public:
   /** Call fn once for every numerical value between begin and end. */
   void par_for(const vecCapIntGpu begin, const vecCapIntGpu end,
                ParallelFunc fn);
-
-  /**
-   * Skip over the skipPower bits.
-   *
-   * For example, if skipPower is 2, it will count:
-   *   0000, 0001, 0100, 0101, 1000, 1001, 1100, 1101.
-   *     ^     ^     ^     ^     ^     ^     ^     ^ - The second bit is
-   *                                                   untouched.
-   */
-  void par_for_skip(const vecCapIntGpu begin, const vecCapIntGpu end,
-                    const vecCapIntGpu skipPower, const vecLenInt skipBitCount,
-                    ParallelFunc fn);
-
-  /** Skip over the bits listed in maskArray in the same fashion as
-   * par_for_skip. */
-  void par_for_mask(const vecCapIntGpu, const vecCapIntGpu,
-                    const std::vector<vecCapIntGpu> &maskArray,
-                    ParallelFunc fn);
-
-  /** Iterate over a sparse state vector. */
-  void par_for_set(const std::set<vecCapIntGpu> &sparseSet, ParallelFunc fn);
-
-  /** Iterate over a sparse state vector. */
-  void par_for_set(const std::vector<vecCapIntGpu> &sparseSet, ParallelFunc fn);
-
-  /** Iterate over the power set of 2 sparse state vectors. */
-  void par_for_sparse_compose(const std::vector<vecCapIntGpu> &lowSet,
-                              const std::vector<vecCapIntGpu> &highSet,
-                              const vecLenInt &highStart, ParallelFunc fn);
 };
 
 extern ParallelFor pfControl;
