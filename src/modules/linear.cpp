@@ -25,10 +25,11 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
   std::random_device rd;
   std::mt19937 gen(rd());
 
+  real1_f lim = (real1_f)(0.5 / std::sqrt(in_f));
+  std::uniform_real_distribution<real1_f> dis(-lim, lim);
+
   const size_t sz = in_f * out_f;
   if (dtype == DType::REAL) {
-    real1_f lim = (real1_f)(1.0 / std::sqrt(in_f));
-    std::uniform_real_distribution<real1_f> dis(-lim, lim);
     std::vector<real1> init;
     init.reserve(sz);
     for (size_t n = 0; n < sz; ++n) {
@@ -38,12 +39,12 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
     weight =
         std::make_shared<Parameter>(init, shape, stride, device, device_id);
   } else {
-    real1_f lim = (real1_f)(1.0 / std::pow(in_f, 0.25));
-    std::uniform_real_distribution<real1_f> dis(-lim, lim);
+    std::uniform_real_distribution<real1_f> adis((real1_f)(-PI_R1),
+                                                 (real1_f)PI_R1);
     std::vector<complex> init;
     init.reserve(sz);
     for (size_t n = 0; n < sz; ++n) {
-      init.push_back(complex((real1)dis(gen), (real1)dis(gen)));
+      init.push_back(std::polar((real1)dis(gen), (real1)adis(gen)));
     }
 
     weight =

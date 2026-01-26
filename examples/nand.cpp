@@ -10,9 +10,10 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "autograd/adam.hpp"
-#include "autograd/bci_loss.hpp"
+#include "autograd/mse_loss.hpp"
 #include "autograd/zero_grad.hpp"
 #include "modules/linear.hpp"
+#include "tensors/real_scalar.hpp"
 
 #include <iostream> // For cout
 
@@ -36,21 +37,21 @@ int main() {
 
   std::vector<ParameterPtr> params = l.parameters();
 
-  Adam opt(0.001);
+  Adam opt(0.00001);
   opt.register_parameters(params);
 
   size_t epoch = 1;
   real1 loss_r = ONE_R1;
 
-  while ((epoch <= 1000) && (loss_r > 0.1)) {
+  while ((epoch <= 10000) && (loss_r > 0.1)) {
     TensorPtr y_pred = Tensor::sigmoid(l.forward(x));
-    TensorPtr loss = bci_loss(y_pred, y);
+    TensorPtr loss = mse_loss(y_pred, y);
 
     Tensor::backward(loss);
     adam_step(opt, params);
 
     loss_r = GET_REAL(loss);
-    if (!(epoch % 100)) {
+    if (!(epoch % 1000)) {
       std::cout << "Epoch " << epoch << ", Loss: " << loss_r << std::endl;
     }
 
