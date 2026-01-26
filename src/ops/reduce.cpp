@@ -42,7 +42,7 @@
 
 #define DISPATCH_GPU_KERNEL(type, api_call)                                    \
   const vecCapIntGpu args[10U]{(vecCapIntGpu)(a.offset),                       \
-                               (vecCapIntGpu)(a.stride[0U]),                   \
+                               (vecCapIntGpu)index,                            \
                                (vecCapIntGpu)(out.offset),                     \
                                (vecCapIntGpu)(out.stride[0U]),                 \
                                0U,                                             \

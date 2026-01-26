@@ -211,7 +211,7 @@ std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
 }
 
 void Tensor::reduce_grad_broadcast() {
-  if ((stride.size() < 2) || !requires_grad()) {
+  if (!requires_grad()) {
     return;
   }
 
@@ -222,8 +222,15 @@ void Tensor::reduce_grad_broadcast() {
 
     std::vector<vecCapIntGpu> sh = grad->shape;
     std::vector<vecCapIntGpu> st = grad->stride;
-    sh.erase(sh.begin() + i);
-    st.erase(st.begin() + i);
+
+    if (sh.size() == 1U) {
+      sh[0U] = 1U;
+      st[0U] = 0U;
+    } else {
+      sh.erase(sh.begin() + i);
+      st.erase(st.begin() + i);
+    }
+
     TensorPtr tmp = allocate_like(sh, st, grad, grad->storage->dtype, false);
     Weed::reduce(i, *(grad.get()), *(tmp.get()));
     grad = tmp;
