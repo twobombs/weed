@@ -21,7 +21,6 @@
 #include "ops/reduce.hpp"
 #include "ops/sub.hpp"
 #include "ops/sum.hpp"
-#include "tensors/complex_scalar.hpp"
 #include "tensors/real_scalar.hpp"
 
 #include "storage/all_storage.hpp"
@@ -186,14 +185,7 @@ TensorPtr Tensor::operator[](vecCapInt idx) {
   }
 
   if (v->shape.empty()) {
-    switch (v->storage->dtype) {
-    case DType::COMPLEX:
-      return std::make_shared<ComplexScalar>(v);
-    case DType::REAL:
-      return std::make_shared<RealScalar>(v);
-    default:
-      return std::make_shared<Scalar>(v);
-    }
+    return std::make_shared<Scalar>(v);
   }
 
   return v;
