@@ -33,6 +33,7 @@ struct GpuComplexStorage : ComplexStorage {
       : ComplexStorage(DeviceTag::GPU, n),
         gpu(OCLEngine::Instance().GetWeedDevice(did)),
         array(nullptr, [](complex *) {}) {
+    AddAlloc(sizeof(complex) * size);
     buffer = MakeBuffer(n);
   }
 
@@ -40,9 +41,24 @@ struct GpuComplexStorage : ComplexStorage {
       : ComplexStorage(DeviceTag::GPU, val.size()),
         gpu(OCLEngine::Instance().GetWeedDevice(did)),
         array(Alloc(val.size())) {
+    AddAlloc(sizeof(complex) * size);
     std::copy(val.begin(), val.end(), array.get());
     buffer = MakeBuffer(val.size());
     array.reset();
+  }
+
+  virtual ~GpuComplexStorage() { SubtractAlloc(sizeof(complex) * size); }
+
+  void AddAlloc(size_t sz) {
+    size_t currentAlloc =
+        OCLEngine::Instance().AddToActiveAllocSize(gpu->deviceID, sz);
+    if (currentAlloc > gpu->device_context->GetGlobalAllocLimit()) {
+      OCLEngine::Instance().SubtractFromActiveAllocSize(gpu->deviceID, sz);
+      throw bad_alloc("VRAM limits exceeded in GpuComplexStorage::AddAlloc()");
+    }
+  }
+  void SubtractAlloc(size_t sz) {
+    OCLEngine::Instance().SubtractFromActiveAllocSize(gpu->deviceID, sz);
   }
 
   /**
