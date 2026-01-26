@@ -200,6 +200,20 @@ std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
   return filtered;
 }
 
+void Tensor::match_shape(const TensorPtr a) {
+  shape = a->shape;
+  stride.resize(shape.size());
+
+  if (requires_grad()) {
+    // This must be reduced along broadcast dimensions
+    // uring the backward() step.
+    TensorPtr g = allocate_like(a, storage->dtype, false);
+    g->storage->FillZeros();
+    Weed::add_in_place(*(g.get()), *(grad.get()));
+    grad = g;
+  }
+}
+
 void Tensor::reduce_grad_broadcast() {
   if (!requires_grad()) {
     return;
@@ -463,12 +477,14 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
     TensorPtr out_grad = out->grad;
     if (a->requires_grad()) {
+      a->match_shape(b);
       TensorPtr a_grad = a->grad;
       a_grad->upcast(out_grad->storage->dtype);
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
       a->reduce_grad_broadcast();
     }
     if (b->requires_grad()) {
+      b->match_shape(a);
       TensorPtr b_grad = b->grad;
       b_grad->upcast(out_grad->storage->dtype);
       Weed::add_in_place(*(b_grad.get()), *(out_grad.get()));
@@ -510,6 +526,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       filterParents(std::vector<TensorPtr>{a, b}), [a, b, out]() {
         TensorPtr out_grad = out->grad;
         if (a->requires_grad()) {
+          a->match_shape(b);
           TensorPtr a_grad = a->grad;
           const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
           a_grad->upcast(dt);
@@ -519,6 +536,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           a->reduce_grad_broadcast();
         }
         if (b->requires_grad()) {
+          b->match_shape(a);
           TensorPtr b_grad = b->grad;
           const DType &dt = get_dtype_by_presidence(b_grad, out_grad);
           b_grad->upcast(dt);
@@ -613,12 +631,14 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
     TensorPtr out_grad = out->grad;
     if (a->requires_grad()) {
+      a->match_shape(b);
       TensorPtr a_grad = a->grad;
       a_grad->upcast(out_grad->storage->dtype);
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
       a->reduce_grad_broadcast();
     }
     if (b->requires_grad()) {
+      b->match_shape(a);
       TensorPtr b_grad = b->grad;
       b_grad->upcast(out_grad->storage->dtype);
       Weed::sub_in_place(*(b_grad.get()), *(out_grad.get()));
@@ -660,6 +680,7 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       filterParents(std::vector<TensorPtr>{a, b}), [a, b, out]() {
         TensorPtr out_grad = out->grad;
         if (a->requires_grad()) {
+          a->match_shape(b);
           TensorPtr a_grad = a->grad;
           const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
           a_grad->upcast(dt);
@@ -669,6 +690,7 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           a->reduce_grad_broadcast();
         }
         if (b->requires_grad()) {
+          b->match_shape(a);
           TensorPtr b_grad = b->grad;
           const DType &dt = get_dtype_by_presidence(b_grad, out_grad);
           b_grad->upcast(dt);

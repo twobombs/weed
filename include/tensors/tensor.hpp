@@ -130,17 +130,7 @@ struct Tensor {
   /**
    * For broadcast, make this scalar match the shape of a target Tensor
    */
-  void match_shape(const TensorPtr a) {
-    shape = a->shape;
-    stride.resize(shape.size());
-
-    if (requires_grad()) {
-      // This must be reduced along broadcast dimensions
-      // uring the backward() step.
-      grad = allocate_like(a, storage->dtype, false);
-      grad->storage->FillZeros();
-    }
-  }
+  void match_shape(const TensorPtr a);
 
   void reduce_grad_broadcast();
 
