@@ -230,9 +230,10 @@ void AbsKernel::gpu_complex_grad_complex(Tensor &din, const Tensor &in,
 }
 #endif
 void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
-  if (din.storage->dtype != dout.storage->dtype) {
-    throw std::invalid_argument("In Weed::abs_grad(din, in, dout), din dtype "
-                                "and dout dtype must match!");
+  if ((din.storage->dtype == DType::REAL) &&
+      (dout.storage->dtype != DType::REAL)) {
+    throw std::invalid_argument("In Weed::abs_grad(din, in, dout), dout dtype "
+                                "must upcast to dout dtype!");
   }
   const size_t dinSize = din.get_size();
   const size_t inSize = in.get_size();
