@@ -209,6 +209,7 @@ void Tensor::match_shape(const TensorPtr a) {
     // uring the backward() step.
     TensorPtr g = allocate_like(a, storage->dtype, false);
     g->storage->FillZeros();
+    grad->match_shape(g);
     Weed::add_in_place(*(g.get()), *(grad.get()));
     grad = g;
   }
