@@ -24,7 +24,8 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
 
   const size_t sz = in_f * out_f;
   if (dtype == DType::REAL) {
-    std::uniform_real_distribution<> dis(0.0, 1.0 / std::sqrt(in_f));
+    real1 lim = 1.0 / std::sqrt(in_f);
+    std::uniform_real_distribution<real1> dis(-lim, lim);
     std::vector<real1> init;
     init.reserve(sz);
     for (size_t n = 0; n < sz; ++n) {
@@ -36,7 +37,8 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
                                          std::vector<vecCapIntGpu>{1, in_f},
                                          device, device_id);
   } else {
-    std::uniform_real_distribution<> dis(0.0, 1.0 / std::pow(in_f, 0.25));
+    real1 lim = 1.0 / std::pow(in_f, 0.25);
+    std::uniform_real_distribution<real1> dis(-lim, lim);
     std::vector<complex> init;
     init.reserve(sz);
     for (size_t n = 0; n < sz; ++n) {
