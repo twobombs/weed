@@ -27,8 +27,6 @@
 
 #include <unordered_set>
 
-#include <iostream>
-
 #define GET_REAL(ptr) static_cast<RealScalar *>((ptr).get())->get_item()
 
 #define INIT_DEVICE_STORAGE(val, GpuType, CpuType)                             \
