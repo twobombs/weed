@@ -18,10 +18,12 @@ struct RealUnaryKernel {
   void (*cpu)(const Tensor &, Tensor &);
   void (*cpu_grad_real)(Tensor &, const Tensor &, const Tensor &);
   void (*cpu_grad_complex)(Tensor &, const Tensor &, const Tensor &);
+  void (*cpu_grad_mixed)(Tensor &, const Tensor &, const Tensor &);
 #if ENABLE_GPU
   void (*gpu)(const Tensor &, Tensor &);
   void (*gpu_grad_real)(Tensor &, const Tensor &, const Tensor &);
   void (*gpu_grad_complex)(Tensor &, const Tensor &, const Tensor &);
+  void (*gpu_grad_mixed)(Tensor &, const Tensor &, const Tensor &);
 #endif
   void unary(const Tensor &, Tensor &);
   void unary_grad(Tensor &, const Tensor &, const Tensor &);

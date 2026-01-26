@@ -53,7 +53,9 @@ static void cpu_relu_grad_real(Tensor &din, const Tensor &in,
   CAST_STORAGE(po, dout, real1, CpuRealStorage);
   size_t n = dout.storage->size;
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    pdi[i * I_d] = (pi[i * I_i] > 0) ? po[i * I_o] : ZERO_R1;
+    if (pi[i * I_i] > 0) {
+      pdi[i * I_d] += po[i * I_o];
+    }
   });
 }
 static void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
@@ -66,7 +68,24 @@ static void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
   CAST_STORAGE(po, dout, complex, CpuComplexStorage);
   size_t n = dout.storage->size;
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    pdi[i * I_d] = (pi[i * I_i] > 0) ? po[i * I_o] : ZERO_CMPLX;
+    if (pi[i * I_i] > 0) {
+      pdi[i * I_d] += po[i * I_o];
+    }
+  });
+}
+static void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
+                                const Tensor &dout) {
+  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
+  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
+  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
+  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
+  CAST_STORAGE(pi, in, real1, CpuRealStorage);
+  CAST_STORAGE(po, dout, real1, CpuRealStorage);
+  size_t n = dout.storage->size;
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
+    if (pi[i * I_i] > 0) {
+      pdi[i * I_d] += po[i * I_o];
+    }
   });
 }
 
@@ -116,6 +135,19 @@ static void gpu_relu_grad_complex(Tensor &din, const Tensor &in,
       OCLAPI::OCL_API_RELU_GRAD_COMPLEX, args, din.get_size(),
       {a_storage->buffer, b_storage->buffer, c_storage->buffer});
 }
+static void gpu_relu_grad_mixed(Tensor &din, const Tensor &in,
+                                const Tensor &dout) {
+  GPU_GRAD_ARGS();
+  GpuComplexStoragePtr a_storage =
+      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
+  GpuRealStoragePtr b_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(in.storage);
+  GpuRealStoragePtr c_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
+  a_storage->gpu->RequestKernel(
+      OCLAPI::OCL_API_RELU_GRAD_MIXED, args, din.get_size(),
+      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+}
 #endif
 
 static void cpu_sigmoid(const Tensor &a, Tensor &out) {
@@ -140,7 +172,7 @@ static void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
   size_t n = dout.storage->size;
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const real1 yi = pi[i * I_i];
-    pdi[i * I_d] += po[i * I_o] * yi * (ONE_R1 - yi);
+    pdi[i * I_d] += yi * (ONE_R1 - yi) * po[i * I_o];
   });
 }
 static void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
@@ -153,8 +185,22 @@ static void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
   CAST_STORAGE(po, dout, complex, CpuComplexStorage);
   size_t n = dout.storage->size;
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    const complex yi = pi[i * I_i];
-    pdi[i * I_d] += po[i * I_o] * yi * (ONE_CMPLX - yi);
+    const real1 yi = pi[i * I_i];
+    pdi[i * I_d] += yi * (ONE_R1 - yi) * po[i * I_o];
+  });
+}
+static void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
+                                   const Tensor &dout) {
+  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
+  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
+  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
+  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
+  CAST_STORAGE(pi, in, real1, CpuRealStorage);
+  CAST_STORAGE(po, dout, real1, CpuRealStorage);
+  size_t n = dout.storage->size;
+  pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
+    const real1 yi = pi[i * I_i];
+    pdi[i * I_d] += yi * (ONE_R1 - yi) * po[i * I_o];
   });
 }
 
@@ -204,6 +250,19 @@ static void gpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
       OCLAPI::OCL_API_SIGMOID_GRAD_COMPLEX, args, din.get_size(),
       {a_storage->buffer, b_storage->buffer, c_storage->buffer});
 }
+static void gpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
+                                   const Tensor &dout) {
+  GPU_GRAD_ARGS();
+  GpuComplexStoragePtr a_storage =
+      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
+  GpuRealStoragePtr b_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(in.storage);
+  GpuRealStoragePtr c_storage =
+      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
+  a_storage->gpu->RequestKernel(
+      OCLAPI::OCL_API_SIGMOID_GRAD_MIXED, args, din.get_size(),
+      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+}
 #endif
 
 void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
@@ -211,7 +270,7 @@ void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
     throw std::invalid_argument(
         "In Weed::unary(a, out), out size does not match input size!");
   }
-  if ((a.storage->dtype == DType::COMPLEX) or
+  if ((a.storage->dtype == DType::COMPLEX) ||
       (out.storage->dtype == DType::COMPLEX)) {
     throw std::invalid_argument("Cannot apply ReLU on complex tensors!");
   }
@@ -231,6 +290,12 @@ void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
 
 void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
                                  const Tensor &dout) {
+  if ((din.storage->dtype == DType::REAL) &&
+      (dout.storage->dtype != DType::REAL)) {
+    throw std::invalid_argument(
+        "In Weed::unary_grad(din, in, dout), dout dtype "
+        "must upcast to dout dtype!");
+  }
   const size_t dinSize = din.get_broadcast_size();
   const size_t inSize = in.get_broadcast_size();
   const size_t doutSize = dout.get_broadcast_size();
@@ -244,11 +309,22 @@ void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
   }
   switch (din.storage->dtype) {
   case DType::COMPLEX:
+    switch (dout.storage->dtype) {
+    case DType::COMPLEX:
 #if ENABLE_GPU
-    DEVICE_SWITCH(cpu_grad_complex, gpu_grad_complex, din, in, dout);
+      DEVICE_SWITCH(cpu_grad_complex, gpu_grad_complex, din, in, dout);
 #else
-    cpu_grad_complex(din, in, dout);
+      cpu_grad_complex(din, in, dout);
 #endif
+      break;
+    case DType::REAL:
+    default:
+#if ENABLE_GPU
+      DEVICE_SWITCH(cpu_grad_mixed, gpu_grad_mixed, din, in, dout);
+#else
+      cpu_grad_complex(din, in, dout);
+#endif
+    }
     break;
   case DType::REAL:
   default:
@@ -263,20 +339,24 @@ void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
 RealUnaryKernel relu_kernel = {cpu_relu,
                                cpu_relu_grad_real,
                                cpu_relu_grad_complex,
+                               cpu_relu_grad_mixed,
 #if ENABLE_GPU
                                gpu_relu,
                                gpu_relu_grad_real,
-                               gpu_relu_grad_complex
+                               gpu_relu_grad_complex,
+                               gpu_relu_grad_mixed
 #endif
 };
 
 RealUnaryKernel sigmoid_kernel = {cpu_sigmoid,
                                   cpu_sigmoid_grad_real,
                                   cpu_sigmoid_grad_complex,
+                                  cpu_sigmoid_grad_mixed,
 #if ENABLE_GPU
                                   gpu_sigmoid,
                                   gpu_sigmoid_grad_real,
-                                  gpu_sigmoid_grad_complex
+                                  gpu_sigmoid_grad_complex,
+                                  gpu_sigmoid_grad_mixed
 #endif
 };
 
