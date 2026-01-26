@@ -35,6 +35,7 @@ struct GpuRealStorage : RealStorage {
         gpu(OCLEngine::Instance().GetWeedDevice(did)),
         array(nullptr, [](real1 *) {}) {
     buffer = MakeBuffer(n);
+    AddAlloc(sizeof(real1) * size);
   }
 
   GpuRealStorage(std::vector<real1> val, int64_t did)
@@ -44,6 +45,19 @@ struct GpuRealStorage : RealStorage {
     std::copy(val.begin(), val.end(), array.get());
     buffer = MakeBuffer(val.size());
     array.reset();
+    AddAlloc(sizeof(real1) * size);
+  }
+
+  void AddAlloc(size_t sz) {
+    size_t currentAlloc =
+        OCLEngine::Instance().AddToActiveAllocSize(gpu->deviceID, sz);
+    if (currentAlloc > gpu->device_context->GetGlobalAllocLimit()) {
+      OCLEngine::Instance().SubtractFromActiveAllocSize(gpu->deviceID, sz);
+      throw bad_alloc("VRAM limits exceeded in QEngineOCL::AddAlloc()");
+    }
+  }
+  void SubtractAlloc(size_t sz) {
+    OCLEngine::Instance().SubtractFromActiveAllocSize(gpu->deviceID, sz);
   }
 
   int64_t get_device_id() override { return gpu->deviceID; }
