@@ -409,6 +409,19 @@ TEST_CASE("test_real_matmul") {
   TensorPtr z = x >> y;
 
   REQUIRE(GET_REAL((*(z.get()))[0]) == (ONE_R1 * 23));
+
+  x = std::make_shared<Tensor>(std::vector<real1>{2.0, 3.0},
+                               std::vector<vecCapInt>{2, 1},
+                               std::vector<vecCapInt>{1, 2}, false, TEST_DTAG);
+  y = std::make_shared<Tensor>(std::vector<real1>{4.0, 5.0},
+                               std::vector<vecCapInt>{1, 2},
+                               std::vector<vecCapInt>{1, 1}, false, TEST_DTAG);
+  z = x >> y;
+
+  REQUIRE(GET_REAL((*(*(z.get()))[0])[0]) == (ONE_R1 * 8));
+  REQUIRE(GET_REAL((*(*(z.get()))[0])[1]) == (ONE_R1 * 12));
+  REQUIRE(GET_REAL((*(*(z.get()))[1])[0]) == (ONE_R1 * 10));
+  REQUIRE(GET_REAL((*(*(z.get()))[1])[1]) == (ONE_R1 * 15));
 }
 
 TEST_CASE("test_complex_matmul") {
@@ -421,6 +434,19 @@ TEST_CASE("test_complex_matmul") {
   TensorPtr z = x >> y;
 
   REQUIRE_CMPLX(GET_COMPLEX((*(z.get()))[0]), (ONE_R1 * 23));
+
+  x = std::make_shared<Tensor>(std::vector<complex>{2.0, 3.0},
+                               std::vector<vecCapInt>{2, 1},
+                               std::vector<vecCapInt>{1, 2}, false, TEST_DTAG);
+  y = std::make_shared<Tensor>(std::vector<complex>{4.0, 5.0},
+                               std::vector<vecCapInt>{1, 2},
+                               std::vector<vecCapInt>{1, 1}, false, TEST_DTAG);
+  z = x >> y;
+
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[0]), (ONE_R1 * 8));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[1]), (ONE_R1 * 12));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[0]), (ONE_R1 * 10));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[1]), (ONE_R1 * 15));
 }
 
 TEST_CASE("test_mixed_matmul") {
@@ -443,4 +469,32 @@ TEST_CASE("test_mixed_matmul") {
   z = x >> y;
 
   REQUIRE_CMPLX(GET_COMPLEX((*(z.get()))[0]), (ONE_R1 * 23));
+
+  REQUIRE_CMPLX(GET_COMPLEX((*(z.get()))[0]), (ONE_R1 * 23));
+
+  x = std::make_shared<Tensor>(std::vector<real1>{2.0, 3.0},
+                               std::vector<vecCapInt>{2, 1},
+                               std::vector<vecCapInt>{1, 2}, false, TEST_DTAG);
+  y = std::make_shared<Tensor>(std::vector<complex>{4.0, 5.0},
+                               std::vector<vecCapInt>{1, 2},
+                               std::vector<vecCapInt>{1, 1}, false, TEST_DTAG);
+  z = x >> y;
+
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[0]), (ONE_R1 * 8));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[1]), (ONE_R1 * 12));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[0]), (ONE_R1 * 10));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[1]), (ONE_R1 * 15));
+
+  x = std::make_shared<Tensor>(std::vector<complex>{2.0, 3.0},
+                               std::vector<vecCapInt>{2, 1},
+                               std::vector<vecCapInt>{1, 2}, false, TEST_DTAG);
+  y = std::make_shared<Tensor>(std::vector<real1>{4.0, 5.0},
+                               std::vector<vecCapInt>{1, 2},
+                               std::vector<vecCapInt>{1, 1}, false, TEST_DTAG);
+  z = x >> y;
+
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[0]), (ONE_R1 * 8));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[0])[1]), (ONE_R1 * 12));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[0]), (ONE_R1 * 10));
+  REQUIRE_CMPLX(GET_COMPLEX((*(*(z.get()))[1])[1]), (ONE_R1 * 15));
 }

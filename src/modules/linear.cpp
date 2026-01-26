@@ -12,26 +12,6 @@
 #include "modules/linear.hpp"
 #include "storage/all_storage.hpp"
 
-#define SWITCH_DTYPE(val, strg, ctype, rtype)                                  \
-  switch (dtype) {                                                             \
-  case DType::COMPLEX:                                                         \
-    static_cast<ctype *>(strg.get())->FillValue(ONE_R1 / 2);                   \
-    break;                                                                     \
-  case DType::REAL:                                                            \
-  default:                                                                     \
-    static_cast<rtype *>(strg.get())->FillValue(ONE_R1 / 2);                   \
-  }
-
-#define FILL_STORAGE(val, strg)                                                \
-  switch (device) {                                                            \
-  case DeviceTag::GPU:                                                         \
-    SWITCH_DTYPE(val, strg, GpuComplexStorage, GpuRealStorage);                \
-    break;                                                                     \
-  case DeviceTag::CPU:                                                         \
-  default:                                                                     \
-    SWITCH_DTYPE(val, strg, CpuComplexStorage, CpuRealStorage);                \
-  }
-
 namespace Weed {
 Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
                DType dtype, DeviceTag device, int64_t device_id)
