@@ -57,6 +57,22 @@ struct Tensor {
       : Tensor(std::vector<complex>{val}, std::vector<vecCapInt>{1},
                std::vector<vecCapInt>{0}, rg, dtag, did) {}
 
+  bool validate_shape(const std::vector<vecCapInt> &shp,
+                      const std::vector<vecCapInt> &s) {
+    vecCapInt st = 1U;
+    for (size_t i = 0U; i < s.size(); ++i) {
+      if (!s[i]) {
+        continue;
+      }
+      if (s[i] != st) {
+        return false;
+      }
+      st *= shp[i];
+    }
+
+    return true;
+  }
+
   /**
    * Will we calculate gradients on back-propagation?
    */

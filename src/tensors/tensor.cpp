@@ -84,6 +84,10 @@ Tensor::Tensor(std::vector<vecCapInt> shp, std::vector<vecCapInt> strd, bool rg,
     throw std::invalid_argument(
         "Tensor shape vector must have same length as stride vector!");
   }
+  if (!validate_shape(shape, stride)) {
+    throw std::invalid_argument(
+        "Initial tensor shape and stride must be contiguous!");
+  }
 
   const vecCapInt size = get_size();
 
@@ -120,6 +124,10 @@ Tensor::Tensor(std::vector<real1> val, std::vector<vecCapInt> shp,
     throw std::invalid_argument(
         "Tensor shape vector must have same length as stride vector!");
   }
+  if (!validate_shape(shape, stride)) {
+    throw std::invalid_argument(
+        "Initial tensor shape and stride must be contiguous!");
+  }
 
   const vecCapInt size = get_size();
 
@@ -148,6 +156,10 @@ Tensor::Tensor(std::vector<complex> val, std::vector<vecCapInt> shp,
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
         "Tensor shape vector must have same length as stride vector!");
+  }
+  if (!validate_shape(shape, stride)) {
+    throw std::invalid_argument(
+        "Initial tensor shape and stride must be contiguous!");
   }
 
   const vecCapInt size = get_size();
