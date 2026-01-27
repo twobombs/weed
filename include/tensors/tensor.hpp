@@ -158,12 +158,13 @@ struct Tensor {
   /**
    * Compare the data type of two tensors and return the more-encompassing one
    */
-  static DType get_dtype_by_presidence(const TensorPtr left,
-                                       const TensorPtr right) {
-    if (right->storage->dtype == DType::COMPLEX) {
-      return DType::COMPLEX;
+  static DType get_dtype_by_presidence(const std::vector<TensorPtr> v) {
+    for (const TensorPtr &p : v) {
+      if (p->storage->dtype == DType::COMPLEX) {
+        return DType::COMPLEX;
+      }
     }
-    return left->storage->dtype;
+    return DType::REAL;
   }
 
   /**

@@ -320,7 +320,7 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
         TensorPtr scale =
             std::make_shared<RealScalar>(ONE_R1, false, out->storage->device);
         // da += dout  (broadcast)
-        const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
+        const DType &dt = get_dtype_by_presidence({a_grad, out_grad});
         a_grad->upcast(dt);
         TensorPtr tmp = Tensor::allocate_like(out_grad, dt, false);
         scale->match_shape(out_grad);
@@ -353,7 +353,7 @@ void Tensor::make_mean_node(TensorPtr a, TensorPtr out) {
         TensorPtr scale = std::make_shared<RealScalar>(
             ONE_R1 / (real1)a->get_size(), false, out->storage->device);
         // da += dout / N   (broadcast)
-        const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
+        const DType &dt = get_dtype_by_presidence({a_grad, out_grad});
         a_grad->upcast(dt);
         scale->match_shape(out_grad);
         TensorPtr tmp = Tensor::allocate_like(out_grad, dt, false);
@@ -463,7 +463,7 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
-  DType dt = get_dtype_by_presidence(a, b);
+  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
@@ -511,7 +511,7 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
-  DType dt = get_dtype_by_presidence(a, b);
+  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
@@ -539,7 +539,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         if (a->requires_grad()) {
           a->match_shape(b);
           TensorPtr a_grad = a->grad;
-          const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
+          const DType &dt = get_dtype_by_presidence({a_grad, b, out_grad});
           a_grad->upcast(dt);
           TensorPtr tmp = Tensor::allocate_like(b, dt, false);
           Weed::mul(*(out_grad.get()), *(b.get()), *(tmp.get()));
@@ -549,7 +549,7 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         if (b->requires_grad()) {
           b->match_shape(a);
           TensorPtr b_grad = b->grad;
-          const DType &dt = get_dtype_by_presidence(b_grad, out_grad);
+          const DType &dt = get_dtype_by_presidence({a, b_grad, out_grad});
           b_grad->upcast(dt);
           TensorPtr tmp = Tensor::allocate_like(a, dt, false);
           Weed::mul(*(out_grad.get()), *(a.get()), *(tmp.get()));
@@ -573,7 +573,7 @@ TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
   const std::vector<vecCapInt> shp = {a->shape[0U], b->shape[1U]};
   const std::vector<vecCapInt> str = {ONE_VCI, a->shape[0U]};
   const bool rg = a->requires_grad() || b->requires_grad();
-  DType dt = get_dtype_by_presidence(a, b);
+  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(shp, str, a, dt, rg);
 
   Weed::matmul(*(a.get()), *(b.get()), *(out.get()));
@@ -591,7 +591,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         TensorPtr out_grad = out->grad;
         if (a->requires_grad()) {
           TensorPtr a_grad = a->grad;
-          const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
+          const DType &dt = get_dtype_by_presidence({a_grad, b, out_grad});
           a_grad->upcast(dt);
           TensorPtr bt = transpose(b);
           TensorPtr tmp = Tensor::allocate_like(a, dt, false);
@@ -600,7 +600,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         }
         if (b->requires_grad()) {
           TensorPtr b_grad = b->grad;
-          const DType &dt = get_dtype_by_presidence(b_grad, out_grad);
+          const DType &dt = get_dtype_by_presidence({a, b_grad, out_grad});
           b_grad->upcast(dt);
           TensorPtr at = transpose(a);
           TensorPtr tmp = Tensor::allocate_like(b, dt, false);
@@ -617,7 +617,7 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
-  DType dt = get_dtype_by_presidence(a, b);
+  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
@@ -665,7 +665,7 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
-  DType dt = get_dtype_by_presidence(a, b);
+  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
@@ -693,7 +693,7 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         if (a->requires_grad()) {
           a->match_shape(b);
           TensorPtr a_grad = a->grad;
-          const DType &dt = get_dtype_by_presidence(a_grad, out_grad);
+          const DType &dt = get_dtype_by_presidence({a_grad, b, out_grad});
           a_grad->upcast(dt);
           TensorPtr tmp = Tensor::allocate_like(b, dt, false);
           Weed::div(*(out_grad.get()), *(b.get()), *(tmp.get()));
@@ -703,10 +703,10 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         if (b->requires_grad()) {
           b->match_shape(a);
           TensorPtr b_grad = b->grad;
-          const DType &dt = get_dtype_by_presidence(b_grad, out_grad);
-          b_grad->upcast(dt);
           TensorPtr b_sqr = Tensor::allocate_like(b, b->storage->dtype, false);
           Weed::mul(*(b.get()), *(b.get()), *(b_sqr.get()));
+          const DType &dt = get_dtype_by_presidence({a, b_sqr});
+          b_grad->upcast(dt);
           TensorPtr tmp = Tensor::allocate_like(a, dt, false);
           Weed::div(*(a.get()), *(b_sqr.get()), *(tmp.get()));
           Weed::sub_in_place(*(b_grad.get()), *(tmp.get()));

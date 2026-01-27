@@ -29,7 +29,7 @@ inline void sgd_step(const std::vector<ParameterPtr> &params, real1 lr) {
   TensorPtr alpha = std::make_shared<RealScalar>(lr, false, dtag);
 
   for (auto p : params) {
-    const DType dt = Tensor::get_dtype_by_presidence(p, p->grad);
+    const DType dt = Tensor::get_dtype_by_presidence({p, p->grad});
     p->upcast(dt);
     alpha->match_shape(p->grad);
 
