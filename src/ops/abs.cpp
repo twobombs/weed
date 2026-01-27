@@ -88,13 +88,13 @@ namespace Weed {
 void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
   CPU_INIT(real1, CpuRealStorage, real1, CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    po[i * I_o] = std::abs(pa[i * I_a]);
+    po[i * I_o] = (pa[i * I_a] < ZERO_R1) ? -pa[i * I_a] : pa[i * I_a];
   });
 }
 void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
   CPU_INIT(complex, CpuComplexStorage, real1, CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    po[i * I_o] = std::abs(pa[i * I_a]);
+    po[i * I_o] = (real1)std::abs(pa[i * I_a]);
   });
 }
 #if ENABLE_GPU

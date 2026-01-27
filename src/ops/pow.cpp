@@ -52,21 +52,21 @@ namespace Weed {
 static void cpu_real_pow(const Tensor &a, const real1 &p, Tensor &out) {
   CPU_INIT(real1, CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    po[i * I_o] = std::pow(pa[i * I_a], p);
+    po[i * I_o] = (real1)std::pow((real1_s)pa[i * I_a], (real1_s)p);
   });
 }
 static void cpu_real_exp(const Tensor &a, const real1 &b, Tensor &out) {
   CPU_INIT(real1, CpuRealStorage);
-  const real1 log_b = (real1)std::log(b);
+  const real1 log_b = (real1)std::log((real1_s)b);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    po[i * I_o] = std::exp(pa[i * I_a] * log_b);
+    po[i * I_o] = (real1)std::exp((real1_s)(pa[i * I_a] * log_b));
   });
 }
 static void cpu_real_log(const Tensor &a, const real1 &b, Tensor &out) {
   CPU_INIT(real1, CpuRealStorage);
-  const real1 inv_log_b = (real1)(1.0 / std::log(b));
+  const real1 inv_log_b = (real1)(ONE_R1 / std::log((real1_s)b));
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
-    po[i * I_o] = std::log(pa[i * I_a]) * inv_log_b;
+    po[i * I_o] = (real1)(std::log((real1_s)pa[i * I_a])) * inv_log_b;
   });
 }
 static void cpu_complex_pow(const Tensor &a, const real1 &p, Tensor &out) {
@@ -77,14 +77,14 @@ static void cpu_complex_pow(const Tensor &a, const real1 &p, Tensor &out) {
 }
 static void cpu_complex_exp(const Tensor &a, const real1 &b, Tensor &out) {
   CPU_INIT(complex, CpuComplexStorage);
-  const real1 log_b = (real1)std::log(b);
+  const real1 log_b = (real1)std::log((real1_s)b);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     po[i * I_o] = std::exp(pa[i * I_a] * log_b);
   });
 }
 static void cpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
   CPU_INIT(complex, CpuComplexStorage);
-  const real1 inv_log_b = (real1)(1.0 / std::log(b));
+  const real1 inv_log_b = (real1)(ONE_R1 / std::log((real1_s)b));
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     po[i * I_o] = std::log(pa[i * I_a]) * inv_log_b;
   });
@@ -94,19 +94,20 @@ static void gpu_real_pow(const Tensor &a, const real1 &p, Tensor &out) {
   GPU(GpuRealStorage, p, OCL_API_POW_REAL);
 }
 static void gpu_real_exp(const Tensor &a, const real1 &b, Tensor &out) {
-  GPU(GpuRealStorage, (real1)std::log(b), OCL_API_EXP_REAL);
+  GPU(GpuRealStorage, (real1)std::log((real1_s)b), OCL_API_EXP_REAL);
 }
 static void gpu_real_log(const Tensor &a, const real1 &b, Tensor &out) {
-  GPU(GpuRealStorage, (real1)(1.0 / std::log(b)), OCL_API_LOG_REAL);
+  GPU(GpuRealStorage, (real1)(ONE_R1 / std::log((real1_s)b)), OCL_API_LOG_REAL);
 }
 static void gpu_complex_pow(const Tensor &a, const real1 &p, Tensor &out) {
   GPU(GpuComplexStorage, p, OCL_API_POW_COMPLEX);
 }
 static void gpu_complex_exp(const Tensor &a, const real1 &b, Tensor &out) {
-  GPU(GpuComplexStorage, (real1)std::log(b), OCL_API_EXP_COMPLEX);
+  GPU(GpuComplexStorage, (real1)std::log((real1_s)b), OCL_API_EXP_COMPLEX);
 }
 static void gpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
-  GPU(GpuComplexStorage, (real1)(1.0 / std::log(b)), OCL_API_LOG_COMPLEX);
+  GPU(GpuComplexStorage, (real1)(ONE_R1 / std::log((real1_s)b)),
+      OCL_API_LOG_COMPLEX);
 }
 #endif
 void PowKernel::pow(const Tensor &a, const real1 &p, Tensor &out) {

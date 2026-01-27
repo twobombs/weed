@@ -68,8 +68,10 @@ struct Adam {
 void adam_step(Adam &opt, const std::vector<ParameterPtr> &params) {
   opt.t += 1;
 
-  const real1 bias_correction1 = (real1)(1.0 - std::pow(opt.beta1, opt.t));
-  const real1 bias_correction2 = (real1)(1.0 - std::pow(opt.beta2, opt.t));
+  const real1 bias_correction1 =
+      (real1)(ONE_R1 - std::pow((real1_s)opt.beta1, (real1_s)opt.t));
+  const real1 bias_correction2 =
+      (real1)(ONE_R1 - std::pow((real1_s)opt.beta2, (real1_s)opt.t));
 
   for (auto &p : params) {
     AdamState &s = opt.state[p];

@@ -757,8 +757,8 @@ TensorPtr Tensor::exp(TensorPtr a, real1 b) {
   Weed::exp(*(a.get()), b, *(out.get()));
 
   if (rg) {
-    RealScalarPtr y = std::make_shared<RealScalar>((real1)std::log(b), false,
-                                                   a->storage->device,
+    RealScalarPtr y = std::make_shared<RealScalar>((real1)std::log((real1_s)b),
+                                                   false, a->storage->device,
                                                    a->storage->get_device_id());
     make_exp_node(a, y, out);
   }
@@ -791,9 +791,9 @@ TensorPtr Tensor::log(TensorPtr a, real1 b) {
   Weed::log(*(a.get()), b, *(out.get()));
 
   if (rg) {
-    RealScalarPtr y = std::make_shared<RealScalar>((real1)(1.0 / std::log(b)),
-                                                   false, a->storage->device,
-                                                   a->storage->get_device_id());
+    RealScalarPtr y = std::make_shared<RealScalar>(
+        (real1)(ONE_R1 / std::log((real1_s)b)), false, a->storage->device,
+        a->storage->get_device_id());
     make_log_node(a, y, out);
   }
 
