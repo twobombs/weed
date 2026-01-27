@@ -427,6 +427,15 @@ TEST_CASE("test_mixed_scalar_add") {
   REQUIRE_CMPLX(GET_COMPLEX(y->grad), R(1));
 }
 
+TEST_CASE("test_mixed_scalar_add_in_place") {
+  TensorPtr x =
+      std::make_shared<ComplexScalar>(complex(R(2)), false, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(R(3), false, TEST_DTAG);
+  Weed::add_in_place(*(x.get()), *(y.get()));
+
+  REQUIRE_CMPLX(GET_COMPLEX(x), R(5));
+}
+
 TEST_CASE("test_real_scalar_add_chain") {
   TensorPtr x = std::make_shared<RealScalar>(R(2), true, TEST_DTAG);
   TensorPtr y = std::make_shared<RealScalar>(R(3), true, TEST_DTAG);
@@ -480,6 +489,15 @@ TEST_CASE("test_mixed_scalar_sub") {
   REQUIRE_CMPLX(GET_COMPLEX(z), R(-1));
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(1));
   REQUIRE_CMPLX(GET_COMPLEX(y->grad), R(-1));
+}
+
+TEST_CASE("test_mixed_scalar_sub_in_place") {
+  TensorPtr x =
+      std::make_shared<ComplexScalar>(complex(R(2)), false, TEST_DTAG);
+  TensorPtr y = std::make_shared<RealScalar>(R(3), false, TEST_DTAG);
+  Weed::sub_in_place(*(x.get()), *(y.get()));
+
+  REQUIRE_CMPLX(GET_COMPLEX(x), R(-1));
 }
 
 TEST_CASE("test_real_scalar_mul") {
