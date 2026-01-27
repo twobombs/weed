@@ -30,7 +30,7 @@ struct Tensor {
   StoragePtr storage;
 
   std::vector<vecCapInt> shape;
-  std::vector<vecCapIntGpu> stride;
+  std::vector<vecCapInt> stride;
   vecCapIntGpu offset;
 
   NodePtr grad_node;
@@ -39,26 +39,26 @@ struct Tensor {
   Tensor()
       : storage(nullptr), shape(), stride(), offset(ZERO_VCI),
         grad_node(nullptr), grad(nullptr) {}
-  Tensor(std::vector<vecCapInt> shp, std::vector<vecCapIntGpu> strd,
+  Tensor(std::vector<vecCapInt> shp, std::vector<vecCapInt> strd,
          bool rg = false, DType dtype = DType::REAL,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(std::vector<real1> val, std::vector<vecCapInt> shp,
-         std::vector<vecCapIntGpu> strd, bool rg = false,
+         std::vector<vecCapInt> strd, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(std::vector<complex> val, std::vector<vecCapInt> shp,
-         std::vector<vecCapIntGpu> strd, bool rg = false,
+         std::vector<vecCapInt> strd, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(real1 val, bool rg = false, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
          int64_t did = -1)
       : Tensor(std::vector<real1>{val}, std::vector<vecCapInt>{1},
-               std::vector<vecCapIntGpu>{0}, rg, dtag, did) {}
+               std::vector<vecCapInt>{0}, rg, dtag, did) {}
   Tensor(complex val, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1)
       : Tensor(std::vector<complex>{val}, std::vector<vecCapInt>{1},
-               std::vector<vecCapIntGpu>{0}, rg, dtag, did) {}
+               std::vector<vecCapInt>{0}, rg, dtag, did) {}
 
   bool validate_shape(const std::vector<vecCapInt> &shp,
-                      const std::vector<vecCapIntGpu> &s) {
+                      const std::vector<vecCapInt> &s) {
     vecCapInt st = 1U;
     for (size_t i = 0U; i < s.size(); ++i) {
       if (!s[i]) {
@@ -153,7 +153,7 @@ struct Tensor {
   /**
    * Select a sub-tensor from the position in the outermost tensor index
    */
-  TensorPtr operator[](vecCapIntGpu idx);
+  TensorPtr operator[](vecCapInt idx);
 
   /**
    * Compare the data type of two tensors and return the more-encompassing one
@@ -181,7 +181,7 @@ struct Tensor {
    * Create a new Tensor like the original, without Storage value initialization
    */
   static TensorPtr allocate_like(const std::vector<vecCapInt> &shape,
-                                 const std::vector<vecCapIntGpu> &stride,
+                                 const std::vector<vecCapInt> &stride,
                                  const TensorPtr orig, const DType &dt,
                                  const bool &rg);
 

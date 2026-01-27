@@ -20,7 +20,7 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
     : in_features(in_f), out_features(out_f) {
 
   const std::vector<vecCapInt> shape{in_f, out_f};
-  const std::vector<vecCapIntGpu> stride{1U, in_f};
+  const std::vector<vecCapInt> stride{1U, in_f};
 
   if (init_rand) {
     std::random_device rd;
@@ -59,7 +59,7 @@ Linear::Linear(vecCapIntGpu in_f, vecCapIntGpu out_f, bool use_bias,
 
   if (use_bias) {
     bias = std::make_shared<Parameter>(std::vector<vecCapInt>{out_f},
-                                       std::vector<vecCapIntGpu>{1U}, dtype,
+                                       std::vector<vecCapInt>{1U}, dtype,
                                        device, device_id);
     bias->storage->FillZeros();
   } else {
