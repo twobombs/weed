@@ -308,6 +308,13 @@ void kernel abs_complex_grad_complex(global cmplx* din, global cmplx* in, global
       din[i_X * I_A + O_A] += zmul(dout[i_X * I_C + O_C], tmp) / sqrt(dot(tmp, tmp));
     }
 }
+void kernel abs_complex_grad_mixed(global cmplx* din, global cmplx* in, global real1* dout, constant vecCapIntGpu* vecCapIntArgs)
+{
+    const cmplx tmp = in[i_X * I_B + O_B];
+    if ((tmp.x != ZERO_R1) || (tmp.y != ZERO_R1)) {
+      din[i_X * I_A + O_A] += (dout[i_X * I_C + O_C] / sqrt(dot(tmp, tmp))) * tmp;
+    }
+}
 
 void kernel add_real(global real1* a, global real1* b, global real1* out, constant vecCapIntGpu* vecCapIntArgs)
 {

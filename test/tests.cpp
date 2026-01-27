@@ -140,6 +140,24 @@ TEST_CASE("test_scalar_relu_complex_grad") {
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), ZERO_CMPLX);
 }
 
+TEST_CASE("test_scalar_relu_mixed_grad") {
+  TensorPtr x = std::make_shared<RealScalar>(R(2), true, TEST_DTAG);
+  TensorPtr y = Tensor::relu(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(1));
+
+  x = std::make_shared<RealScalar>(R(-2), true, TEST_DTAG);
+  y = Tensor::relu(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == ZERO_CMPLX);
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), ZERO_CMPLX);
+}
+
 TEST_CASE("test_scalar_sigmoid") {
   TensorPtr x = std::make_shared<RealScalar>(ZERO_R1, true, TEST_DTAG);
   TensorPtr y = Tensor::sigmoid(x);
@@ -155,6 +173,16 @@ TEST_CASE("test_scalar_sigmoid_complex_grad") {
   TensorPtr z = std::make_shared<ComplexScalar>(R(1), true, TEST_DTAG);
   TensorPtr w = y * z;
   Tensor::backward(w);
+
+  REQUIRE(GET_REAL(y) == ZERO_R1);
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), ZERO_R1);
+}
+
+TEST_CASE("test_scalar_sigmoid_mixed_graf") {
+  TensorPtr x = std::make_shared<RealScalar>(ZERO_R1, true, TEST_DTAG);
+  TensorPtr y = Tensor::sigmoid(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
 
   REQUIRE(GET_REAL(y) == ZERO_R1);
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), ZERO_R1);
@@ -291,6 +319,24 @@ TEST_CASE("test_complex_scalar_abs_grad_complex") {
 
   REQUIRE(GET_REAL(y) == R(2));
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(-2));
+}
+
+TEST_CASE("test_real_scalar_abs_mixed_grad") {
+  TensorPtr x = std::make_shared<RealScalar>(R(2), true, TEST_DTAG);
+  TensorPtr y = Tensor::abs(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(1));
+
+  x = std::make_shared<RealScalar>(R(-2), true, TEST_DTAG);
+  y = Tensor::abs(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(2));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(-1));
 }
 
 TEST_CASE("test_real_scalar_pow") {

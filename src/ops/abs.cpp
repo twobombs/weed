@@ -244,9 +244,9 @@ void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
   }
   switch (in.storage->dtype) {
   case DType::COMPLEX:
-    switch (dout.storage->dtype) {
+    switch (din.storage->dtype) {
     case DType::COMPLEX:
-      switch (din.storage->dtype) {
+      switch (dout.storage->dtype) {
       case DType::COMPLEX:
 #if ENABLE_GPU
         DEVICE_SWITCH_GRAD(cpu_complex_grad_complex, gpu_complex_grad_complex,
@@ -277,9 +277,9 @@ void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
     break;
   case DType::REAL:
   default:
-    switch (dout.storage->dtype) {
+    switch (din.storage->dtype) {
     case DType::COMPLEX:
-      switch (din.storage->dtype) {
+      switch (dout.storage->dtype) {
       case DType::COMPLEX:
 #if ENABLE_GPU
         DEVICE_SWITCH_GRAD(cpu_real_grad_complex, gpu_real_grad_complex, din,
