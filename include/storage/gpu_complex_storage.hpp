@@ -77,7 +77,7 @@ struct GpuComplexStorage : public ComplexStorage, public GpuStorage {
                            sizeof(complex) * n, array.get());
   }
 
-  complex operator[](vecCapInt idx) {
+  complex operator[](vecCapIntGpu idx) {
     if (idx >= size) {
       throw std::invalid_argument(
           "GpuComplexStorage::operator[] argument out-of-bounds!");

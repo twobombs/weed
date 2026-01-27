@@ -14,20 +14,20 @@
 #include "storage/all_storage.hpp"
 
 #define REDUCE_KERNEL(type)                                                    \
-  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];                       \
+  const vecCapIntGpu I_o = out.stride[0U];                                     \
   const size_t n = out.get_size();                                             \
   const int64_t id = index;                                                    \
   pfControl.par_for(0, n, [&](const vecCapIntGpu &o, const unsigned &cpu) {    \
-    vecCapIntGpu base = a.offset;                                              \
-    vecCapIntGpu tmp = o;                                                      \
+    vecCapInt base = a.offset;                                                 \
+    vecCapInt tmp = o;                                                         \
                                                                                \
     for (int64_t d = a.shape.size() - 1; d >= 0; --d) {                        \
       if (d == id) {                                                           \
         continue;                                                              \
       }                                                                        \
                                                                                \
-      vecCapIntGpu dim = a.shape[d];                                           \
-      vecCapIntGpu i_d = tmp % dim;                                            \
+      vecCapInt dim = a.shape[d];                                              \
+      vecCapInt i_d = tmp % dim;                                               \
       tmp /= dim;                                                              \
                                                                                \
       base += i_d * a.stride[d];                                               \
@@ -35,7 +35,7 @@
                                                                                \
     type sum = ZERO_R1;                                                        \
     for (vecCapIntGpu j = 0U; j < a.shape[id]; ++j) {                          \
-      sum += pa[base + j * a.stride[id]];                                      \
+      sum += pa[(vecCapIntGpu)(base + j * a.stride[id])];                      \
     }                                                                          \
     po[o * I_o] = sum;                                                         \
   });

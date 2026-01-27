@@ -238,9 +238,9 @@ void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
         "In Weed::unary_grad(din, in, dout), dout dtype "
         "must upcast to dout dtype!");
   }
-  const size_t dinSize = din.get_broadcast_size();
-  const size_t inSize = in.get_broadcast_size();
-  const size_t doutSize = dout.get_broadcast_size();
+  const vecCapInt dinSize = din.get_broadcast_size();
+  const vecCapInt inSize = in.get_broadcast_size();
+  const vecCapInt doutSize = dout.get_broadcast_size();
   if ((dinSize != inSize) || (dinSize != doutSize)) {
     throw std::invalid_argument(
         "In Weed::unary_grad(din, in, dout), sizes do not match!");

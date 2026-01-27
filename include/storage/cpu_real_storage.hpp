@@ -31,7 +31,9 @@ struct CpuRealStorage : RealStorage {
     std::copy(i.begin(), i.end(), data.get());
   }
 
-  real1 operator[](vecCapInt idx) override { return data.get()[(size_t)idx]; }
+  real1 operator[](vecCapIntGpu idx) override {
+    return data.get()[(size_t)idx];
+  }
 
   void FillZeros() override {
     std::fill(data.get(), data.get() + size, ZERO_R1);

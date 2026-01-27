@@ -102,7 +102,7 @@ struct GpuRealStorage : public RealStorage, public GpuStorage {
                            sizeof(real1) * n, array.get());
   }
 
-  real1 operator[](vecCapInt idx) {
+  real1 operator[](vecCapIntGpu idx) {
     if (idx >= size) {
       throw std::invalid_argument(
           "GpuRealStorage::operator[] argument out-of-bounds!");

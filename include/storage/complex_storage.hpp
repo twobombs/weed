@@ -18,13 +18,13 @@ namespace Weed {
  * Storage for complex data type elements
  */
 struct ComplexStorage : Storage {
-  ComplexStorage(DeviceTag dtg, vecCapInt n)
+  ComplexStorage(DeviceTag dtg, vecCapIntGpu n)
       : Storage(dtg, DType::COMPLEX, n) {}
 
   /**
    * Get the complex element at the position
    */
-  virtual complex operator[](vecCapInt idx) = 0;
+  virtual complex operator[](vecCapIntGpu idx) = 0;
 
   /**
    * Fill the entire Storage with specified complex value

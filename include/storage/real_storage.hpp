@@ -18,12 +18,12 @@ namespace Weed {
  * Storage for real data type elements
  */
 struct RealStorage : Storage {
-  RealStorage(DeviceTag dtg, vecCapInt n) : Storage(dtg, DType::REAL, n) {}
+  RealStorage(DeviceTag dtg, vecCapIntGpu n) : Storage(dtg, DType::REAL, n) {}
 
   /**
    * Get the complex element at the position
    */
-  virtual real1 operator[](vecCapInt idx) = 0;
+  virtual real1 operator[](vecCapIntGpu idx) = 0;
 
   /**
    * Fill the entire Storage with specified real value

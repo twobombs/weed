@@ -111,8 +111,8 @@ static void gpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
 }
 #endif
 void PowKernel::pow(const Tensor &a, const real1 &p, Tensor &out) {
-  const size_t aSize = a.get_broadcast_size();
-  const size_t outSize = out.get_broadcast_size();
+  const vecCapInt aSize = a.get_broadcast_size();
+  const vecCapInt outSize = out.get_broadcast_size();
   if (aSize != outSize) {
     throw std::invalid_argument(
         "In Weed::pow(a, b, out), out size does not match input size!");

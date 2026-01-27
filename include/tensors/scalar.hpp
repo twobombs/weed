@@ -43,7 +43,7 @@ struct Scalar : public Tensor {
           "Cannot construct scalar from Tensor with get_size() > 1!");
     }
     shape = std::vector<vecCapInt>{ONE_VCI};
-    stride = std::vector<vecCapInt>{ZERO_VCI};
+    stride = std::vector<vecCapIntGpu>{0U};
     offset = orig->offset;
     storage = orig->storage;
     grad_node = orig->grad_node;

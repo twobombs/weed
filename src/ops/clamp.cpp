@@ -128,8 +128,8 @@ void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
     throw std::invalid_argument(
         "In Weed::clamp(a, l, h, out), arguments must all be real-number!");
   }
-  const size_t aSize = a.get_broadcast_size();
-  const size_t outSize = out.get_broadcast_size();
+  const vecCapInt aSize = a.get_broadcast_size();
+  const vecCapInt outSize = out.get_broadcast_size();
   if (aSize != outSize) {
     throw std::invalid_argument(
         "In Weed::clamp(a, l, h, out), out size does not match input size!");
