@@ -13,6 +13,19 @@
 #include "common/parallel_for.hpp"
 #include "storage/all_storage.hpp"
 
+#define GPU_GRAD(type1, type2, type3, api_call)                                \
+  GPU_GRAD_ARGS();                                                             \
+  std::shared_ptr<type1> dy_storage =                                          \
+      std::dynamic_pointer_cast<type1>(dy.storage);                            \
+  std::shared_ptr<type2> dx_storage =                                          \
+      std::dynamic_pointer_cast<type2>(dx.storage);                            \
+  std::shared_ptr<type3> x_storage =                                           \
+      std::dynamic_pointer_cast<type3>(x.storage);                             \
+  const complex v = complex(l, h);                                             \
+  x_storage->gpu->RequestKernel(                                               \
+      OCLAPI::api_call, args, x.get_size(),                                    \
+      {dy_storage->buffer, x_storage->buffer, dx_storage->buffer}, 0U, &v)
+
 #define DEVICE_SWITCH(cpu, gpu, a, l, h, out)                                  \
   switch (out.storage->device) {                                               \
   case DeviceTag::GPU:                                                         \
@@ -99,31 +112,13 @@ void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
 }
 void ClampKernel::gpu_grad_real(const Tensor &dy, const Tensor &x,
                                 const real1 &l, const real1 &h, Tensor &dx) {
-  GPU_GRAD_ARGS();
-  GpuRealStoragePtr dy_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dy.storage);
-  GpuRealStoragePtr dx_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dx.storage);
-  GpuRealStoragePtr x_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(x.storage);
-  const complex v = complex(l, h);
-  x_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_CLAMP_GRAD_REAL, args, x.get_size(),
-      {dy_storage->buffer, x_storage->buffer, dx_storage->buffer}, 0U, &v);
+  GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
+           OCL_API_CLAMP_GRAD_REAL);
 }
 void ClampKernel::gpu_grad_complex(const Tensor &dy, const Tensor &x,
                                    const real1 &l, const real1 &h, Tensor &dx) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr dy_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(dy.storage);
-  GpuComplexStoragePtr dx_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(dx.storage);
-  GpuRealStoragePtr x_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(x.storage);
-  const complex v = complex(l, h);
-  x_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_CLAMP_GRAD_COMPLEX, args, x.get_size(),
-      {dy_storage->buffer, x_storage->buffer, dx_storage->buffer}, 0U, &v);
+  GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
+           OCL_API_CLAMP_GRAD_COMPLEX);
 }
 #endif
 void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,

@@ -27,7 +27,7 @@
   std::shared_ptr<type2> o_storage =                                           \
       std::dynamic_pointer_cast<type2>(out.storage);                           \
   a_storage->gpu->RequestKernel(OCLAPI::api_call, args, a.get_size(),          \
-                                {a_storage->buffer, o_storage->buffer});
+                                {a_storage->buffer, o_storage->buffer})
 
 #define CPU_GRAD_INIT(type1, storage1, type2, storage2, type3, storage3)       \
   const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);                     \
