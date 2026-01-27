@@ -13,8 +13,8 @@
 
 #include "devices/gpu_device.hpp"
 #include "storage/gpu_complex_storage.hpp"
-#include "storage/real_storage.hpp"
 #include "storage/gpu_storage.hpp"
+#include "storage/real_storage.hpp"
 
 #if !ENABLE_OPENCL && !ENABLE_CUDA
 #error GPU files were included without either OpenCL and CUDA enabled.
@@ -30,16 +30,14 @@ struct GpuRealStorage : public RealStorage, public GpuStorage {
   RealPtr array;
 
   GpuRealStorage(vecCapIntGpu n, int64_t did)
-      : RealStorage(DeviceTag::GPU, n),
-        array(nullptr, [](real1 *) {}) {
+      : RealStorage(DeviceTag::GPU, n), array(nullptr, [](real1 *) {}) {
     gpu = OCLEngine::Instance().GetWeedDevice(did);
     AddAlloc(sizeof(real1) * size);
     buffer = MakeBuffer(n);
   }
 
   GpuRealStorage(std::vector<real1> val, int64_t did)
-      : RealStorage(DeviceTag::GPU, val.size()),
-        array(Alloc(val.size())) {
+      : RealStorage(DeviceTag::GPU, val.size()), array(Alloc(val.size())) {
     gpu = OCLEngine::Instance().GetWeedDevice(did);
     AddAlloc(sizeof(real1) * size);
     std::copy(val.begin(), val.end(), array.get());

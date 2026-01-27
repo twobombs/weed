@@ -29,16 +29,14 @@ struct GpuComplexStorage : public ComplexStorage, public GpuStorage {
   ComplexPtr array;
 
   GpuComplexStorage(vecCapIntGpu n, int64_t did)
-      : ComplexStorage(DeviceTag::GPU, n),
-        array(nullptr, [](complex *) {}) {
+      : ComplexStorage(DeviceTag::GPU, n), array(nullptr, [](complex *) {}) {
     gpu = OCLEngine::Instance().GetWeedDevice(did);
     AddAlloc(sizeof(complex) * size);
     buffer = MakeBuffer(n);
   }
 
   GpuComplexStorage(std::vector<complex> val, int64_t did)
-      : ComplexStorage(DeviceTag::GPU, val.size()),
-        array(Alloc(val.size())) {
+      : ComplexStorage(DeviceTag::GPU, val.size()), array(Alloc(val.size())) {
     gpu = OCLEngine::Instance().GetWeedDevice(did);
     AddAlloc(sizeof(complex) * size);
     std::copy(val.begin(), val.end(), array.get());

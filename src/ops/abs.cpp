@@ -13,6 +13,43 @@
 #include "common/parallel_for.hpp"
 #include "storage/all_storage.hpp"
 
+#define CPU_INIT(type1, storage1, type2, storage2)                             \
+  const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];                         \
+  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];                       \
+  CAST_STORAGE(pa, a, type1, storage1);                                        \
+  CAST_STORAGE(po, out, type2, storage2);                                      \
+  size_t n = out.storage->size
+
+#define GPU(type1, type2, api_call)                                            \
+  GPU_ARGS();                                                                  \
+  std::shared_ptr<type1> a_storage =                                           \
+      std::dynamic_pointer_cast<type1>(a.storage);                             \
+  std::shared_ptr<type2> o_storage =                                           \
+      std::dynamic_pointer_cast<type2>(out.storage);                           \
+  a_storage->gpu->RequestKernel(OCLAPI::api_call, args, a.get_size(),          \
+                                {a_storage->buffer, o_storage->buffer});
+
+#define CPU_GRAD_INIT(type1, storage1, type2, storage2, type3, storage3)       \
+  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);                     \
+  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);                      \
+  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);                    \
+  CAST_STORAGE(pdi, din, type1, storage1);                                     \
+  CAST_STORAGE(pi, in, type2, storage2);                                       \
+  CAST_STORAGE(po, dout, type3, storage3);                                     \
+  size_t n = dout.storage->size
+
+#define GPU_GRAD(type1, type2, type3, api_call)                                \
+  GPU_GRAD_ARGS();                                                             \
+  std::shared_ptr<type1> a_storage =                                           \
+      std::dynamic_pointer_cast<type1>(din.storage);                           \
+  std::shared_ptr<type2> b_storage =                                           \
+      std::dynamic_pointer_cast<type2>(in.storage);                            \
+  std::shared_ptr<type3> c_storage =                                           \
+      std::dynamic_pointer_cast<type3>(dout.storage);                          \
+  a_storage->gpu->RequestKernel(                                               \
+      OCLAPI::api_call, args, din.get_size(),                                  \
+      {a_storage->buffer, b_storage->buffer, c_storage->buffer})
+
 #define DEVICE_SWITCH(cpu, gpu, a, out)                                        \
   switch (out.storage->device) {                                               \
   case DeviceTag::GPU:                                                         \
@@ -49,43 +86,23 @@
   }
 namespace Weed {
 void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
-  const vecCapIntGpu I_a = (vecCapIntGpu)a.stride[0U];
-  const vecCapIntGpu I_o = (vecCapIntGpu)out.stride[0U];
-  CAST_STORAGE(pa, a, real1, CpuRealStorage);
-  CAST_STORAGE(po, out, real1, CpuRealStorage);
-  size_t n = out.storage->size;
+  CPU_INIT(real1, CpuRealStorage, real1, CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     po[i * I_o] = std::abs(pa[i * I_a]);
   });
 }
 void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
-  const vecCapIntGpu I_a = (vecCapIntGpu)(a.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(out.stride[0U]);
-  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-  CAST_STORAGE(po, out, real1, CpuRealStorage);
-  size_t n = out.storage->size;
+  CPU_INIT(complex, CpuComplexStorage, real1, CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     po[i * I_o] = std::abs(pa[i * I_a]);
   });
 }
 #if ENABLE_GPU
 void AbsKernel::gpu_real(const Tensor &a, Tensor &out) {
-  GPU_ARGS();
-  GpuRealStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
-  GpuRealStoragePtr o_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(out.storage);
-  a_storage->gpu->RequestKernel(OCLAPI::OCL_API_ABS_REAL, args, a.get_size(),
-                                {a_storage->buffer, o_storage->buffer});
+  GPU(GpuRealStorage, GpuRealStorage, OCL_API_ABS_REAL);
 }
 void AbsKernel::gpu_complex(const Tensor &a, Tensor &out) {
-  GPU_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(a.storage);
-  GpuRealStoragePtr o_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(out.storage);
-  a_storage->gpu->RequestKernel(OCLAPI::OCL_API_ABS_COMPLEX, args, a.get_size(),
-                                {a_storage->buffer, o_storage->buffer});
+  GPU(GpuComplexStorage, GpuRealStorage, OCL_API_ABS_COMPLEX);
 }
 #endif
 void AbsKernel::abs(const Tensor &a, Tensor &out) {
@@ -113,13 +130,8 @@ void AbsKernel::abs(const Tensor &a, Tensor &out) {
 
 void AbsKernel::cpu_real_grad_real(Tensor &din, const Tensor &in,
                                    const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, real1, CpuRealStorage);
-  CAST_STORAGE(pi, in, real1, CpuRealStorage);
-  CAST_STORAGE(po, dout, real1, CpuRealStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(real1, CpuRealStorage, real1, CpuRealStorage, real1,
+                CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const real1 tmp = pi[i * I_i];
     if (tmp != ZERO_R1) {
@@ -130,13 +142,8 @@ void AbsKernel::cpu_real_grad_real(Tensor &din, const Tensor &in,
 }
 void AbsKernel::cpu_real_grad_complex(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
-  CAST_STORAGE(pi, in, real1, CpuRealStorage);
-  CAST_STORAGE(po, dout, complex, CpuComplexStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(complex, CpuComplexStorage, real1, CpuRealStorage, complex,
+                CpuComplexStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const real1 tmp = pi[i * I_i];
     if (tmp != ZERO_R1) {
@@ -147,13 +154,8 @@ void AbsKernel::cpu_real_grad_complex(Tensor &din, const Tensor &in,
 }
 void AbsKernel::cpu_real_grad_mixed(Tensor &din, const Tensor &in,
                                     const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
-  CAST_STORAGE(pi, in, real1, CpuRealStorage);
-  CAST_STORAGE(po, dout, real1, CpuRealStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(complex, CpuComplexStorage, real1, CpuRealStorage, real1,
+                CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const real1 tmp = pi[i * I_i];
     if (tmp != ZERO_R1) {
@@ -164,13 +166,8 @@ void AbsKernel::cpu_real_grad_mixed(Tensor &din, const Tensor &in,
 }
 void AbsKernel::cpu_complex_grad_real(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
-  CAST_STORAGE(pi, in, complex, CpuComplexStorage);
-  CAST_STORAGE(po, dout, real1, CpuRealStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(complex, CpuComplexStorage, complex, CpuComplexStorage, real1,
+                CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const complex tmp = pi[i * I_i];
     if (tmp != ZERO_CMPLX) {
@@ -180,13 +177,8 @@ void AbsKernel::cpu_complex_grad_real(Tensor &din, const Tensor &in,
 }
 void AbsKernel::cpu_complex_grad_complex(Tensor &din, const Tensor &in,
                                          const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
-  CAST_STORAGE(pi, in, complex, CpuComplexStorage);
-  CAST_STORAGE(po, dout, complex, CpuComplexStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(complex, CpuComplexStorage, complex, CpuComplexStorage, complex,
+                CpuComplexStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const complex tmp = pi[i * I_i];
     if (tmp != ZERO_CMPLX) {
@@ -196,13 +188,8 @@ void AbsKernel::cpu_complex_grad_complex(Tensor &din, const Tensor &in,
 }
 void AbsKernel::cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
                                        const Tensor &dout) {
-  const vecCapIntGpu I_d = (vecCapIntGpu)(din.stride[0U]);
-  const vecCapIntGpu I_i = (vecCapIntGpu)(in.stride[0U]);
-  const vecCapIntGpu I_o = (vecCapIntGpu)(dout.stride[0U]);
-  CAST_STORAGE(pdi, din, complex, CpuComplexStorage);
-  CAST_STORAGE(pi, in, complex, CpuComplexStorage);
-  CAST_STORAGE(po, dout, real1, CpuRealStorage);
-  size_t n = dout.storage->size;
+  CPU_GRAD_INIT(complex, CpuComplexStorage, complex, CpuComplexStorage, real1,
+                CpuRealStorage);
   pfControl.par_for(0, n, [&](const vecCapIntGpu &i, const unsigned &cpu) {
     const complex tmp = pi[i * I_i];
     if (tmp != ZERO_CMPLX) {
@@ -213,81 +200,33 @@ void AbsKernel::cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
 #if ENABLE_GPU
 void AbsKernel::gpu_real_grad_real(Tensor &din, const Tensor &in,
                                    const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuRealStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(din.storage);
-  GpuRealStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(in.storage);
-  GpuRealStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_REAL_GRAD_REAL, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
+           OCL_API_ABS_REAL_GRAD_REAL);
 }
 void AbsKernel::gpu_real_grad_complex(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
-  GpuRealStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(in.storage);
-  GpuComplexStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_REAL_GRAD_COMPLEX, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
+           OCL_API_ABS_REAL_GRAD_COMPLEX);
 }
 void AbsKernel::gpu_real_grad_mixed(Tensor &din, const Tensor &in,
                                     const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
-  GpuRealStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(in.storage);
-  GpuRealStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_REAL_GRAD_MIXED, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuRealStorage,
+           OCL_API_ABS_REAL_GRAD_MIXED);
 }
 void AbsKernel::gpu_complex_grad_real(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
-  GpuComplexStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(in.storage);
-  GpuRealStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_COMPLEX_GRAD_REAL, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
+           OCL_API_ABS_COMPLEX_GRAD_REAL);
 }
 void AbsKernel::gpu_complex_grad_complex(Tensor &din, const Tensor &in,
                                          const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
-  GpuComplexStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(in.storage);
-  GpuComplexStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_COMPLEX_GRAD_COMPLEX, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuComplexStorage,
+           OCL_API_ABS_COMPLEX_GRAD_COMPLEX);
 }
 void AbsKernel::gpu_complex_grad_mixed(Tensor &din, const Tensor &in,
                                        const Tensor &dout) {
-  GPU_GRAD_ARGS();
-  GpuComplexStoragePtr a_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(din.storage);
-  GpuComplexStoragePtr b_storage =
-      std::dynamic_pointer_cast<GpuComplexStorage>(in.storage);
-  GpuRealStoragePtr c_storage =
-      std::dynamic_pointer_cast<GpuRealStorage>(dout.storage);
-  a_storage->gpu->RequestKernel(
-      OCLAPI::OCL_API_ABS_COMPLEX_GRAD_MIXED, args, din.get_size(),
-      {a_storage->buffer, b_storage->buffer, c_storage->buffer});
+  GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
+           OCL_API_ABS_COMPLEX_GRAD_MIXED);
 }
 #endif
 void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
