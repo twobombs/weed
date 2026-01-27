@@ -43,7 +43,7 @@ int main() {
   size_t epoch = 1;
   real1 loss_r = ONE_R1;
 
-  while ((epoch <= 10000) && (loss_r > 0.1)) {
+  while ((epoch <= 1000) && (loss_r > 0.1)) {
     TensorPtr y_pred = Tensor::sigmoid(l.forward(x));
     TensorPtr loss = mse_loss(y_pred, y);
 
@@ -51,7 +51,7 @@ int main() {
     adam_step(opt, params);
 
     loss_r = GET_REAL(loss);
-    if (!(epoch % 1000)) {
+    if (!(epoch % 100)) {
       std::cout << "Epoch " << epoch << ", Loss: " << loss_r << std::endl;
     }
 
