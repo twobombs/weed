@@ -22,10 +22,8 @@ namespace Weed {
  */
 struct SparseCpuRealStorage : RealStorage {
   RealSparseVector data;
-  real1 default_value;
 
-  SparseCpuRealStorage(tcapint n)
-      : RealStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
+  SparseCpuRealStorage(tcapint n) : RealStorage(DeviceTag::CPU, n), data() {}
 
   bool is_sparse() override { return true; }
 
@@ -40,13 +38,13 @@ struct SparseCpuRealStorage : RealStorage {
   real1 operator[](tcapint idx) override {
     const auto it = data.find(idx);
     if (it == data.end()) {
-      return default_value;
+      return ZERO_R1;
     }
     return it->second;
   }
 
   void write(tcapint idx, real1 val) override {
-    if (std::abs(val - default_value) <= FP_NORM_EPSILON) {
+    if (std::abs(val) <= FP_NORM_EPSILON) {
       data.erase(idx);
     } else {
       data[idx] = val;
@@ -59,17 +57,12 @@ struct SparseCpuRealStorage : RealStorage {
     }
   }
 
-  void FillZeros() override {
-    data.clear();
-    default_value = ZERO_R1;
-  }
-  void FillOnes() override {
-    data.clear();
-    default_value = ONE_R1;
-  }
+  void FillZeros() override { data.clear(); }
+  void FillOnes() override { FillValue(ONE_R1); }
   void FillValue(real1 v) override {
-    data.clear();
-    default_value = v;
+    for (size_t i = 0U; i < size; ++i) {
+      data[i] = v;
+    }
   }
 
   StoragePtr Upcast(DType dt) override {
@@ -79,7 +72,6 @@ struct SparseCpuRealStorage : RealStorage {
 
     SparseCpuComplexStoragePtr n =
         std::make_shared<SparseCpuComplexStorage>(size);
-    n->default_value = default_value;
     for (auto it = data.begin(); it != data.end(); ++it) {
       n->data[it->first] = (complex)it->second;
     }

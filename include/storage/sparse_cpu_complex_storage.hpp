@@ -19,10 +19,9 @@ namespace Weed {
  */
 struct SparseCpuComplexStorage : ComplexStorage {
   ComplexSparseVector data;
-  complex default_value;
 
   SparseCpuComplexStorage(tcapint n)
-      : ComplexStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
+      : ComplexStorage(DeviceTag::CPU, n), data() {}
 
   bool is_sparse() override { return true; }
 
@@ -37,13 +36,13 @@ struct SparseCpuComplexStorage : ComplexStorage {
   complex operator[](tcapint idx) override {
     const auto it = data.find(idx);
     if (it == data.end()) {
-      return default_value;
+      return ZERO_CMPLX;
     }
     return it->second;
   }
 
   void write(tcapint idx, complex val) override {
-    if (std::abs(val - default_value) <= FP_NORM_EPSILON) {
+    if (std::abs(val) <= FP_NORM_EPSILON) {
       data.erase(idx);
     } else {
       data[idx] = val;
@@ -56,17 +55,12 @@ struct SparseCpuComplexStorage : ComplexStorage {
     }
   }
 
-  void FillZeros() override {
-    data.clear();
-    default_value = ZERO_CMPLX;
-  }
-  void FillOnes() override {
-    data.clear();
-    default_value = ONE_CMPLX;
-  }
+  void FillZeros() override { data.clear(); }
+  void FillOnes() override { FillValue(ONE_CMPLX); }
   void FillValue(complex v) override {
-    data.clear();
-    default_value = v;
+    for (size_t i = 0U; i < size; ++i) {
+      data[i] = v;
+    }
   }
 
   StoragePtr Upcast(DType dt) override { return get_ptr(); }
