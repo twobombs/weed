@@ -42,10 +42,10 @@ struct Tensor {
   Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg = false,
          DType dtype = DType::REAL, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
          int64_t did = -1, bool s = true, bool gs = true);
-  Tensor(std::vector<real1> val, std::vector<tcapint> shp,
+  Tensor(const std::vector<real1>& val, std::vector<tcapint> shp,
          std::vector<tcapint> strd, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
-  Tensor(std::vector<complex> val, std::vector<tcapint> shp,
+  Tensor(const std::vector<complex>& val, std::vector<tcapint> shp,
          std::vector<tcapint> strd, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
   Tensor(real1 val, bool rg = false, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
@@ -56,9 +56,9 @@ struct Tensor {
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1)
       : Tensor(std::vector<complex>{val}, std::vector<tcapint>{1},
                std::vector<tcapint>{0}, rg, dtag, did) {}
-  Tensor(RealSparseVector val, std::vector<tcapint> shp,
+  Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
          std::vector<tcapint> strd, bool rg = false);
-  Tensor(ComplexSparseVector val, std::vector<tcapint> shp,
+  Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
          std::vector<tcapint> strd, bool rg = false);
 
   bool validate_shape(const std::vector<tcapint> &shp,

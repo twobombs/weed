@@ -20,7 +20,7 @@ namespace Weed {
 struct SparseCpuComplexStorage : ComplexStorage {
   ComplexSparseVector data;
 
-  SparseCpuComplexStorage(ComplexSparseVector v, tcapint n)
+  SparseCpuComplexStorage(const ComplexSparseVector &v, tcapint n)
       : ComplexStorage(DeviceTag::CPU, n), data(v) {}
   SparseCpuComplexStorage(tcapint n)
       : ComplexStorage(DeviceTag::CPU, n), data() {}

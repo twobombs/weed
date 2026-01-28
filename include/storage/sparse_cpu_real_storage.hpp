@@ -23,7 +23,7 @@ namespace Weed {
 struct SparseCpuRealStorage : RealStorage {
   RealSparseVector data;
 
-  SparseCpuRealStorage(RealSparseVector v, tcapint n)
+  SparseCpuRealStorage(const RealSparseVector &v, tcapint n)
       : RealStorage(DeviceTag::CPU, n), data(v) {}
   SparseCpuRealStorage(tcapint n) : RealStorage(DeviceTag::CPU, n), data() {}
 

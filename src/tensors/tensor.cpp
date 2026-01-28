@@ -124,7 +124,7 @@ Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
   }
 }
 
-Tensor::Tensor(std::vector<real1> val, std::vector<tcapint> shp,
+Tensor::Tensor(const std::vector<real1>& val, std::vector<tcapint> shp,
                std::vector<tcapint> strd, bool rg, DeviceTag dtag, int64_t did)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::REAL, dtag,
@@ -156,7 +156,7 @@ Tensor::Tensor(std::vector<real1> val, std::vector<tcapint> shp,
     grad->storage->FillZeros();
   }
 }
-Tensor::Tensor(std::vector<complex> val, std::vector<tcapint> shp,
+Tensor::Tensor(const std::vector<complex>& val, std::vector<tcapint> shp,
                std::vector<tcapint> strd, bool rg, DeviceTag dtag, int64_t did)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::COMPLEX, dtag,
@@ -189,7 +189,7 @@ Tensor::Tensor(std::vector<complex> val, std::vector<tcapint> shp,
   }
 }
 
-Tensor::Tensor(RealSparseVector val, std::vector<tcapint> shp,
+Tensor::Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
                std::vector<tcapint> strd, bool rg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::REAL,
@@ -210,7 +210,7 @@ Tensor::Tensor(RealSparseVector val, std::vector<tcapint> shp,
     grad->storage->FillZeros();
   }
 }
-Tensor::Tensor(ComplexSparseVector val, std::vector<tcapint> shp,
+Tensor::Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
                std::vector<tcapint> strd, bool rg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::COMPLEX,
