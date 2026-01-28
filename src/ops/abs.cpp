@@ -71,14 +71,14 @@ void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
     real1 tmp = (*pa)[O_a + i * I_a];
     po->write(i * I_o, (tmp < ZERO_R1) ? -tmp : tmp);
   };
-  SPARSE_CPU_RUN(SparseCpuRealStorage);
+  SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
   CPU_INIT_2(ComplexStorage, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i * I_o, (real1)std::abs((*pa)[O_a + i * I_a]));
   };
-  SPARSE_CPU_RUN(SparseCpuComplexStorage);
+  SPARSE_CPU_2_RUN(SparseCpuComplexStorage);
 }
 #if ENABLE_GPU
 void AbsKernel::gpu_real(const Tensor &a, Tensor &out) {
@@ -121,7 +121,7 @@ void AbsKernel::cpu_real_grad_real(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, (tmp > ZERO_R1) ? tmp_o : -tmp_o);
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_real_grad_complex(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
@@ -133,7 +133,7 @@ void AbsKernel::cpu_real_grad_complex(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, (tmp > ZERO_R1) ? tmp_o : -tmp_o);
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 void AbsKernel::cpu_real_grad_mixed(Tensor &din, const Tensor &in,
                                     const Tensor &dout) {
@@ -145,7 +145,7 @@ void AbsKernel::cpu_real_grad_mixed(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, (tmp > ZERO_R1) ? tmp_o : -tmp_o);
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex_grad_real(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
@@ -156,7 +156,7 @@ void AbsKernel::cpu_complex_grad_real(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, tmp * ((*po)[O_o + i * I_o] / std::abs(tmp)));
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex_grad_complex(Tensor &din, const Tensor &in,
                                          const Tensor &dout) {
@@ -167,7 +167,7 @@ void AbsKernel::cpu_complex_grad_complex(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o] * tmp / std::abs(tmp));
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 void AbsKernel::cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
                                        const Tensor &dout) {
@@ -178,7 +178,7 @@ void AbsKernel::cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
       pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o] * tmp / std::abs(tmp));
     }
   };
-  SPARSE_CPU_GRAD_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 #if ENABLE_GPU
 void AbsKernel::gpu_real_grad_real(Tensor &din, const Tensor &in,

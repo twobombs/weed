@@ -76,7 +76,7 @@
   GET_STORAGE(storage3, dout, po);                                             \
   size_t n = dout.storage->size
 
-#define SPARSE_CPU_RUN(strg)                                                   \
+#define SPARSE_CPU_2_RUN(strg)                                                 \
   if (out.storage->is_sparse() && a.storage->is_sparse()) {                    \
     GET_STORAGE(strg, a, sa);                                                  \
     pfControl.par_for(sa->data, fn);                                           \
@@ -84,7 +84,7 @@
     pfControl.par_for(0, n, fn);                                               \
   }
 
-#define SPARSE_CPU_GRAD_RUN(storage1, storage2)                                \
+#define SPARSE_CPU_GRAD_3_RUN(storage1, storage2)                              \
   if (din.storage->is_sparse() && dout.storage->is_sparse()) {                 \
     GET_STORAGE(storage1, din, si);                                            \
     GET_STORAGE(storage2, dout, so);                                           \

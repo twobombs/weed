@@ -58,31 +58,34 @@
   }
 
 #define CPU_GRAD_KERNEL()                                                      \
-  pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &) {            \
+  const auto fn = [&](const tcapint &i, const unsigned &) {                    \
     real1 ai = (*pi)[O_i + i * I_i];                                           \
     if (ai > l && ai < h) {                                                    \
       pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);                           \
     }                                                                          \
-  })
+  }
 
 namespace Weed {
 void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
                       Tensor &out) {
   CPU_INIT_2(RealStorage, RealStorage);
-  pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {
+  const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i * I_o, std::min(std::max((*pa)[O_a + i * I_a], l), h));
-  });
+  };
+  SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
 void ClampKernel::cpu_grad_real(const Tensor &dout, const Tensor &in,
                                 const real1 &l, const real1 &h, Tensor &din) {
   CPU_GRAD_INIT_3(RealStorage, RealStorage, RealStorage);
   CPU_GRAD_KERNEL();
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void ClampKernel::cpu_grad_complex(const Tensor &dout, const Tensor &in,
                                    const real1 &l, const real1 &h,
                                    Tensor &din) {
   CPU_GRAD_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
   CPU_GRAD_KERNEL();
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 #if ENABLE_GPU
 void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
