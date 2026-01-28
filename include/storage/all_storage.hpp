@@ -21,9 +21,6 @@
 #include "storage/gpu_real_storage.hpp"
 #endif
 
-#define CAST_STORAGE(out, in, type, ptr)                                       \
-  type *out = static_cast<ptr *>(in.storage.get())->data.get() + in.offset
-
 #define GET_STORAGE(type, i, o) type o = *static_cast<type *>(i.storage.get());
 
 #define CPU_INIT_2_SCALAR(storage1, storage2)                                  \

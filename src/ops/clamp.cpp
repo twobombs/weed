@@ -57,20 +57,11 @@
         dx.stride[0U], 0U, 0U, 0U, 0U                                          \
   }
 
-#define CPU_GRAD(type, storage)                                                \
-  CAST_STORAGE(pdx, dx, type, storage);                                        \
-  CAST_STORAGE(px, x, real1, CpuRealStorage);                                  \
-  CAST_STORAGE(pdy, dy, type, storage);                                        \
-                                                                               \
-  const tcapint I_dx = dx.stride[0];                                           \
-  const tcapint I_x = x.stride[0];                                             \
-  const tcapint I_dy = dy.stride[0];                                           \
-  const size_t n = x.get_size();                                               \
-                                                                               \
+#define CPU_GRAD_KERNEL()                                                      \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &) {            \
-    real1 xi = px[i * I_x];                                                    \
-    if (xi > l && xi < h) {                                                    \
-      pdx[i * I_dx] += pdy[i * I_dy];                                          \
+    real1 ai = pi[O_i + i * I_i];                                              \
+    if (ai > l && ai < h) {                                                    \
+      pdi.add(O_d + i * I_d, po[O_o + i * I_o]);                               \
     }                                                                          \
   })
 
@@ -82,13 +73,16 @@ void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
     po.write(i * I_o, std::min(std::max(pa[O_a + i * I_a], l), h));
   });
 }
-void ClampKernel::cpu_grad_real(const Tensor &dy, const Tensor &x,
-                                const real1 &l, const real1 &h, Tensor &dx) {
-  CPU_GRAD(real1, CpuRealStorage);
+void ClampKernel::cpu_grad_real(const Tensor &dout, const Tensor &in,
+                                const real1 &l, const real1 &h, Tensor &din) {
+  CPU_GRAD_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
+  CPU_GRAD_KERNEL();
 }
-void ClampKernel::cpu_grad_complex(const Tensor &dy, const Tensor &x,
-                                   const real1 &l, const real1 &h, Tensor &dx) {
-  CPU_GRAD(complex, CpuComplexStorage);
+void ClampKernel::cpu_grad_complex(const Tensor &dout, const Tensor &in,
+                                   const real1 &l, const real1 &h,
+                                   Tensor &din) {
+  CPU_GRAD_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
+  CPU_GRAD_KERNEL();
 }
 #if ENABLE_GPU
 void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
