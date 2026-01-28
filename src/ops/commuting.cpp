@@ -24,14 +24,14 @@
   }
 
 #define ADD_KERNEL()                                                           \
-  pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
+  const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
     po->write(i *I_o, (*pa)[O_a + i * I_a] + (*pb)[O_b + i * I_b]);            \
-  })
+  }
 
 #define MUL_KERNEL()                                                           \
-  pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
+  const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
     po->write(i *I_o, (*pa)[O_a + i * I_a] * (*pb)[O_b + i * I_b]);            \
-  })
+  };
 
 #define DISPATCH_GPU_KERNEL(type, type2, api_call)                             \
   const tcapint args[10U]{                                                     \
@@ -51,14 +51,17 @@ namespace Weed {
 static void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
   ADD_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
   ADD_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
   ADD_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 
 #if ENABLE_GPU
@@ -77,14 +80,17 @@ static void gpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
 static void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
   MUL_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
   MUL_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
   MUL_KERNEL();
+  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 
 #if ENABLE_GPU
