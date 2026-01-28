@@ -39,6 +39,15 @@
   GET_STORAGE(storage2, out, po);                                              \
   size_t n = out.storage->size
 
+#define CPU_INIT_2_IN_PLACE(storage1, storage2)                                \
+  const tcapint O_a = a.offset;                                                \
+  const tcapint I_a = a.stride[0U];                                            \
+  const tcapint O_b = b.offset;                                                \
+  const tcapint I_b = b.stride[0U];                                            \
+  GET_STORAGE(storage1, a, pa);                                                \
+  GET_STORAGE(storage2, b, pb);                                                \
+  size_t n = b.storage->size
+
 #define CPU_INIT_3(storage1, storage2, storage3)                               \
   const tcapint O_a = a.offset;                                                \
   const tcapint I_a = a.stride[0U];                                            \

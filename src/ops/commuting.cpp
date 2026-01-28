@@ -24,21 +24,13 @@
   }
 
 #define ADD_KERNEL()                                                           \
-  const tcapint I_a = a.stride[0U];                                            \
-  const tcapint I_b = b.stride[0U];                                            \
-  const tcapint I_o = out.stride[0U];                                          \
-  const size_t n = out.get_size();                                             \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
-    po[i * I_o] = pa[i * I_a] + pb[i * I_b];                                   \
+    po.write(i *I_o, pa[O_a + i * I_a] + pb[O_b + i * I_b]);                   \
   })
 
 #define MUL_KERNEL()                                                           \
-  const tcapint I_a = a.stride[0U];                                            \
-  const tcapint I_b = b.stride[0U];                                            \
-  const tcapint I_o = out.stride[0U];                                          \
-  const size_t n = out.get_size();                                             \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
-    po[i * I_o] = pa[i * I_a] * pb[i * I_b];                                   \
+    po.write(i *I_o, pa[O_a + i * I_a] * pb[O_b + i * I_b]);                   \
   })
 
 #define DISPATCH_GPU_KERNEL(type, type2, api_call)                             \
@@ -57,24 +49,15 @@
 
 namespace Weed {
 static void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, real1, CpuRealStorage);
-  CAST_STORAGE(pb, b, real1, CpuRealStorage);
-  CAST_STORAGE(po, out, real1, CpuRealStorage);
-
+  CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
   ADD_KERNEL();
 }
 static void cpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-  CAST_STORAGE(pb, b, complex, CpuComplexStorage);
-  CAST_STORAGE(po, out, complex, CpuComplexStorage);
-
+  CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
   ADD_KERNEL();
 }
 static void cpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-  CAST_STORAGE(pb, b, real1, CpuRealStorage);
-  CAST_STORAGE(po, out, complex, CpuComplexStorage);
-
+  CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
   ADD_KERNEL();
 }
 
@@ -92,24 +75,15 @@ static void gpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
 #endif
 
 static void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, real1, CpuRealStorage);
-  CAST_STORAGE(pb, b, real1, CpuRealStorage);
-  CAST_STORAGE(po, out, real1, CpuRealStorage);
-
+  CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
   MUL_KERNEL();
 }
 static void cpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-  CAST_STORAGE(pb, b, complex, CpuComplexStorage);
-  CAST_STORAGE(po, out, complex, CpuComplexStorage);
-
+  CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
   MUL_KERNEL();
 }
 static void cpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CAST_STORAGE(pa, a, complex, CpuComplexStorage);
-  CAST_STORAGE(pb, b, real1, CpuRealStorage);
-  CAST_STORAGE(po, out, complex, CpuComplexStorage);
-
+  CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
   MUL_KERNEL();
 }
 

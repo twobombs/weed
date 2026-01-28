@@ -24,19 +24,13 @@
   }
 
 #define ADD_KERNEL()                                                           \
-  const tcapint I_a = a.stride[0U];                                            \
-  const tcapint I_b = b.stride[0U];                                            \
-  const size_t n = a.get_size();                                               \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
-    pa.add(i *I_a, pb[i * I_b]);                                               \
+    pa.add(O_a + i * I_a, pb[O_b + i * I_b]);                                  \
   })
 
 #define SUB_KERNEL()                                                           \
-  const tcapint I_a = a.stride[0U];                                            \
-  const tcapint I_b = b.stride[0U];                                            \
-  const size_t n = a.get_size();                                               \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
-    pa.add(i *I_a, -pb[i * I_b]);                                              \
+    pa.add(O_a + i * I_a, -pb[O_b + i * I_b]);                                 \
   })
 
 #define DISPATCH_GPU_KERNEL(type, type2, api_call)                             \
@@ -51,21 +45,15 @@
 
 namespace Weed {
 static void cpu_real_add(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuRealStorage, a, pa);
-  GET_STORAGE(CpuRealStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuRealStorage, CpuRealStorage);
   ADD_KERNEL();
 }
 static void cpu_complex_add(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuComplexStorage, a, pa);
-  GET_STORAGE(CpuComplexStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuComplexStorage, CpuComplexStorage);
   ADD_KERNEL();
 }
 static void cpu_mixed_add(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuComplexStorage, a, pa);
-  GET_STORAGE(CpuRealStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuComplexStorage, CpuRealStorage);
   ADD_KERNEL();
 }
 #if ENABLE_GPU
@@ -84,21 +72,15 @@ static void gpu_mixed_add(Tensor &a, const Tensor &b) {
 #endif
 
 static void cpu_real_sub(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuRealStorage, a, pa);
-  GET_STORAGE(CpuRealStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuRealStorage, CpuRealStorage);
   SUB_KERNEL();
 }
 static void cpu_complex_sub(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuComplexStorage, a, pa);
-  GET_STORAGE(CpuComplexStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuComplexStorage, CpuComplexStorage);
   SUB_KERNEL();
 }
 static void cpu_mixed_sub(Tensor &a, const Tensor &b) {
-  GET_STORAGE(CpuComplexStorage, a, pa);
-  GET_STORAGE(CpuRealStorage, b, pb);
-
+  CPU_INIT_2_IN_PLACE(CpuComplexStorage, CpuRealStorage);
   SUB_KERNEL();
 }
 
