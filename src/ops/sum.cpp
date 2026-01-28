@@ -24,7 +24,7 @@
   }
 
 #define CPU_SUM(type)                                                          \
-  unsigned cpuCount = pfControl.GetNumCores();                                 \
+  unsigned cpuCount = (unsigned)std::min(n, (size_t)pfControl.GetNumCores());  \
   std::vector<type> total(cpuCount, ZERO_R1);                                  \
   pfControl.par_for(0, n, [&](const tcapint &i, const unsigned &cpu) {         \
     total[cpu] += pa[O_a + i * I_a];                                           \
