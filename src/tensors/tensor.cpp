@@ -76,9 +76,9 @@ TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shape,
 }
 
 Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
-               DType dtype, DeviceTag dtag, int64_t did, bool s)
+               DType dtype, DeviceTag dtag, int64_t did, bool s, bool gs)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
-      grad(rg ? std::make_shared<Tensor>(shp, strd, false, dtype, dtag, did, s)
+      grad(rg ? std::make_shared<Tensor>(shp, strd, false, dtype, dtag, did, gs)
               : nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(

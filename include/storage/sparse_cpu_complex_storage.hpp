@@ -24,6 +24,8 @@ struct SparseCpuComplexStorage : ComplexStorage {
   SparseCpuComplexStorage(tcapint n)
       : ComplexStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
 
+  bool is_sparse() override { return true; }
+
   /**
    * Get the complex element at the position
    */

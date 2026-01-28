@@ -27,6 +27,8 @@ struct SparseCpuRealStorage : RealStorage {
   SparseCpuRealStorage(tcapint n)
       : RealStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
 
+  bool is_sparse() override { return true; }
+
   /**
    * Get the real element at the position
    */

@@ -45,6 +45,11 @@ struct Storage : public std::enable_shared_from_this<Storage> {
   }
 
   /**
+   * Is this Storage sparse?
+   */
+  virtual bool is_sparse() { return false; }
+
+  /**
    * Get a shared pointer to this Storage
    */
   virtual StoragePtr get_ptr() { return shared_from_this(); }
