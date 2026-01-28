@@ -8,7 +8,7 @@
 // See LICENSE.md in the project root or https://www.gnu.org/licenses/lgpl-3.0.en.html
 // for details.
 
-#define ONE_BCI ((uchar)2U)
+#define ONE_BCI ((uchar)1U)
 #define tcapint uchar
 #define tcapint2 uchar2
 #define tcapint4 uchar4
