@@ -78,7 +78,7 @@ void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i * I_o, (real1)std::abs((*pa)[O_a + i * I_a]));
   };
-  SPARSE_CPU_RUN(SparseCpuRealStorage);
+  SPARSE_CPU_RUN(SparseCpuComplexStorage);
 }
 #if ENABLE_GPU
 void AbsKernel::gpu_real(const Tensor &a, Tensor &out) {
