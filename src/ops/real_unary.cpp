@@ -55,7 +55,7 @@ static void cpu_relu_grad_real(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(RealStorage, RealStorage, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     if ((*pi)[O_i + i * I_i] > 0) {
-      pdi->write(O_d + i * I_d, (*po)[O_o + i * I_o]);
+      pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);
     }
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
@@ -65,7 +65,7 @@ static void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     if ((*pi)[O_i + i * I_i] > 0) {
-      pdi->write(O_d + i * I_d, (*po)[O_o + i * I_o]);
+      pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);
     }
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
@@ -75,7 +75,7 @@ static void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(ComplexStorage, RealStorage, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     if ((*pi)[O_i + i * I_i] > 0) {
-      pdi->write(O_d + i * I_d, (*po)[O_o + i * I_o]);
+      pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);
     }
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
@@ -124,7 +124,7 @@ static void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(RealStorage, RealStorage, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     const real1 yi = (*pi)[O_i + i * I_i];
-    pdi->write(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
+    pdi->add(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
@@ -133,7 +133,7 @@ static void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     const real1 yi = (*pi)[O_i + i * I_i];
-    pdi->write(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
+    pdi->add(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
@@ -142,7 +142,7 @@ static void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
   CPU_GRAD_INIT_3(ComplexStorage, RealStorage, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     const real1 yi = (*pi)[O_i + i * I_i];
-    pdi->write(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
+    pdi->add(O_d + i * I_d, yi * (ONE_R1 - yi) * (*po)[O_o + i * I_o]);
   };
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
