@@ -47,17 +47,17 @@ namespace Weed {
 static void cpu_real_add(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(RealStorage, RealStorage);
   ADD_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_add(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(ComplexStorage, ComplexStorage);
   ADD_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_add(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(ComplexStorage, RealStorage);
   ADD_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 #if ENABLE_GPU
 static void gpu_real_add(Tensor &a, const Tensor &b) {
@@ -77,17 +77,17 @@ static void gpu_mixed_add(Tensor &a, const Tensor &b) {
 static void cpu_real_sub(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(RealStorage, RealStorage);
   SUB_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_sub(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(ComplexStorage, ComplexStorage);
   SUB_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_sub(Tensor &a, const Tensor &b) {
   CPU_INIT_2_IN_PLACE(ComplexStorage, RealStorage);
   SUB_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 
 #if ENABLE_GPU
