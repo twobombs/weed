@@ -192,6 +192,12 @@ struct Tensor {
                                  const bool &gs = false);
 
   /**
+   * Create a new Tensor like the original, but a Scalar, and without Storage
+   * value initialization
+   */
+  static TensorPtr allocate_scalar_like(const TensorPtr orig);
+
+  /**
    * Use autograd to calculate gradients that are in the same graph as this
    * Tensor
    */

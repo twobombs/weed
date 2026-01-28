@@ -79,6 +79,15 @@ TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shape,
   return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did, s, rs);
 }
 
+TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig) {
+  StoragePtr st = orig->storage;
+
+  return std::make_shared<Tensor>(
+      std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, orig->requires_grad(),
+      st->dtype, st->device, st->get_device_id(), IS_SPARSE(orig),
+      IS_SPARSE(orig->grad));
+}
+
 Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
                DType dtype, DeviceTag dtag, int64_t did, bool s, bool gs)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
@@ -289,8 +298,9 @@ void Tensor::reduce_grad_broadcast() {
       continue;
     }
 
-    std::vector<tcapint> sh = grad->shape;
-    std::vector<tcapint> st = grad->stride;
+    TensorPtr gcp = grad->copy();
+    std::vector<tcapint> &sh = gcp->shape;
+    std::vector<tcapint> &st = gcp->stride;
 
     if (sh.size() == 1U) {
       sh[0U] = 1U;
@@ -300,8 +310,8 @@ void Tensor::reduce_grad_broadcast() {
       st.erase(st.begin() + i);
     }
 
-    TensorPtr tmp = allocate_like(sh, st, grad, grad->storage->dtype, false,
-                                  IS_SPARSE(grad));
+    TensorPtr tmp =
+        allocate_like(gcp, gcp->storage->dtype, false, IS_SPARSE(grad));
     Weed::reduce(i, *(grad.get()), *(tmp.get()));
     grad = tmp;
   }
@@ -356,9 +366,7 @@ TensorPtr Tensor::transpose(TensorPtr a) {
 
 TensorPtr Tensor::sum(TensorPtr a) {
   const bool rg = a->requires_grad();
-  TensorPtr out =
-      allocate_like(std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, a,
-                    a->storage->dtype, rg, false, false);
+  TensorPtr out = allocate_scalar_like(a);
 
   Weed::sum(*(a.get()), *(out.get()));
 
@@ -390,9 +398,7 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
 
 TensorPtr Tensor::mean(TensorPtr a) {
   const bool rg = a->requires_grad();
-  TensorPtr out =
-      allocate_like(std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, a,
-                    a->storage->dtype, rg, false, false);
+  TensorPtr out = allocate_scalar_like(a);
 
   Weed::mean(*(a.get()), *(out.get()));
 
@@ -607,9 +613,10 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           a->match_shape(b);
           TensorPtr a_grad = a->grad;
           const DType &dt = get_dtype_by_presidence({b, out_grad});
-          a_grad->upcast(dt);
-          TensorPtr tmp = Tensor::allocate_like(b, dt, false, IS_SPARSE(b));
+          TensorPtr tmp =
+              Tensor::allocate_like(a_grad, dt, false, IS_SPARSE(b));
           Weed::mul(*(out_grad.get()), *(b.get()), *(tmp.get()));
+          a_grad->upcast(dt);
           Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
           a->reduce_grad_broadcast();
         }
@@ -617,8 +624,9 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           b->match_shape(a);
           TensorPtr b_grad = b->grad;
           const DType &dt = get_dtype_by_presidence({a, out_grad});
+          TensorPtr tmp =
+              Tensor::allocate_like(b_grad, dt, false, IS_SPARSE(a));
           b_grad->upcast(dt);
-          TensorPtr tmp = Tensor::allocate_like(a, dt, false, IS_SPARSE(a));
           Weed::mul(*(out_grad.get()), *(a.get()), *(tmp.get()));
           Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
           b->reduce_grad_broadcast();
@@ -661,19 +669,21 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
         if (a->requires_grad()) {
           TensorPtr a_grad = a->grad;
           const DType &dt = get_dtype_by_presidence({b, out_grad});
-          a_grad->upcast(dt);
           TensorPtr bt = transpose(b);
-          TensorPtr tmp = Tensor::allocate_like(a, dt, false, IS_SPARSE(a));
+          TensorPtr tmp =
+              Tensor::allocate_like(a_grad, dt, false, IS_SPARSE(a));
           Weed::matmul(*(out->grad.get()), *(bt.get()), *(tmp.get()));
+          a_grad->upcast(dt);
           Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
         }
         if (b->requires_grad()) {
           TensorPtr b_grad = b->grad;
           const DType &dt = get_dtype_by_presidence({a, out_grad});
-          b_grad->upcast(dt);
           TensorPtr at = transpose(a);
-          TensorPtr tmp = Tensor::allocate_like(b, dt, false, IS_SPARSE(a));
+          TensorPtr tmp =
+              Tensor::allocate_like(b_grad, dt, false, IS_SPARSE(a));
           Weed::matmul(*(at.get()), *(out->grad.get()), *(tmp.get()));
+          b_grad->upcast(dt);
           Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
         }
       });
