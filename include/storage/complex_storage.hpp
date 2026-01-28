@@ -18,8 +18,8 @@ namespace Weed {
  * Storage for complex data type elements
  */
 struct ComplexStorage : Storage {
-  ComplexStorage(DeviceTag dtg, tcapint n, bool s)
-      : Storage(dtg, DType::COMPLEX, n, s) {}
+  ComplexStorage(DeviceTag dtg, tcapint n)
+      : Storage(dtg, DType::COMPLEX, n) {}
 
   /**
    * Get the complex element at the position

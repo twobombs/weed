@@ -27,7 +27,7 @@ struct GpuComplexStorage : public ComplexStorage, public GpuStorage {
   ComplexPtr array;
 
   GpuComplexStorage(tcapint n, int64_t did, bool alloc = true)
-      : ComplexStorage(DeviceTag::GPU, n, false),
+      : ComplexStorage(DeviceTag::GPU, n),
         array(nullptr, [](complex *) {}) {
     dev = OCLEngine::Instance().GetWeedDevice(did);
     if (alloc) {
@@ -37,7 +37,7 @@ struct GpuComplexStorage : public ComplexStorage, public GpuStorage {
   }
 
   GpuComplexStorage(std::vector<complex> val, int64_t did)
-      : ComplexStorage(DeviceTag::GPU, val.size(), false),
+      : ComplexStorage(DeviceTag::GPU, val.size()),
         array(Alloc(val.size())) {
     dev = OCLEngine::Instance().GetWeedDevice(did);
     AddAlloc(sizeof(complex) * size);

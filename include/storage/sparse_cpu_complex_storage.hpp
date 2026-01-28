@@ -22,7 +22,7 @@ struct SparseCpuComplexStorage : ComplexStorage {
   complex default_value;
 
   SparseCpuComplexStorage(tcapint n)
-      : ComplexStorage(DeviceTag::CPU, n, true), default_value(ZERO_R1) {}
+      : ComplexStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
 
   /**
    * Get the complex element at the position

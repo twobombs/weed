@@ -13,9 +13,6 @@
 #include "common/parallel_for.hpp"
 #include "storage/all_storage.hpp"
 
-#define CAST_STORAGE(out, in, type, ptr)                                       \
-  type *out = static_cast<ptr *>(in.storage.get())->data.get() + in.offset
-
 #define DEVICE_SWITCH(cpu, gpu, a, out)                                        \
   switch (out.storage->device) {                                               \
   case DeviceTag::GPU:                                                         \
@@ -62,8 +59,8 @@ static void cpu_sum_real(const Tensor &a, Tensor &out) {
 }
 static void cpu_mean_real(const Tensor &a, Tensor &out) {
   cpu_sum_real(a, out);
-  CAST_STORAGE(po, out, real1, CpuRealStorage);
-  po[0U] /= a.get_size();
+  GET_STORAGE(CpuRealStorage, out, po);
+  po.write(0U, po[0U] / (real1)a.get_size());
 }
 static void cpu_sum_complex(const Tensor &a, Tensor &out) {
   CPU_INIT_2_SCALAR(CpuComplexStorage, CpuComplexStorage);
@@ -72,8 +69,8 @@ static void cpu_sum_complex(const Tensor &a, Tensor &out) {
 }
 static void cpu_mean_complex(const Tensor &a, Tensor &out) {
   cpu_sum_complex(a, out);
-  CAST_STORAGE(po, out, complex, CpuComplexStorage);
-  po[0U] /= (real1)a.get_size();
+  GET_STORAGE(CpuComplexStorage, out, po);
+  po.write(0U, po[0U] / (real1)a.get_size());
 }
 #if ENABLE_GPU
 static void gpu_sum_real(const Tensor &a, Tensor &out) {

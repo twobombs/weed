@@ -88,8 +88,8 @@ TEST_CASE("test_complex_cpu_gpu_conversions") {
 
 TEST_CASE("test_sum_real") {
   TensorPtr x = std::make_shared<Tensor>(
-      std::vector<real1>{R(1), R(2), R(3)}, std::vector<tcapint>{3, 1},
-      std::vector<tcapint>{1, 3}, true, TEST_DTAG);
+      std::vector<real1>{R(1), R(2), R(3)}, std::vector<tcapint>{3},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
   TensorPtr y = Tensor::sum(x);
   Tensor::backward(y);
 

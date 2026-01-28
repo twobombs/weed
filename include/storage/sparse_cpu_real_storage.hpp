@@ -25,7 +25,7 @@ struct SparseCpuRealStorage : RealStorage {
   real1 default_value;
 
   SparseCpuRealStorage(tcapint n)
-      : RealStorage(DeviceTag::CPU, n, true), default_value(ZERO_R1) {}
+      : RealStorage(DeviceTag::CPU, n), data(), default_value(ZERO_R1) {}
 
   /**
    * Get the real element at the position
