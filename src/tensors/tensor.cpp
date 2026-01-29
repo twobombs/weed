@@ -681,7 +681,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           const std::vector<tcapint> shp = {ogs, bt->shape[1U]};
           const std::vector<tcapint> str = {1U, ogs};
           TensorPtr tmp =
-              Tensor::allocate_like(shp, str, a_grad, dt, false, IS_SPARSE(a));
+              Tensor::allocate_like(shp, str, a_grad, dt, false, IS_SPARSE(a_grad));
           Weed::matmul(*(out->grad.get()), *(bt.get()), *(tmp.get()));
           a_grad->upcast(dt);
           Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
@@ -696,7 +696,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           const std::vector<tcapint> shp = {ats, ogs};
           const std::vector<tcapint> str = {1U, ats};
           TensorPtr tmp =
-              Tensor::allocate_like(shp, str, b_grad, dt, false, IS_SPARSE(a));
+              Tensor::allocate_like(shp, str, b_grad, dt, false, IS_SPARSE(b_grad));
           Weed::matmul(*(at.get()), *(out->grad.get()), *(tmp.get()));
           b_grad->upcast(dt);
           Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
