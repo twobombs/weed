@@ -59,24 +59,24 @@ bool Tensor::all_same_device(const std::vector<TensorPtr> &t) {
 }
 
 TensorPtr Tensor::allocate_like(const TensorPtr orig, const DType &dt,
-                                const bool &rg, const bool &s, const bool &rs) {
+                                const bool &rg, const bool &s, const bool &sg) {
   const StoragePtr storage_ptr = orig->storage;
   const DeviceTag dtag = storage_ptr->device;
   const int64_t did = storage_ptr->get_device_id();
 
   return std::make_shared<Tensor>(orig->shape, orig->stride, rg, dt, dtag, did,
-                                  s, rs);
+                                  s, sg);
 }
 
 TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shape,
                                 const std::vector<tcapint> &stride,
                                 const TensorPtr orig, const DType &dt,
-                                const bool &rg, const bool &s, const bool &rs) {
+                                const bool &rg, const bool &s, const bool &sg) {
   const StoragePtr storage_ptr = orig->storage;
   const DeviceTag dtag = storage_ptr->device;
   int64_t did = storage_ptr->get_device_id();
 
-  return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did, s, rs);
+  return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did, s, sg);
 }
 
 TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool &rg) {
@@ -88,9 +88,9 @@ TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool &rg) {
 }
 
 Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
-               DType dtype, DeviceTag dtag, int64_t did, bool s, bool gs)
+               DType dtype, DeviceTag dtag, int64_t did, bool s, bool sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
-      grad(rg ? std::make_shared<Tensor>(shp, strd, false, dtype, dtag, did, gs)
+      grad(rg ? std::make_shared<Tensor>(shp, strd, false, dtype, dtag, did, sg)
               : nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
@@ -198,10 +198,10 @@ Tensor::Tensor(const std::vector<complex> &val, std::vector<tcapint> shp,
 }
 
 Tensor::Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg)
+               std::vector<tcapint> strd, bool rg, bool sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::REAL,
-                                         DeviceTag::CPU)
+                                         DeviceTag::CPU, -1, sg)
               : nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
@@ -219,10 +219,10 @@ Tensor::Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
   }
 }
 Tensor::Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg)
+               std::vector<tcapint> strd, bool rg, bool sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::COMPLEX,
-                                         DeviceTag::CPU)
+                                         DeviceTag::CPU, -1, sg)
               : nullptr) {
   if (shape.size() != stride.size()) {
     throw std::invalid_argument(
@@ -541,17 +541,17 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
 
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
-  const bool rs = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
   DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
-    out = allocate_like(b, dt, rg, s, rs);
+    out = allocate_like(b, dt, rg, s, sg);
   } else if (b->get_size() == ONE_VCI) {
     b->match_shape(a);
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   } else {
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   }
 
   Weed::add(*(a.get()), *(b.get()), *(out.get()));
@@ -591,17 +591,17 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
 
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
-  const bool rs = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
   DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
-    out = allocate_like(b, dt, rg, s, rs);
+    out = allocate_like(b, dt, rg, s, sg);
   } else if (b->get_size() == ONE_VCI) {
     b->match_shape(a);
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   } else {
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   }
 
   Weed::mul(*(a.get()), *(b.get()), *(out.get()));
@@ -659,9 +659,9 @@ TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
   const std::vector<tcapint> str = {1U, as0};
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
-  const bool rs = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
   DType dt = get_dtype_by_presidence({a, b});
-  TensorPtr out = allocate_like(shp, str, a, dt, rg, s, rs);
+  TensorPtr out = allocate_like(shp, str, a, dt, rg, s, sg);
 
   Weed::matmul(*(a.get()), *(b.get()), *(out.get()));
 
@@ -715,17 +715,17 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
 
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
-  const bool rs = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
   DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
-    out = allocate_like(b, dt, rg, s, rs);
+    out = allocate_like(b, dt, rg, s, sg);
   } else if (b->get_size() == ONE_VCI) {
     b->match_shape(a);
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   } else {
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   }
 
   Weed::sub(*(a.get()), *(b.get()), *(out.get()));
@@ -766,16 +766,16 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   DType dt = get_dtype_by_presidence({a, b});
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
-  const bool rs = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
   TensorPtr out;
   if (a->get_size() == ONE_VCI) {
     a->match_shape(b);
-    out = allocate_like(b, dt, rg, s, rs);
+    out = allocate_like(b, dt, rg, s, sg);
   } else if (b->get_size() == ONE_VCI) {
     b->match_shape(a);
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   } else {
-    out = allocate_like(a, dt, rg, s, rs);
+    out = allocate_like(a, dt, rg, s, sg);
   }
 
   Weed::div(*(a.get()), *(b.get()), *(out.get()));

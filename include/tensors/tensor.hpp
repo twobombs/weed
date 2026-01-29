@@ -41,7 +41,7 @@ struct Tensor {
         grad_node(nullptr), grad(nullptr) {}
   Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg = false,
          DType dtype = DType::REAL, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
-         int64_t did = -1, bool s = true, bool gs = true);
+         int64_t did = -1, bool s = true, bool sg = true);
   Tensor(const std::vector<real1> &val, std::vector<tcapint> shp,
          std::vector<tcapint> strd, bool rg = false,
          DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
@@ -57,9 +57,9 @@ struct Tensor {
       : Tensor(std::vector<complex>{val}, std::vector<tcapint>{1},
                std::vector<tcapint>{0}, rg, dtag, did) {}
   Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false);
+         std::vector<tcapint> strd, bool rg = false, bool sg = true);
   Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false);
+         std::vector<tcapint> strd, bool rg = false, bool sg = true);
 
   bool validate_shape(const std::vector<tcapint> &shp,
                       const std::vector<tcapint> &s) {
@@ -181,7 +181,7 @@ struct Tensor {
    */
   static TensorPtr allocate_like(const TensorPtr orig, const DType &dt,
                                  const bool &rg, const bool &s,
-                                 const bool &gs = false);
+                                 const bool &sg = false);
   /**
    * Create a new Tensor like the original, without Storage value initialization
    */
@@ -189,7 +189,7 @@ struct Tensor {
                                  const std::vector<tcapint> &stride,
                                  const TensorPtr orig, const DType &dt,
                                  const bool &rg, const bool &s,
-                                 const bool &gs = false);
+                                 const bool &sg = false);
 
   /**
    * Create a new Tensor like the original, but a Scalar, and without Storage
