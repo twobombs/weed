@@ -67,11 +67,11 @@ public:
   /**
    * Call fn once for every value in a sparse map.
    */
-  void par_for(const std::map<tcapint, real1> &sparseMap, ParallelFunc fn);
+  void par_for(const RealSparseVector &sparseMap, ParallelFunc fn);
   /**
    * Call fn once for every value in a sparse map.
    */
-  void par_for(const std::map<tcapint, complex> &sparseMap, ParallelFunc fn);
+  void par_for(const ComplexSparseVector &sparseMap, ParallelFunc fn);
   /**
    * Call fn once for every value in a sparse set.
    */

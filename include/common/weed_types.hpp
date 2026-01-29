@@ -18,9 +18,9 @@
 #include <complex>
 #include <cstddef>
 #include <limits>
-#include <map>
 #include <math.h>
 #include <memory>
+#include <unordered_map>
 
 using std::size_t;
 
@@ -239,8 +239,8 @@ WEED_CONST real1 ADAM_EPSILON_DEFAULT = (real1)1e-8;
 #endif
 #endif
 
-typedef std::map<tcapint, real1> RealSparseVector;
-typedef std::map<tcapint, complex> ComplexSparseVector;
+typedef std::unordered_map<tcapint, real1> RealSparseVector;
+typedef std::unordered_map<tcapint, complex> ComplexSparseVector;
 
 constexpr size_t SPARSE_KEY_BYTES = sizeof(tcapint) + sizeof(complex);
 
