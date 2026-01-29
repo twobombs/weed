@@ -20,6 +20,19 @@
   GET_STORAGE(rstorage, b, pb);                                                \
   GET_STORAGE(ostorage, out, po);
 
+#define CPU_SWITCH(lstorage, rstorage, type)                                   \
+  if (out.storage->is_sparse()) {                                              \
+    if (!b.storage->is_sparse()) {                                             \
+      MIXED_LEFT_CPU_BY_TYPE(lstorage, rstorage, type);                        \
+    } else if (!a.storage->is_sparse()) {                                      \
+      MIXED_RIGHT_CPU_BY_TYPE(lstorage, rstorage, type);                       \
+    } else {                                                                   \
+      SPARSE_CPU_BY_TYPE(lstorage, rstorage, type);                            \
+    }                                                                          \
+  } else {                                                                     \
+    CPU_BY_TYPE(type);                                                         \
+  }
+
 #define CPU_BY_TYPE(stype)                                                     \
   pfControl.par_for(0, (d.M) * (d.N),                                          \
                     [&](const tcapint &l, const unsigned &cpu) {               \
@@ -29,6 +42,71 @@
                       for (tcapint k = 0; k < d.K; ++k) {                      \
                         const auto a_idx = d.A_o + i * d.A_s0 + k * d.A_s1;    \
                         const auto b_idx = d.B_o + k * d.B_s0 + j * d.B_s1;    \
+                        sum += (*pa)[a_idx] * (*pb)[b_idx];                    \
+                      }                                                        \
+                      const auto o_idx = d.O_o + i * d.O_s0 + j * d.O_s1;      \
+                      po->write(o_idx, sum);                                   \
+                    })
+
+#define SPARSE_CPU_BY_TYPE(lstorage, rstorage, stype)                          \
+  GET_STORAGE(lstorage, a, sa);                                                \
+  GET_STORAGE(rstorage, b, sb);                                                \
+  const auto &da = sa->data;                                                   \
+  const auto &db = sb->data;                                                   \
+  pfControl.par_for(0, (d.M) * (d.N),                                          \
+                    [&](const tcapint &l, const unsigned &cpu) {               \
+                      const tcapint i = l / d.N;                               \
+                      const tcapint j = l % d.N;                               \
+                      stype sum = ZERO_R1;                                     \
+                      for (tcapint k = 0; k < d.K; ++k) {                      \
+                        const auto a_idx = d.A_o + i * d.A_s0 + k * d.A_s1;    \
+                        if (da.find(a_idx) == da.end()) {                      \
+                          continue;                                            \
+                        }                                                      \
+                        const auto b_idx = d.B_o + k * d.B_s0 + j * d.B_s1;    \
+                        if (db.find(b_idx) == db.end()) {                      \
+                          continue;                                            \
+                        }                                                      \
+                        sum += (*pa)[a_idx] * (*pb)[b_idx];                    \
+                      }                                                        \
+                      const auto o_idx = d.O_o + i * d.O_s0 + j * d.O_s1;      \
+                      po->write(o_idx, sum);                                   \
+                    })
+
+#define MIXED_LEFT_CPU_BY_TYPE(lstorage, rstorage, stype)                      \
+  GET_STORAGE(lstorage, a, sa);                                                \
+  const auto &da = sa->data;                                                   \
+  pfControl.par_for(0, (d.M) * (d.N),                                          \
+                    [&](const tcapint &l, const unsigned &cpu) {               \
+                      const tcapint i = l / d.N;                               \
+                      const tcapint j = l % d.N;                               \
+                      stype sum = ZERO_R1;                                     \
+                      for (tcapint k = 0; k < d.K; ++k) {                      \
+                        const auto a_idx = d.A_o + i * d.A_s0 + k * d.A_s1;    \
+                        if (da.find(a_idx) == da.end()) {                      \
+                          continue;                                            \
+                        }                                                      \
+                        const auto b_idx = d.B_o + k * d.B_s0 + j * d.B_s1;    \
+                        sum += (*pa)[a_idx] * (*pb)[b_idx];                    \
+                      }                                                        \
+                      const auto o_idx = d.O_o + i * d.O_s0 + j * d.O_s1;      \
+                      po->write(o_idx, sum);                                   \
+                    })
+
+#define MIXED_RIGHT_CPU_BY_TYPE(lstorage, rstorage, stype)                     \
+  GET_STORAGE(rstorage, b, sb);                                                \
+  const auto &db = sb->data;                                                   \
+  pfControl.par_for(0, (d.M) * (d.N),                                          \
+                    [&](const tcapint &l, const unsigned &cpu) {               \
+                      const tcapint i = l / d.N;                               \
+                      const tcapint j = l % d.N;                               \
+                      stype sum = ZERO_R1;                                     \
+                      for (tcapint k = 0; k < d.K; ++k) {                      \
+                        const auto b_idx = d.B_o + k * d.B_s0 + j * d.B_s1;    \
+                        if (db.find(b_idx) == db.end()) {                      \
+                          continue;                                            \
+                        }                                                      \
+                        const auto a_idx = d.A_o + i * d.A_s0 + k * d.A_s1;    \
                         sum += (*pa)[a_idx] * (*pb)[b_idx];                    \
                       }                                                        \
                       const auto o_idx = d.O_o + i * d.O_s0 + j * d.O_s1;      \
@@ -96,21 +174,21 @@ MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
 
 void MatMulKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_HEADER(RealStorage, RealStorage, RealStorage);
-  CPU_BY_TYPE(real1);
+  CPU_SWITCH(SparseCpuRealStorage, SparseCpuRealStorage, real1);
 }
 void MatMulKernel::cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
   CPU_HEADER(ComplexStorage, ComplexStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+  CPU_SWITCH(SparseCpuComplexStorage, SparseCpuComplexStorage, complex);
 }
 void MatMulKernel::cpu_mixed_c_left(const Tensor &a, const Tensor &b,
                                     Tensor &out) {
   CPU_HEADER(ComplexStorage, RealStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+  CPU_SWITCH(SparseCpuComplexStorage, SparseCpuRealStorage, complex);
 }
 void MatMulKernel::cpu_mixed_c_right(const Tensor &a, const Tensor &b,
                                      Tensor &out) {
   CPU_HEADER(RealStorage, ComplexStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+  CPU_SWITCH(SparseCpuRealStorage, SparseCpuComplexStorage, complex);
 }
 
 #if ENABLE_GPU
