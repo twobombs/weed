@@ -79,11 +79,11 @@ TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shape,
   return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did, s, rs);
 }
 
-TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig) {
+TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool& rg) {
   StoragePtr st = orig->storage;
 
   return std::make_shared<Tensor>(
-      std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, orig->requires_grad(),
+      std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, rg,
       st->dtype, st->device, st->get_device_id(), IS_SPARSE(orig),
       IS_SPARSE(orig->grad));
 }
@@ -366,7 +366,7 @@ TensorPtr Tensor::transpose(TensorPtr a) {
 
 TensorPtr Tensor::sum(TensorPtr a) {
   const bool rg = a->requires_grad();
-  TensorPtr out = allocate_scalar_like(a);
+  TensorPtr out = allocate_scalar_like(a, rg);
 
   Weed::sum(*(a.get()), *(out.get()));
 
@@ -398,7 +398,7 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
 
 TensorPtr Tensor::mean(TensorPtr a) {
   const bool rg = a->requires_grad();
-  TensorPtr out = allocate_scalar_like(a);
+  TensorPtr out = allocate_scalar_like(a, rg);
 
   Weed::mean(*(a.get()), *(out.get()));
 
