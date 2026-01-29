@@ -39,48 +39,39 @@ struct Tensor {
   Tensor()
       : storage(nullptr), shape(), stride(), offset(ZERO_VCI),
         grad_node(nullptr), grad(nullptr) {}
-  Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg = false,
-         DType dtype = DType::REAL, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
-         int64_t did = -1, bool s = true, bool sg = true);
-  Tensor(const std::vector<real1> &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false,
-         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
-  Tensor(const std::vector<complex> &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false,
-         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1);
-  Tensor(real1 val, bool rg = false, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE,
-         int64_t did = -1)
-      : Tensor(std::vector<real1>{val}, std::vector<tcapint>{1},
-               std::vector<tcapint>{0}, rg, dtag, did) {}
-  Tensor(complex val, bool rg = false,
-         DeviceTag dtag = DeviceTag::DEFAULT_DEVICE, int64_t did = -1)
-      : Tensor(std::vector<complex>{val}, std::vector<tcapint>{1},
-               std::vector<tcapint>{0}, rg, dtag, did) {}
-  Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false, bool sg = true);
-  Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
-         std::vector<tcapint> strd, bool rg = false, bool sg = true);
-
-  bool validate_shape(const std::vector<tcapint> &shp,
-                      const std::vector<tcapint> &s) {
-    tcapint st = 1U;
-    for (size_t i = 0U; i < s.size(); ++i) {
-      if (!s[i]) {
-        continue;
-      }
-      if (s[i] != st) {
-        return false;
-      }
-      st *= shp[i];
-    }
-
-    return true;
-  }
+  Tensor(const std::vector<tcapint> &shp, const std::vector<tcapint> &strd,
+         const bool &rg = false, const DType &dtype = DType::REAL,
+         const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
+         const int64_t &did = -1, const bool &s = true, const bool &sg = true);
+  Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
+         const std::vector<tcapint> &strd, const bool &rg = false,
+         const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
+         const int64_t &did = -1);
+  Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
+         const std::vector<tcapint> &strd, const bool &rg = false,
+         const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
+         const int64_t &did = -1);
+  Tensor(const real1 &val, const bool &rg = false,
+         const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
+         const int64_t &did = -1)
+      : Tensor(std::vector<real1>{val}, std::vector<tcapint>{1U},
+               std::vector<tcapint>{0U}, rg, dtag, did) {}
+  Tensor(const complex &val, const bool &rg = false,
+         const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
+         const int64_t &did = -1)
+      : Tensor(std::vector<complex>{val}, std::vector<tcapint>{1U},
+               std::vector<tcapint>{0U}, rg, dtag, did) {}
+  Tensor(const RealSparseVector &val, const std::vector<tcapint> &shp,
+         const std::vector<tcapint> &strd, const bool &rg = false,
+         const bool &sg = true);
+  Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
+         const std::vector<tcapint> &strd, const bool &rg = false,
+         const bool &sg = true);
 
   /**
    * Will we calculate gradients on back-propagation?
    */
-  bool requires_grad() { return !!grad; }
+  bool requires_grad() const { return !!grad; }
 
   /**
    * How many elements are in this tensor?
@@ -115,7 +106,7 @@ struct Tensor {
   /**
    * Make a shallow copy of this tensor
    */
-  TensorPtr copy() {
+  TensorPtr copy() const {
     TensorPtr cp = std::make_shared<Tensor>();
     // A tensor is a view on storage:
     cp->storage = storage;
@@ -131,7 +122,7 @@ struct Tensor {
   /**
    * Make this tensor a shallow copy of another
    */
-  void copy(TensorPtr cp) {
+  void copy(const TensorPtr cp) {
     // A tensor is a view on storage:
     storage = cp->storage;
     shape = cp->shape;
@@ -145,7 +136,7 @@ struct Tensor {
    * Internally cast this real-value tensor to a complex-value tensor (if
    * necessary)
    */
-  void upcast(DType dt) { storage = storage->Upcast(dt); }
+  void upcast(const DType &dt) { storage = storage->Upcast(dt); }
 
   /**
    * For broadcast, make this scalar match the shape of a target Tensor
@@ -157,18 +148,34 @@ struct Tensor {
   /**
    * Select a sub-tensor from the position in the outermost tensor index
    */
-  TensorPtr operator[](tcapint idx);
+  TensorPtr operator[](const tcapint& idx) const;
 
   /**
    * Compare the data type of two tensors and return the more-encompassing one
    */
-  static DType get_dtype_by_presidence(const std::vector<TensorPtr> v) {
-    for (const TensorPtr &p : v) {
+  static DType get_dtype_by_presidence(const std::vector<TensorPtr> &v) {
+    for (const TensorPtr& p : v) {
       if (p->storage->dtype == DType::COMPLEX) {
         return DType::COMPLEX;
       }
     }
     return DType::REAL;
+  }
+
+  static bool validate_shape(const std::vector<tcapint> &shp,
+                             const std::vector<tcapint> &s) {
+    tcapint st = 1U;
+    for (size_t i = 0U; i < s.size(); ++i) {
+      if (!s[i]) {
+        continue;
+      }
+      if (s[i] != st) {
+        return false;
+      }
+      st *= shp[i];
+    }
+
+    return true;
   }
 
   /**
@@ -201,12 +208,12 @@ struct Tensor {
    * Use autograd to calculate gradients that are in the same graph as this
    * Tensor
    */
-  static void backward(TensorPtr loss);
+  static void backward(const TensorPtr loss);
 
   /**
    * If the tensor has exactly two indices, transpose them
    */
-  static TensorPtr transpose(TensorPtr a);
+  static TensorPtr transpose(const TensorPtr a);
 
   /**
    * Sum of all elements (with autograd)

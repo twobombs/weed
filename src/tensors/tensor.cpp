@@ -96,8 +96,10 @@ TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool &rg) {
   return cp;
 }
 
-Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
-               DType dtype, DeviceTag dtag, int64_t did, bool s, bool sg)
+Tensor::Tensor(const std::vector<tcapint> &shp,
+               const std::vector<tcapint> &strd, const bool &rg,
+               const DType &dtype, const DeviceTag &dtag, const int64_t &did,
+               const bool &s, const bool &sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, dtype, dtag, did, sg)
               : nullptr) {
@@ -141,8 +143,9 @@ Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
   }
 }
 
-Tensor::Tensor(const std::vector<real1> &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg, DeviceTag dtag, int64_t did)
+Tensor::Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
+               const std::vector<tcapint> &strd, const bool &rg,
+               const DeviceTag &dtag, const int64_t &did)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::REAL, dtag,
                                          did)
@@ -173,8 +176,9 @@ Tensor::Tensor(const std::vector<real1> &val, std::vector<tcapint> shp,
     grad->storage->FillZeros();
   }
 }
-Tensor::Tensor(const std::vector<complex> &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg, DeviceTag dtag, int64_t did)
+Tensor::Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
+               const std::vector<tcapint> &strd, const bool &rg,
+               const DeviceTag &dtag, const int64_t &did)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::COMPLEX, dtag,
                                          did)
@@ -206,8 +210,8 @@ Tensor::Tensor(const std::vector<complex> &val, std::vector<tcapint> shp,
   }
 }
 
-Tensor::Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg, bool sg)
+Tensor::Tensor(const RealSparseVector &val, const std::vector<tcapint> &shp,
+               const std::vector<tcapint> &strd, const bool &rg, const bool &sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::REAL,
                                          DeviceTag::CPU, -1, sg)
@@ -227,8 +231,8 @@ Tensor::Tensor(const RealSparseVector &val, std::vector<tcapint> shp,
     grad->storage->FillZeros();
   }
 }
-Tensor::Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
-               std::vector<tcapint> strd, bool rg, bool sg)
+Tensor::Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
+               const std::vector<tcapint> &strd, const bool &rg, const bool &sg)
     : shape(shp), stride(strd), offset(ZERO_VCI), grad_node(nullptr),
       grad(rg ? std::make_shared<Tensor>(shp, strd, false, DType::COMPLEX,
                                          DeviceTag::CPU, -1, sg)
@@ -249,7 +253,7 @@ Tensor::Tensor(const ComplexSparseVector &val, std::vector<tcapint> shp,
   }
 }
 
-TensorPtr Tensor::operator[](tcapint idx) {
+TensorPtr Tensor::operator[](const tcapint &idx) const {
   if (idx > shape.back()) {
     throw std::invalid_argument("Tensor index out-of-range!");
   }
@@ -270,7 +274,7 @@ TensorPtr Tensor::operator[](tcapint idx) {
   return v;
 }
 
-std::vector<TensorPtr> filterParents(std::vector<TensorPtr> parents) {
+std::vector<TensorPtr> filterParents(const std::vector<TensorPtr> &parents) {
   std::vector<TensorPtr> filtered;
   for (TensorPtr p : parents) {
     if (p->requires_grad()) {
@@ -363,7 +367,7 @@ void Tensor::backward(TensorPtr loss) {
   }
 }
 
-TensorPtr Tensor::transpose(TensorPtr a) {
+TensorPtr Tensor::transpose(const TensorPtr a) {
   if (a->shape.size() > 2U) {
     throw std::invalid_argument("Tensor::transpose is only for 2D tensors (and "
                                 "vectors and covectors)!");
@@ -544,9 +548,9 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const DType dt = get_dtype_by_presidence({a, b});
   a->match_shape(b);
   b->match_shape(a);
-  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(b, dt, rg, s, sg);
 
   Weed::add(*(a.get()), *(b.get()), *(out.get()));
@@ -585,9 +589,9 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const DType dt = get_dtype_by_presidence({a, b});
   a->match_shape(b);
   b->match_shape(a);
-  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(b, dt, rg, s, sg);
 
   Weed::mul(*(a.get()), *(b.get()), *(out.get()));
@@ -644,7 +648,7 @@ TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
-  DType dt = get_dtype_by_presidence({a, b});
+  const DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(shp, str, a, dt, rg, s, sg);
 
   Weed::matmul(*(a.get()), *(b.get()), *(out.get()));
@@ -708,9 +712,9 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const DType dt = get_dtype_by_presidence({a, b});
   a->match_shape(b);
   b->match_shape(a);
-  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(b, dt, rg, s, sg);
 
   Weed::sub(*(a.get()), *(b.get()), *(out.get()));
@@ -749,9 +753,9 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad() || b->requires_grad();
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const bool sg = IS_SPARSE(a->grad) && IS_SPARSE(b->grad);
+  const DType dt = get_dtype_by_presidence({a, b});
   a->match_shape(b);
   b->match_shape(a);
-  DType dt = get_dtype_by_presidence({a, b});
   TensorPtr out = allocate_like(b, dt, rg, s, sg);
 
   Weed::div(*(a.get()), *(b.get()), *(out.get()));
