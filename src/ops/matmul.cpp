@@ -66,7 +66,8 @@ struct MatrixDim {
 };
 
 MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
-  if ((a.shape.size() != 2U) || (b.shape.size() != 2U) || (out.shape.size() != 2U)) {
+  if ((a.shape.size() != 2U) || (b.shape.size() != 2U) ||
+      (out.shape.size() != 2U)) {
     throw std::invalid_argument("MatMul is only for matrices with 2 indices!");
   }
   MatrixDim d;

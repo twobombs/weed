@@ -58,9 +58,9 @@ Linear::Linear(tcapint in_f, tcapint out_f, bool use_bias, DType dtype,
   }
 
   if (use_bias) {
-    bias = std::make_shared<Parameter>(std::vector<tcapint>{out_f, 1U},
-                                       std::vector<tcapint>{1U, 0U}, dtype, device,
-                                       device_id);
+    bias = std::make_shared<Parameter>(std::vector<tcapint>{1U, out_f},
+                                       std::vector<tcapint>{0U, 1U}, dtype,
+                                       device, device_id);
     bias->storage->FillZeros();
   } else {
     bias = nullptr;
@@ -69,8 +69,8 @@ Linear::Linear(tcapint in_f, tcapint out_f, bool use_bias, DType dtype,
 
 TensorPtr Linear::forward(const TensorPtr x) {
   // x: (B, in_features)
-  // W: (out_features, in_features)
-  // We want: x @ W^T → (B, out_features)
+  // W: (in_features, out_features)
+  // We want: x @ W → (B, out_features)
 
   TensorPtr y = x >> weight;
 
