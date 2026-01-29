@@ -714,7 +714,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   if (!all_same_device({a, b})) {
     throw std::invalid_argument(
-        "Cannot mix Tensor devices in Tensor::div(a, b)!");
+        "Cannot mix Tensor devices in Tensor::sub(a, b)!");
   }
 
   const bool rg = a->requires_grad() || b->requires_grad();
@@ -857,6 +857,7 @@ void Tensor::make_pow_node(TensorPtr x, TensorPtr p, TensorPtr y) {
 
     dx->upcast(r->storage->dtype);
     Weed::add_in_place(*(dx.get()), *(r.get()));
+    x->reduce_grad_broadcast();
   });
 }
 
@@ -894,6 +895,7 @@ void Tensor::make_exp_node(TensorPtr x, TensorPtr log_b, TensorPtr y) {
 
         dx->upcast(r->storage->dtype);
         Weed::add_in_place(*(dx.get()), *(r.get()));
+        x->reduce_grad_broadcast();
       });
 }
 
@@ -931,6 +933,7 @@ void Tensor::make_log_node(TensorPtr x, TensorPtr inv_log_b, TensorPtr y) {
 
         dx->upcast(r->storage->dtype);
         Weed::add_in_place(*(dx.get()), *(r.get()));
+        x->reduce_grad_broadcast();
       });
 }
 } // namespace Weed
