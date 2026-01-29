@@ -36,7 +36,9 @@ struct CpuComplexStorage : ComplexStorage {
     data.get()[(size_t)idx] = val;
   }
 
-  void add(tcapint idx, complex val) override { data.get()[(size_t)idx] += val; }
+  void add(tcapint idx, complex val) override {
+    data.get()[(size_t)idx] += val;
+  }
 
   void FillZeros() override {
     std::fill(data.get(), data.get() + size, ZERO_CMPLX);

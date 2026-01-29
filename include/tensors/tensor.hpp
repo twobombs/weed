@@ -195,7 +195,7 @@ struct Tensor {
    * Create a new Tensor like the original, but a Scalar, and without Storage
    * value initialization
    */
-  static TensorPtr allocate_scalar_like(const TensorPtr orig, const bool& rg);
+  static TensorPtr allocate_scalar_like(const TensorPtr orig, const bool &rg);
 
   /**
    * Use autograd to calculate gradients that are in the same graph as this
@@ -297,8 +297,7 @@ inline TensorPtr operator+(TensorPtr left, TensorPtr right) {
   return Tensor::add(left, right);
 }
 inline TensorPtr operator+(real1 left, TensorPtr right) {
-  TensorPtr l = std::make_shared<Tensor>(left, right->requires_grad(),
-                                         right->storage->device,
+  TensorPtr l = std::make_shared<Tensor>(left, false, right->storage->device,
                                          right->storage->get_device_id());
   return Tensor::add(l, right);
 }
@@ -307,14 +306,12 @@ inline TensorPtr operator-(TensorPtr left, TensorPtr right) {
   return Tensor::sub(left, right);
 }
 inline TensorPtr operator-(real1 left, TensorPtr right) {
-  TensorPtr l = std::make_shared<Tensor>(left, right->requires_grad(),
-                                         right->storage->device,
+  TensorPtr l = std::make_shared<Tensor>(left, false, right->storage->device,
                                          right->storage->get_device_id());
   return Tensor::sub(l, right);
 }
 inline TensorPtr operator-(TensorPtr left, real1 right) {
-  TensorPtr r = std::make_shared<Tensor>(right, left->requires_grad(),
-                                         left->storage->device,
+  TensorPtr r = std::make_shared<Tensor>(right, false, left->storage->device,
                                          left->storage->get_device_id());
   return Tensor::sub(left, r);
 }
@@ -322,8 +319,7 @@ inline TensorPtr operator*(TensorPtr left, TensorPtr right) {
   return Tensor::mul(left, right);
 }
 inline TensorPtr operator*(real1 left, TensorPtr right) {
-  TensorPtr l = std::make_shared<Tensor>(left, right->requires_grad(),
-                                         right->storage->device,
+  TensorPtr l = std::make_shared<Tensor>(left, false, right->storage->device,
                                          right->storage->get_device_id());
   return Tensor::mul(l, right);
 }
@@ -332,14 +328,12 @@ inline TensorPtr operator/(TensorPtr left, TensorPtr right) {
   return Tensor::div(left, right);
 }
 inline TensorPtr operator/(real1 left, TensorPtr right) {
-  TensorPtr l = std::make_shared<Tensor>(left, right->requires_grad(),
-                                         right->storage->device,
+  TensorPtr l = std::make_shared<Tensor>(left, false, right->storage->device,
                                          right->storage->get_device_id());
   return Tensor::div(l, right);
 }
 inline TensorPtr operator/(TensorPtr left, real1 right) {
-  TensorPtr r = std::make_shared<Tensor>(right, left->requires_grad(),
-                                         left->storage->device,
+  TensorPtr r = std::make_shared<Tensor>(right, false, left->storage->device,
                                          left->storage->get_device_id());
   return Tensor::div(left, r);
 }

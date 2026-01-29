@@ -79,13 +79,12 @@ TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shape,
   return std::make_shared<Tensor>(shape, stride, rg, dt, dtag, did, s, rs);
 }
 
-TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool& rg) {
+TensorPtr Tensor::allocate_scalar_like(const TensorPtr orig, const bool &rg) {
   StoragePtr st = orig->storage;
 
   return std::make_shared<Tensor>(
-      std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, rg,
-      st->dtype, st->device, st->get_device_id(), IS_SPARSE(orig),
-      IS_SPARSE(orig->grad));
+      std::vector<tcapint>{1U}, std::vector<tcapint>{0U}, rg, st->dtype,
+      st->device, st->get_device_id(), IS_SPARSE(orig), IS_SPARSE(orig->grad));
 }
 
 Tensor::Tensor(std::vector<tcapint> shp, std::vector<tcapint> strd, bool rg,
