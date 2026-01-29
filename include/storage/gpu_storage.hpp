@@ -28,17 +28,8 @@ struct GpuStorage {
 
   GpuStorage() : dev(nullptr), buffer(nullptr), is_mapped(false) {}
 
-  void AddAlloc(const size_t &sz) {
-    size_t currentAlloc =
-        OCLEngine::Instance().AddToActiveAllocSize(dev->deviceID, sz);
-    if (currentAlloc > dev->device_context->GetGlobalAllocLimit()) {
-      OCLEngine::Instance().SubtractFromActiveAllocSize(dev->deviceID, sz);
-      throw bad_alloc("VRAM limits exceeded in GpuComplexStorage::AddAlloc()");
-    }
-  }
-  void SubtractAlloc(const size_t &sz) {
-    OCLEngine::Instance().SubtractFromActiveAllocSize(dev->deviceID, sz);
-  }
+  void AddAlloc(const size_t &sz) { dev->AddAlloc(sz); }
+  void SubtractAlloc(const size_t &sz) { dev->SubtractAlloc(sz); }
 };
 typedef std::shared_ptr<GpuStorage> GpuStoragePtr;
 } // namespace Weed

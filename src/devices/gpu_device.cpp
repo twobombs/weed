@@ -29,7 +29,7 @@ void CL_CALLBACK _PopQueue(cl_event event, cl_int type, void *user_data) {
   ((GpuDevice *)user_data)->PopQueue(true);
 }
 
-BufferPtr GpuDevice::MakeBuffer(cl_mem_flags flags, size_t size,
+BufferPtr GpuDevice::MakeBuffer(const cl_mem_flags &flags, const size_t &size,
                                 void *host_ptr) {
   CheckCallbackError();
 
@@ -73,7 +73,7 @@ BufferPtr GpuDevice::MakeBuffer(cl_mem_flags flags, size_t size,
   return toRet;
 }
 
-void GpuDevice::PopQueue(bool isDispatch) {
+void GpuDevice::PopQueue(const bool &isDispatch) {
   // For lock_guard scope
   if (true) {
     std::lock_guard<std::mutex> lock(queue_mutex);
@@ -104,7 +104,7 @@ void GpuDevice::PopQueue(bool isDispatch) {
   }
 }
 
-void GpuDevice::clFinish(bool doHard) {
+void GpuDevice::clFinish(const bool &doHard) {
   if (!device_context) {
     return;
   }
@@ -128,7 +128,8 @@ void GpuDevice::clFinish(bool doHard) {
 }
 
 // For std::function, cl_int use might discard int qualifiers.
-void GpuDevice::tryOcl(std::string message, std::function<int()> oclCall) {
+void GpuDevice::tryOcl(const std::string &message,
+                       const std::function<int()> &oclCall) {
   CheckCallbackError();
 
   if (oclCall() == CL_SUCCESS) {
@@ -230,7 +231,7 @@ void GpuDevice::DispatchQueue() {
   }
 }
 
-EventVecPtr GpuDevice::ResetWaitEvents(bool waitQueue) {
+EventVecPtr GpuDevice::ResetWaitEvents(const bool &waitQueue) {
   if (waitQueue) {
     while (wait_queue_items.size() > 1) {
       device_context->WaitOnAllEvents();
@@ -270,9 +271,9 @@ inline size_t pick_group_size(const size_t &nwi) {
   return ngs;
 }
 
-void GpuDevice::RequestKernel(OCLAPI api_call, const tcapint *vciArgs,
-                              const size_t nwi, std::vector<BufferPtr> buffers,
-                              const size_t nwi2, const complex *c) {
+void GpuDevice::RequestKernel(const OCLAPI &api_call, const tcapint *vciArgs,
+                              const size_t &nwi, std::vector<BufferPtr> buffers,
+                              const size_t &nwi2, const complex *c) {
   EventVecPtr waitVec = ResetWaitEvents();
   PoolItemPtr poolItem = GetFreePoolItem();
   cl::Event writeArgsEvent;
@@ -294,23 +295,23 @@ void GpuDevice::RequestKernel(OCLAPI api_call, const tcapint *vciArgs,
   QueueCall(api_call, nwi, ngs, buffers, nwi2, ngs2);
 }
 
-void GpuDevice::ClearRealBuffer(BufferPtr buffer, const size_t nwi) {
+void GpuDevice::ClearRealBuffer(BufferPtr buffer, const size_t &nwi) {
   const size_t ngs = pick_group_size(nwi);
   QueueCall(OCLAPI::OCL_API_CLEAR_BUFFER_REAL, nwi, ngs,
             std::vector<BufferPtr>{buffer});
 }
-void GpuDevice::FillOnesReal(BufferPtr buffer, const size_t nwi) {
+void GpuDevice::FillOnesReal(BufferPtr buffer, const size_t &nwi) {
   const size_t ngs = pick_group_size(nwi);
   QueueCall(OCLAPI::OCL_API_FILL_ONES_REAL, nwi, ngs,
             std::vector<BufferPtr>{buffer});
 }
-void GpuDevice::FillOnesComplex(BufferPtr buffer, const size_t nwi) {
+void GpuDevice::FillOnesComplex(BufferPtr buffer, const size_t &nwi) {
   const size_t ngs = pick_group_size(nwi);
   QueueCall(OCLAPI::OCL_API_FILL_ONES_COMPLEX, nwi, ngs,
             std::vector<BufferPtr>{buffer});
 }
-void GpuDevice::FillValueReal(BufferPtr buffer, const size_t nwi,
-                              const real1 v) {
+void GpuDevice::FillValueReal(BufferPtr buffer, const size_t &nwi,
+                              const real1 &v) {
   complex cmplxArgs[CMPLX_ARG_LEN] = {(complex)v};
   EventVecPtr waitVec = ResetWaitEvents();
   PoolItemPtr poolItem = GetFreePoolItem();
@@ -323,8 +324,8 @@ void GpuDevice::FillValueReal(BufferPtr buffer, const size_t nwi,
   QueueCall(OCLAPI::OCL_API_FILL_VALUE_REAL, nwi, ngs,
             std::vector<BufferPtr>{buffer, poolItem->complexBuffer});
 }
-void GpuDevice::FillValueComplex(BufferPtr buffer, const size_t nwi,
-                                 const complex v) {
+void GpuDevice::FillValueComplex(BufferPtr buffer, const size_t &nwi,
+                                 const complex &v) {
   complex cmplxArgs[CMPLX_ARG_LEN] = {v};
   EventVecPtr waitVec = ResetWaitEvents();
   PoolItemPtr poolItem = GetFreePoolItem();
@@ -338,20 +339,20 @@ void GpuDevice::FillValueComplex(BufferPtr buffer, const size_t nwi,
             std::vector<BufferPtr>{buffer, poolItem->complexBuffer});
 }
 void GpuDevice::UpcastRealBuffer(BufferPtr buffer_in, BufferPtr buffer_out,
-                                 const size_t nwi) {
+                                 const size_t &nwi) {
   const size_t ngs = pick_group_size(nwi);
   QueueCall(OCLAPI::OCL_API_REAL_TO_COMPLEX_BUFFER, nwi, ngs,
             std::vector<BufferPtr>{buffer_in, buffer_out});
 }
 
-real1 GpuDevice::GetReal(BufferPtr buffer, tcapint idx) {
+real1 GpuDevice::GetReal(BufferPtr buffer, const tcapint &idx) {
   real1 v;
   EventVecPtr waitVec = ResetWaitEvents();
   DISPATCH_BLOCK_READ(waitVec, *buffer, sizeof(real1) * idx, sizeof(real1), &v);
 
   return v;
 }
-complex GpuDevice::GetComplex(BufferPtr buffer, tcapint idx) {
+complex GpuDevice::GetComplex(BufferPtr buffer, const tcapint &idx) {
   complex v;
   EventVecPtr waitVec = ResetWaitEvents();
   DISPATCH_BLOCK_READ(waitVec, *buffer, sizeof(complex) * idx, sizeof(complex),
@@ -359,7 +360,8 @@ complex GpuDevice::GetComplex(BufferPtr buffer, tcapint idx) {
 
   return v;
 }
-void GpuDevice::SetReal(real1 val, BufferPtr buffer, tcapint idx) {
+void GpuDevice::SetReal(const real1 &val, BufferPtr buffer,
+                        const tcapint &idx) {
   EventVecPtr waitVec = ResetWaitEvents();
   device_context->EmplaceEvent(
       [this, val, buffer, idx, waitVec](cl::Event &event) {
@@ -370,7 +372,8 @@ void GpuDevice::SetReal(real1 val, BufferPtr buffer, tcapint idx) {
         });
       });
 }
-void GpuDevice::SetComplex(complex val, BufferPtr buffer, tcapint idx) {
+void GpuDevice::SetComplex(const complex &val, BufferPtr buffer,
+                           const tcapint &idx) {
   EventVecPtr waitVec = ResetWaitEvents();
   device_context->EmplaceEvent([this, val, buffer, idx,
                                 waitVec](cl::Event &event) {
