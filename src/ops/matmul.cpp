@@ -66,7 +66,7 @@ struct MatrixDim {
 };
 
 MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
-  if (a.shape.size() != 2U) {
+  if (a.shape.size() < 2U) {
     throw std::invalid_argument("MatMul is only for matrices with 2 indices!");
   }
   MatrixDim d;
@@ -75,9 +75,9 @@ MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
     throw std::invalid_argument("MatMul operand dimensions aren't compatible!");
   }
   d.M = a.shape[0U];
-  d.N = b.shape.size() > 1U ? b.shape[1U] : 1U;
-  if ((d.M != out.shape[0U]) ||
-      ((out.shape.size() > 1U) && (d.N != out.shape[1U]))) {
+  d.N = (b.shape.size() > 1U) ? b.shape[1U] : 1U;
+  tcapint o1 = (out.shape.size() > 1U) ? out.shape[1] : 1U;
+  if ((d.M != out.shape[0U]) || (d.N != o1)) {
     throw std::invalid_argument("MatMul output dimensions don't match inputs!");
   }
 
@@ -87,9 +87,9 @@ MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
   d.A_s0 = a.stride[0];
   d.A_s1 = a.stride[1];
   d.B_s0 = b.stride[0];
-  d.B_s1 = b.stride[1];
+  d.B_s1 = (b.stride.size() > 1U) ? b.stride[1] : b.shape[0U];
   d.O_s0 = out.stride[0];
-  d.O_s1 = out.stride[1];
+  d.O_s1 = (out.stride.size() > 1U) ? out.stride[1] : out.shape[0U];
 
   return d;
 }
