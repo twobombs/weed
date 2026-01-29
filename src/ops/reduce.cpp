@@ -98,10 +98,6 @@ void ReduceKernel::reduce(const size_t &index, const Tensor &a, Tensor &out) {
   if (a.storage->dtype != out.storage->dtype) {
     throw std::invalid_argument("Output tensor dtype mismatch!");
   }
-  if (a.get_broadcast_size() != out.get_broadcast_size()) {
-    throw std::invalid_argument(
-        "In Weed::reduce(a, out), out size does not match input size!");
-  }
   if (a.storage->dtype == DType::COMPLEX) {
 #if ENABLE_GPU
     DEVICE_SWITCH(cpu_complex, gpu_complex);
