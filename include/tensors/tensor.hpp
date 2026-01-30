@@ -139,7 +139,7 @@ struct Tensor {
   /**
    * For broadcast, make this scalar match the shape of a target Tensor
    */
-  void match_shape(const TensorPtr a);
+  bool match_shape(const TensorPtr a);
 
   void reduce_grad_broadcast();
 

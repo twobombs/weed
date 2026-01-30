@@ -236,9 +236,9 @@ std::vector<TensorPtr> filterParents(const std::vector<TensorPtr> &parents) {
   return filtered;
 }
 
-void Tensor::match_shape(const TensorPtr a) {
+bool Tensor::match_shape(const TensorPtr a) {
   if (shape.size() > a->shape.size()) {
-    return;
+    return true;
   }
 
   if (shape.size() == a->shape.size()) {
@@ -251,13 +251,15 @@ void Tensor::match_shape(const TensorPtr a) {
     }
 
     if (isSame) {
-      return;
+      return true;
     }
   }
 
   // Shapes are definitely different
   shape = a->shape;
   stride.resize(shape.size());
+
+  return false;
 }
 
 void Tensor::reduce_grad_broadcast() {
@@ -510,9 +512,13 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  a->match_shape(b);
-  b->match_shape(a);
-  TensorPtr out = allocate_like(b, dt, rg, s);
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    b->match_shape(a);
+    out = allocate_like(a, dt, rg, s);
+  } else {
+    out = allocate_like(b, dt, rg, s);
+  }
 
   Weed::add(*(a.get()), *(b.get()), *(out.get()));
 
@@ -551,9 +557,13 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  a->match_shape(b);
-  b->match_shape(a);
-  TensorPtr out = allocate_like(b, dt, rg, s);
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    b->match_shape(a);
+    out = allocate_like(a, dt, rg, s);
+  } else {
+    out = allocate_like(b, dt, rg, s);
+  }
 
   Weed::mul(*(a.get()), *(b.get()), *(out.get()));
 
@@ -656,9 +666,13 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  a->match_shape(b);
-  b->match_shape(a);
-  TensorPtr out = allocate_like(b, dt, rg, s);
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    b->match_shape(a);
+    out = allocate_like(a, dt, rg, s);
+  } else {
+    out = allocate_like(b, dt, rg, s);
+  }
 
   Weed::sub(*(a.get()), *(b.get()), *(out.get()));
 
@@ -697,9 +711,13 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  a->match_shape(b);
-  b->match_shape(a);
-  TensorPtr out = allocate_like(b, dt, rg, s);
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    b->match_shape(a);
+    out = allocate_like(a, dt, rg, s);
+  } else {
+    out = allocate_like(b, dt, rg, s);
+  }
 
   Weed::div(*(a.get()), *(b.get()), *(out.get()));
 
