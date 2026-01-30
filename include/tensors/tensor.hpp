@@ -137,27 +137,6 @@ struct Tensor {
   }
 
   /**
-   * Internally cast this real-value tensor to a complex-value tensor (if
-   * necessary)
-   */
-  void upcast(const DType &dt) { storage = storage->Upcast(dt); }
-
-  /**
-   * Make a gradient tensor (static)
-   */
-  static TensorPtr make_gradient(const std::vector<tcapint> &shp,
-                                 const DType &dtype, const DeviceTag &dtag,
-                                 const int64_t did, const bool &s) {
-    // This must be reduced along broadcast dimensions
-    // during the backward() step.
-    TensorPtr g = std::make_shared<Tensor>(shp, gradient_stride(shp), false,
-                                           dtype, dtag, did, s);
-    g->storage->FillZeros();
-
-    return g;
-  }
-
-  /**
    * For broadcast, make this scalar match the shape of a target Tensor
    */
   void match_shape(const TensorPtr a);
@@ -213,6 +192,28 @@ struct Tensor {
 
     return g_stride;
   }
+
+  /**
+   * Internally cast this real-value tensor to a complex-value tensor (if
+   * necessary)
+   */
+  void upcast(const DType &dt) { storage = storage->Upcast(dt); }
+
+  /**
+   * Make a gradient tensor (static)
+   */
+  static TensorPtr make_gradient(const std::vector<tcapint> &shp,
+                                 const DType &dtype, const DeviceTag &dtag,
+                                 const int64_t did, const bool &s) {
+    // This must be reduced along broadcast dimensions
+    // during the backward() step.
+    TensorPtr g = std::make_shared<Tensor>(shp, gradient_stride(shp), false,
+                                           dtype, dtag, did, s);
+    g->storage->FillZeros();
+
+    return g;
+  }
+
   /**
    * Ensure that all tensors in a list are on the same device
    */
