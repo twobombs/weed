@@ -261,9 +261,11 @@ void Tensor::reduce_grad_broadcast() {
   }
 
   for (int64_t i = stride.size() - 1U; i >= 0; --i) {
-    if (stride[i] || (shape[i] == 1U)) {
+    if (stride[i]) {
       continue;
     }
+
+    bool is_skip = shape[i] == 1U;
 
     TensorPtr gcp = grad->copy();
     std::vector<tcapint> &sh = gcp->shape;
@@ -275,6 +277,11 @@ void Tensor::reduce_grad_broadcast() {
     } else {
       sh.erase(sh.begin() + i);
       st.erase(st.begin() + i);
+    }
+
+    if (is_skip) {
+      // Already reduced
+      continue;
     }
 
     TensorPtr tmp =
