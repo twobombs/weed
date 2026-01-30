@@ -241,20 +241,6 @@ bool Tensor::match_shape(const TensorPtr a) {
     return true;
   }
 
-  if (shape.size() == a->shape.size()) {
-    bool isSame = true;
-    for (size_t i = 0U; i < shape.size(); ++i) {
-      if (shape[i] != a->shape[i]) {
-        isSame = false;
-        break;
-      }
-    }
-
-    if (isSame) {
-      return true;
-    }
-  }
-
   for (size_t i = 0U; i < shape.size(); ++i) {
     if ((shape[i] != a->shape[i]) && stride[i]) {
       throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
