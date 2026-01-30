@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "autograd/bci_loss.hpp"
+// #include "autograd/adam.hpp"
 #include "autograd/sgd.hpp"
 #include "autograd/zero_grad.hpp"
 #include "modules/linear.hpp"

@@ -18,6 +18,10 @@
 
 #include <vector>
 
+#define SCALAR(v, o)                                                           \
+  std::make_shared<Tensor>(v, false, o->storage->device,                       \
+                           o->storage->get_device_id())
+
 namespace Weed {
 struct Tensor;
 
@@ -337,14 +341,58 @@ struct Tensor {
 inline TensorPtr operator+(TensorPtr left, TensorPtr right) {
   return Tensor::add(left, right);
 }
+inline TensorPtr operator+(real1 left, TensorPtr right) {
+  return Tensor::add(SCALAR(left, right), right);
+}
+inline TensorPtr operator+(TensorPtr left, real1 right) { return right + left; }
+inline TensorPtr operator+(complex left, TensorPtr right) {
+  return Tensor::add(SCALAR(left, right), right);
+}
+inline TensorPtr operator+(TensorPtr left, complex right) {
+  return right + left;
+}
 inline TensorPtr operator-(TensorPtr left, TensorPtr right) {
   return Tensor::sub(left, right);
+}
+inline TensorPtr operator-(real1 left, TensorPtr right) {
+  return Tensor::sub(SCALAR(left, right), right);
+}
+inline TensorPtr operator-(TensorPtr left, real1 right) {
+  return Tensor::sub(left, SCALAR(right, left));
+}
+inline TensorPtr operator-(complex left, TensorPtr right) {
+  return Tensor::sub(SCALAR(left, right), right);
+}
+inline TensorPtr operator-(TensorPtr left, complex right) {
+  return Tensor::sub(left, SCALAR(right, left));
 }
 inline TensorPtr operator*(TensorPtr left, TensorPtr right) {
   return Tensor::mul(left, right);
 }
+inline TensorPtr operator*(real1 left, TensorPtr right) {
+  return Tensor::mul(SCALAR(left, right), right);
+}
+inline TensorPtr operator*(TensorPtr left, real1 right) { return right * left; }
+inline TensorPtr operator*(complex left, TensorPtr right) {
+  return Tensor::mul(SCALAR(left, right), right);
+}
+inline TensorPtr operator*(TensorPtr left, complex right) {
+  return right * left;
+}
 inline TensorPtr operator/(TensorPtr left, TensorPtr right) {
   return Tensor::div(left, right);
+}
+inline TensorPtr operator/(real1 left, TensorPtr right) {
+  return Tensor::div(SCALAR(left, right), right);
+}
+inline TensorPtr operator/(TensorPtr left, real1 right) {
+  return Tensor::div(left, SCALAR(right, left));
+}
+inline TensorPtr operator/(complex left, TensorPtr right) {
+  return Tensor::div(SCALAR(left, right), right);
+}
+inline TensorPtr operator/(TensorPtr left, complex right) {
+  return Tensor::div(left, SCALAR(right, left));
 }
 inline TensorPtr operator>>(TensorPtr left, TensorPtr right) {
   return Tensor::matmul(left, right);

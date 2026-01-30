@@ -27,11 +27,7 @@ inline void sgd_step(const std::vector<ParameterPtr> &params, real1 lr) {
 
   for (auto &p : params) {
     TensorPtr pg = p->grad;
-    TensorPtr alpha = std::make_shared<RealScalar>(lr, false, pg->storage->device, pg->storage->get_device_id());
-    alpha->shape = pg->shape;
-    alpha->stride.resize(pg->stride.size());
-    TensorPtr tmp = Tensor::allocate_like(pg, pg->storage->dtype, false, pg->storage->is_sparse());
-    Weed::mul(*(alpha.get()), *(pg.get()), *(tmp.get()));
+    TensorPtr tmp = lr * pg;
     Weed::sub_in_place(*(p.get()), *(tmp.get()));
   }
 }
