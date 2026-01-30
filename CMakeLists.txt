@@ -322,8 +322,10 @@ install (FILES
     include/storage/sparse_cpu_real_storage.hpp
     include/storage/storage.hpp
     include/tensors/complex_scalar.hpp
+    include/tensors/complex_tensor.hpp
     include/tensors/parameter.hpp
     include/tensors/real_scalar.hpp
+    include/tensors/real_tensor.hpp
     include/tensors/scalar.hpp
     include/tensors/tensor.hpp
     include/queue_item.hpp

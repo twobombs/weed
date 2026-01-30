@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "tensor.hpp"
+#include "tensors/tensor.hpp"
 
 namespace Weed {
 struct Scalar;
