@@ -30,7 +30,6 @@ inline void sgd_step(const std::vector<ParameterPtr> &params, real1 lr) {
                                    params[0U]->storage->get_device_id());
 
   for (auto &p : params) {
-    p->upcast(Tensor::get_dtype_by_presidence({p, p->grad}));
     TensorPtr tmp = alpha * p->grad;
     Weed::sub_in_place(*(p.get()), *(tmp.get()));
   }
