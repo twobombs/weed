@@ -148,12 +148,19 @@ struct Tensor {
 
   void reduce_grad_broadcast();
 
+  bool is_scalar() const { return get_size() == 1U; }
+
   /**
    *  Lookup an index in Storage based on shape and stride
    */
   tcapint get_storage_index(const tcapint &idx) const {
+    if (is_scalar()) {
+      return offset;
+    }
+
     tcapint curr = idx;
     tcapint stor = offset;
+
     for (size_t i = 0U; (i < shape.size()) && curr; ++i) {
       const tcapint &l = shape[i];
       stor += (curr % l) * stride[i];
@@ -161,7 +168,7 @@ struct Tensor {
     }
 
     if (curr) {
-      throw std::invalid_argument("RealTensor index out-of-range!");
+      throw std::invalid_argument("Tensor index out-of-range!");
     }
 
     return stor;
