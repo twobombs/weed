@@ -255,7 +255,13 @@ bool Tensor::match_shape(const TensorPtr a) {
     }
   }
 
-  // Shapes are definitely different
+  for (size_t i = 0U; i < shape.size(); ++i) {
+    if ((shape[i] != a->shape[i]) && stride[i]) {
+      throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
+                                  "alter an index that was not broadcast.)");
+    }
+  }
+
   shape = a->shape;
   stride.resize(shape.size());
 
