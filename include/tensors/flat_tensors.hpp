@@ -23,7 +23,7 @@
   const tcapint I_a = a.stride[0U];                                            \
   GET_CONST_FLAT_TENSOR(ft, a, pa);                                            \
   GET_STORAGE(strg, out, po);                                                  \
-  size_t n = a.get_size()
+  size_t n = a.get_broadcast_size()
 
 #define CPU_INIT_2(ft, strg)                                                   \
   const tcapint O_a = a.offset;                                                \
@@ -40,7 +40,7 @@
   const tcapint I_b = b.stride[0U];                                            \
   GET_FLAT_TENSOR(ft1, a, pa);                                                 \
   GET_CONST_FLAT_TENSOR(ft2, b, pb);                                           \
-  size_t n = a.get_size()
+  size_t n = a.get_broadcast_size()
 
 #define CPU_INIT_3(ft1, ft2, strg)                                             \
   const tcapint O_a = a.offset;                                                \
