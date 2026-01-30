@@ -27,7 +27,7 @@ namespace Weed {
  * documented feature.)
  */
 struct RealTensor : public Tensor {
-  RealTensor(TensorPtr orig) : Tensor(TensorPtr orig) {
+  RealTensor(TensorPtr orig) : Tensor(orig) {
     if (storage->dtype != DType::REAL) {
       throw std::domain_error("RealTensor constructor must copy from a "
                               "real-valued generic Tensor!");
@@ -38,21 +38,24 @@ struct RealTensor : public Tensor {
    * Select element at flattened position
    */
   real1 operator[](const tcapint &idx) const {
-    tcapint curr = idx;
-    tcapint stor = offset;
-    for (size_t i = 0U; (i < shape.size()) && curr; ++i) {
-      const tcapint &l = shape[i];
-      stor += (curr % l) * stride[i];
-      curr /= l;
-    }
+    return (*static_cast<RealStorage *>(storage.get()))[get_storage_index(idx)];
+  }
 
-    if (curr) {
-      throw std::invalid_argument("RealTensor index out-of-range!");
-    }
+  /**
+   * Set the real element at the position
+   */
+  void write(const tcapint &idx, const real1 &val) {
+    static_cast<RealStorage *>(storage.get())
+        ->write(get_storage_index(idx), val);
+  }
 
-    return (*static_cast<RealStorage *>(storage.get()))[stor];
+  /**
+   * Add to the real element at the position
+   */
+  void add(const tcapint &idx, const real1 &val) {
+    static_cast<RealStorage *>(storage.get())->add(get_storage_index(idx), val);
   }
 };
 
-typedef std::shared_ptr<RealScalar> RealTensorPtr;
+typedef std::shared_ptr<RealTensor> RealTensorPtr;
 } // namespace Weed

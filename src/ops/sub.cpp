@@ -11,7 +11,7 @@
 
 #include "ops/sub.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define SUB_KERNEL()                                                           \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
@@ -44,24 +44,24 @@
 
 namespace Weed {
 void SubKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(RealStorage, RealStorage, RealStorage);
+  CPU_INIT_3(RealTensor, RealTensor, RealStorage);
   SUB_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void SubKernel::cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(ComplexStorage, ComplexStorage, ComplexStorage);
+  CPU_INIT_3(ComplexTensor, ComplexTensor, ComplexStorage);
   SUB_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void SubKernel::cpu_mixed_c_left(const Tensor &a, const Tensor &b,
                                  Tensor &out) {
-  CPU_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
+  CPU_INIT_3(ComplexTensor, RealTensor, ComplexStorage);
   SUB_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void SubKernel::cpu_mixed_c_right(const Tensor &a, const Tensor &b,
                                   Tensor &out) {
-  CPU_INIT_3(RealStorage, ComplexStorage, ComplexStorage);
+  CPU_INIT_3(RealTensor, ComplexTensor, ComplexStorage);
   SUB_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuComplexStorage);
 }

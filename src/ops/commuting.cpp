@@ -11,7 +11,7 @@
 
 #include "ops/commuting.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, b, out)                                     \
   switch (out.storage->device) {                                               \
@@ -49,17 +49,17 @@
 
 namespace Weed {
 static void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
+  CPU_INIT_3(RealTensor, RealTensor, RealStorage);
   ADD_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
+  CPU_INIT_3(ComplexTensor, ComplexTensor, ComplexStorage);
   ADD_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
+  CPU_INIT_3(ComplexTensor, RealTensor, ComplexStorage);
   ADD_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
@@ -78,17 +78,17 @@ static void gpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
 #endif
 
 static void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuRealStorage, CpuRealStorage, CpuRealStorage);
+  CPU_INIT_3(RealTensor, RealTensor, RealStorage);
   MUL_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuComplexStorage, CpuComplexStorage, CpuComplexStorage);
+  CPU_INIT_3(ComplexTensor, ComplexTensor, ComplexStorage);
   MUL_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(CpuComplexStorage, CpuRealStorage, CpuComplexStorage);
+  CPU_INIT_3(ComplexTensor, RealTensor, ComplexStorage);
   MUL_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }

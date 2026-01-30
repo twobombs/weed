@@ -67,6 +67,7 @@ struct Tensor {
          const std::vector<tcapint> &strd, const bool &rg = false);
   Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
          const std::vector<tcapint> &strd, const bool &rg = false);
+  Tensor(TensorPtr orig) { copy(orig); }
 
   /**
    * How many elements are in this tensor?
@@ -146,6 +147,25 @@ struct Tensor {
   bool match_shape(const TensorPtr a);
 
   void reduce_grad_broadcast();
+
+  /**
+   *  Lookup an index in Storage based on shape and stride
+   */
+  tcapint get_storage_index(const tcapint &idx) const {
+    tcapint curr = idx;
+    tcapint stor = offset;
+    for (size_t i = 0U; (i < shape.size()) && curr; ++i) {
+      const tcapint &l = shape[i];
+      stor += (curr % l) * stride[i];
+      curr /= l;
+    }
+
+    if (curr) {
+      throw std::invalid_argument("RealTensor index out-of-range!");
+    }
+
+    return stor;
+  }
 
   /**
    * Select a sub-tensor from the position in the outermost tensor index

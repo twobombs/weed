@@ -11,7 +11,7 @@
 
 #include "ops/reduce.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define REDUCE_KERNEL(type)                                                    \
   const tcapint I_o = out.stride[0U];                                          \

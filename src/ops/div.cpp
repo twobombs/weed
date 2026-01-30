@@ -11,7 +11,7 @@
 
 #include "ops/div.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define DIV_KERNEL()                                                           \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
@@ -44,24 +44,24 @@
 
 namespace Weed {
 void DivKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(RealStorage, RealStorage, RealStorage);
+  CPU_INIT_3(RealTensor, RealTensor, RealStorage);
   DIV_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void DivKernel::cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(ComplexStorage, ComplexStorage, ComplexStorage);
+  CPU_INIT_3(ComplexTensor, ComplexTensor, ComplexStorage);
   DIV_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 void DivKernel::cpu_mixed_c_left(const Tensor &a, const Tensor &b,
                                  Tensor &out) {
-  CPU_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
+  CPU_INIT_3(ComplexTensor, RealTensor, ComplexStorage);
   DIV_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void DivKernel::cpu_mixed_c_right(const Tensor &a, const Tensor &b,
                                   Tensor &out) {
-  CPU_INIT_3(RealStorage, ComplexStorage, ComplexStorage);
+  CPU_INIT_3(RealTensor, ComplexTensor, ComplexStorage);
   DIV_KERNEL();
   SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuComplexStorage);
 }

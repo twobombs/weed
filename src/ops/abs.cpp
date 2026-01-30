@@ -11,7 +11,7 @@
 
 #include "ops/abs.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define GPU(type1, type2, api_call)                                            \
   GPU_ARGS();                                                                  \
@@ -84,7 +84,7 @@
 
 namespace Weed {
 void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
-  CPU_INIT_2(RealStorage, RealStorage);
+  CPU_INIT_2(RealTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     real1 tmp = (*pa)[O_a + i * I_a];
     po->write(i * I_o, (tmp < ZERO_R1) ? -tmp : tmp);
@@ -92,7 +92,7 @@ void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
-  CPU_INIT_2(ComplexStorage, RealStorage);
+  CPU_INIT_2(ComplexTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i * I_o, (real1)std::abs((*pa)[O_a + i * I_a]));
   };
@@ -131,37 +131,37 @@ void AbsKernel::abs(const Tensor &a, Tensor &out) {
 
 void AbsKernel::cpu_real_grad_real(Tensor &din, const Tensor &in,
                                    const Tensor &dout) {
-  CPU_GRAD_INIT_3(RealStorage, RealStorage, RealStorage);
+  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
   REAL_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_real_grad_complex(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
   COMPLEX_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 void AbsKernel::cpu_real_grad_mixed(Tensor &din, const Tensor &in,
                                     const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexStorage, RealStorage, RealStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
   REAL_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex_grad_real(Tensor &din, const Tensor &in,
                                       const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexStorage, ComplexStorage, RealStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, ComplexTensor, RealTensor);
   COMPLEX_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex_grad_complex(Tensor &din, const Tensor &in,
                                          const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexStorage, ComplexStorage, ComplexStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, ComplexTensor, ComplexTensor);
   COMPLEX_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 void AbsKernel::cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
                                        const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexStorage, ComplexStorage, RealStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, ComplexTensor, RealTensor);
   COMPLEX_ABS_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
