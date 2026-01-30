@@ -91,6 +91,7 @@ struct Tensor {
     if (shape.empty()) {
       return ZERO_VCI;
     }
+
     tcapint max_index = 1U;
     for (size_t i = 0U; i < shape.size(); ++i) {
       max_index *= shape[i];
@@ -148,7 +149,19 @@ struct Tensor {
 
   void reduce_grad_broadcast();
 
-  bool is_scalar() const { return get_size() == 1U; }
+  bool is_scalar() const {
+    if (shape.empty()) {
+      return false;
+    }
+
+    for (size_t i = 0U; i < shape.size(); ++i) {
+      if (((shape[i] - ONE_VCI) * stride[i]) != 0U) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   /**
    *  Lookup an index in Storage based on shape and stride
