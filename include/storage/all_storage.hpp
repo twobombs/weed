@@ -30,7 +30,8 @@
   size_t n = a.get_size()
 
 #define SPARSE_CPU_2_RUN(strg)                                                 \
-  if (out.storage->is_sparse() && a.storage->is_sparse()) {                    \
+  if (out.storage->is_sparse() && a.storage->is_sparse() &&                    \
+      a.is_contiguous()) {                                                     \
     GET_STORAGE(strg, a, sa);                                                  \
     pfControl.par_for(sa->data, fn);                                           \
   } else {                                                                     \
@@ -38,7 +39,7 @@
   }
 
 #define SPARSE_CPU_2_SWITCH(storage1, storage2)                                \
-  if (b.storage->is_sparse()) {                                                \
+  if (b.storage->is_sparse() && b.is_contiguous()) {                           \
     GET_STORAGE(storage2, b, sb);                                              \
     pfControl.par_for(sb->data, fn);                                           \
   } else {                                                                     \
@@ -47,7 +48,7 @@
 
 #define SPARSE_CPU_3_RUN(storage1, storage2)                                   \
   if (out.storage->is_sparse() && a.storage->is_sparse() &&                    \
-      b.storage->is_sparse()) {                                                \
+      b.storage->is_sparse() && a.is_contiguous() && b.is_contiguous()) {      \
     GET_STORAGE(storage1, a, sa);                                              \
     GET_STORAGE(storage2, b, sb);                                              \
     std::set<tcapint> keys;                                                    \
@@ -63,7 +64,8 @@
   }
 
 #define SPARSE_CPU_GRAD_3_RUN(storage1, storage2)                              \
-  if (din.storage->is_sparse() && dout.storage->is_sparse()) {                 \
+  if (din.storage->is_sparse() && dout.storage->is_sparse() &&                 \
+      din.is_contiguous() && dout.is_contiguous()) {                           \
     GET_STORAGE(storage1, din, si);                                            \
     GET_STORAGE(storage2, dout, so);                                           \
     std::set<tcapint> keys;                                                    \

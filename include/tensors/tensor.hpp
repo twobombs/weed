@@ -147,8 +147,21 @@ struct Tensor {
    */
   bool match_shape(const TensorPtr a);
 
+  /**
+   * For internal use, sum the gradient over all broadcast indices
+   */
   void reduce_grad_broadcast();
 
+  /**
+   * Is the Tensor Storage contiguous (i.e., densely packed in a traversable
+   * order)?
+   */
+  bool is_contiguous() const { return validate_shape(shape, stride); }
+
+  /**
+   * Is this Tensor a Scalar (i.e., has only a single storage element that's
+   * broadcast)?
+   */
   bool is_scalar() const {
     if (shape.empty()) {
       return false;
