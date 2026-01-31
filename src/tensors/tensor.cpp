@@ -647,7 +647,6 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->make_gradient();
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
     TensorPtr out_grad = out->grad;
-    out_grad->match_shape(out);
     if (a->requires_grad) {
       TensorPtr a_grad = a->grad;
       TensorPtr bt = transpose(b);
