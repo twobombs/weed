@@ -277,12 +277,7 @@ install (FILES
     include/common/complex8x2simd.hpp
     include/common/oclapi.hpp
     include/common/oclengine.hpp
-    include/common/cudaengine.cuh
-    include/common/cuda_kernels.cuh
     include/common/parallel_for.hpp
-    include/common/cuda_kernels.cuh
-    include/common/dispatchqueue.hpp
-    include/common/big_integer.hpp
     include/common/half.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed/common
     )
@@ -296,6 +291,8 @@ install (FILES
     include/autograd/sgd.hpp
     include/autograd/zero_grad.hpp
     include/devices/gpu_device.hpp
+    include/devices/pool_item.hpp
+    include/devices/queue_item.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
     include/modules/linear.hpp
@@ -309,7 +306,7 @@ install (FILES
     include/ops/real_unary.hpp
     include/ops/sub.hpp
     include/ops/sum.hpp
-    includes/ops/pow.hpp
+    include/ops/pow.hpp
     include/storage/all_storage.hpp
     include/storage/complex_storage.hpp
     include/storage/cpu_complex_storage.hpp
@@ -328,7 +325,6 @@ install (FILES
     include/tensors/real_tensor.hpp
     include/tensors/scalar.hpp
     include/tensors/tensor.hpp
-    include/queue_item.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed
     )
 
