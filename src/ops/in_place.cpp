@@ -11,7 +11,7 @@
 
 #include "ops/in_place.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, b)                                          \
   switch (a.storage->device) {                                                 \
@@ -45,17 +45,17 @@
 
 namespace Weed {
 static void cpu_real_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(RealStorage, RealStorage);
+  CPU_INIT_2_IN_PLACE(RealTensor, RealTensor);
   ADD_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexStorage, ComplexStorage);
+  CPU_INIT_2_IN_PLACE(ComplexTensor, ComplexTensor);
   ADD_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexStorage, RealStorage);
+  CPU_INIT_2_IN_PLACE(ComplexTensor, RealTensor);
   ADD_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
@@ -75,17 +75,17 @@ static void gpu_mixed_add(Tensor &a, const Tensor &b) {
 #endif
 
 static void cpu_real_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(RealStorage, RealStorage);
+  CPU_INIT_2_IN_PLACE(RealTensor, RealTensor);
   SUB_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 static void cpu_complex_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexStorage, ComplexStorage);
+  CPU_INIT_2_IN_PLACE(ComplexTensor, ComplexTensor);
   SUB_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuComplexStorage);
 }
 static void cpu_mixed_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexStorage, RealStorage);
+  CPU_INIT_2_IN_PLACE(ComplexTensor, RealTensor);
   SUB_KERNEL();
   SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage, SparseCpuRealStorage);
 }

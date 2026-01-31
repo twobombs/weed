@@ -67,6 +67,7 @@ struct Tensor {
          const std::vector<tcapint> &strd, const bool &rg = false);
   Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
          const std::vector<tcapint> &strd, const bool &rg = false);
+  Tensor(TensorPtr orig) { copy(orig); }
 
   /**
    * How many elements are in this tensor?
@@ -90,6 +91,7 @@ struct Tensor {
     if (shape.empty()) {
       return ZERO_VCI;
     }
+
     tcapint max_index = 1U;
     for (size_t i = 0U; i < shape.size(); ++i) {
       max_index *= shape[i];
@@ -145,7 +147,58 @@ struct Tensor {
    */
   bool match_shape(const TensorPtr a);
 
+  /**
+   * For internal use, sum the gradient over all broadcast indices
+   */
   void reduce_grad_broadcast();
+
+  /**
+   * Is the Tensor Storage contiguous (i.e., densely packed in a traversable
+   * order)?
+   */
+  bool is_contiguous() const { return validate_shape(shape, stride); }
+
+  /**
+   * Is this Tensor a Scalar (i.e., has only a single storage element that's
+   * broadcast)?
+   */
+  bool is_scalar() const {
+    if (shape.empty()) {
+      return false;
+    }
+
+    for (size_t i = 0U; i < shape.size(); ++i) {
+      if (((shape[i] - ONE_VCI) * stride[i]) != 0U) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   *  Lookup an index in Storage based on shape and stride
+   */
+  tcapint get_storage_index(const tcapint &idx) const {
+    if (is_scalar()) {
+      return offset;
+    }
+
+    tcapint curr = idx;
+    tcapint stor = offset;
+
+    for (size_t i = 0U; (i < shape.size()) && curr; ++i) {
+      const tcapint &l = shape[i];
+      stor += (curr % l) * stride[i];
+      curr /= l;
+    }
+
+    if (curr) {
+      throw std::invalid_argument("Tensor index out-of-range!");
+    }
+
+    return stor;
+  }
 
   /**
    * Select a sub-tensor from the position in the outermost tensor index

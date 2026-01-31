@@ -11,7 +11,7 @@
 
 #include "ops/clamp.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
   GPU_GRAD_ARGS();                                                             \
@@ -68,7 +68,7 @@
 namespace Weed {
 void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
                       Tensor &out) {
-  CPU_INIT_2(RealStorage, RealStorage);
+  CPU_INIT_2(RealTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i * I_o, std::min(std::max((*pa)[O_a + i * I_a], l), h));
   };
@@ -76,14 +76,14 @@ void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
 }
 void ClampKernel::cpu_grad_real(const Tensor &dout, const Tensor &in,
                                 const real1 &l, const real1 &h, Tensor &din) {
-  CPU_GRAD_INIT_3(RealStorage, RealStorage, RealStorage);
+  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
   CPU_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
 void ClampKernel::cpu_grad_complex(const Tensor &dout, const Tensor &in,
                                    const real1 &l, const real1 &h,
                                    Tensor &din) {
-  CPU_GRAD_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
   CPU_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }

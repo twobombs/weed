@@ -11,7 +11,7 @@
 
 #include "ops/sum.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, out)                                        \
   switch (out.storage->device) {                                               \
@@ -65,7 +65,7 @@
 
 namespace Weed {
 static void cpu_sum_real(const Tensor &a, Tensor &out) {
-  CPU_INIT_2_SCALAR(RealStorage, RealStorage);
+  CPU_INIT_2_SCALAR(RealTensor, RealStorage);
   CPU_KERNEL(real1, SparseCpuRealStorage);
   po->write(0U, t);
 }
@@ -75,7 +75,7 @@ static void cpu_mean_real(const Tensor &a, Tensor &out) {
   po->write(0U, (*po)[0U] / (real1)a.get_size());
 }
 static void cpu_sum_complex(const Tensor &a, Tensor &out) {
-  CPU_INIT_2_SCALAR(ComplexStorage, ComplexStorage);
+  CPU_INIT_2_SCALAR(ComplexTensor, ComplexStorage);
   CPU_KERNEL(complex, SparseCpuComplexStorage);
   po->write(0U, t);
 }
