@@ -838,7 +838,7 @@ void Tensor::make_log_node(TensorPtr x, real1 inv_log_b, TensorPtr y) {
 
         TensorPtr r = Tensor::allocate_like(dy_v, dy_v->storage->dtype, false,
                                             IS_SPARSE(dy_v));
-        Weed::div(*(dy_v.get()), *(y.get()), *(r.get()));
+        Weed::div(*(dy_v.get()), *(x.get()), *(r.get()));
 
         dx->upcast(r->storage->dtype);
         Weed::add_in_place(*(dx.get()), *(r.get()));
