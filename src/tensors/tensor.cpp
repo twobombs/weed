@@ -284,26 +284,12 @@ void Tensor::reduce_grad_broadcast() {
       sh[0U] = 1U;
       st[0U] = 0U;
     } else {
-      size_t o_stride = gcp->stride[i];
+      const size_t p_stride = gcp->stride[i];
 
       sh.erase(sh.begin() + i);
       st.erase(st.begin() + i);
 
-      size_t j = i;
-      while (j > 0U) {
-        --j;
-        size_t p_stride = gcp->stride[j];
-        if (p_stride) {
-          o_stride /= p_stride;
-          break;
-        }
-      }
-
-      if (!o_stride) {
-        throw std::domain_error("Can't reduce a non-contiguous gradient in "
-                                "Tensor::reduce_grad_broadcast()! (Did you "
-                                "accidentally transpose a gradient?)");
-      }
+      const size_t o_stride = gcp->stride[i] / p_stride;
 
       for (size_t j = i; j < gcp->stride.size(); ++j) {
         gcp->stride[j] /= o_stride;
