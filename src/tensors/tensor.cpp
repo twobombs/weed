@@ -274,7 +274,7 @@ void Tensor::reduce_grad_broadcast() {
       continue;
     }
 
-    bool is_skip = shape[i] == 1U;
+    bool is_skip = grad->shape[i] == 1U;
 
     TensorPtr gcp = grad->copy();
     std::vector<tcapint> &sh = gcp->shape;
