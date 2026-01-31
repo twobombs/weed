@@ -407,7 +407,7 @@ TEST_CASE("test_real_scalar_log") {
   Tensor::backward(y);
 
   REQUIRE_FLOAT(GET_REAL(y), R(3));
-  REQUIRE_FLOAT(GET_REAL(x->grad), R(1 / (3 * std::log(2))));
+  REQUIRE_FLOAT(GET_REAL(x->grad), R(1 / (8 * std::log(2))));
 }
 
 TEST_CASE("test_complex_scalar_log") {
@@ -417,7 +417,7 @@ TEST_CASE("test_complex_scalar_log") {
   Tensor::backward(y);
 
   REQUIRE_CMPLX(GET_COMPLEX(y), complex(R(3)));
-  REQUIRE_CMPLX(GET_COMPLEX(x->grad), complex(R(1 / (3 * std::log(2)))));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), complex(R(1 / (8 * std::log(2)))));
 }
 
 TEST_CASE("test_real_scalar_add") {
