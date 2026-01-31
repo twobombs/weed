@@ -222,7 +222,7 @@ struct Tensor {
    * Validate the Tensor shape, for constructors
    */
   static bool is_contiguous(const std::vector<tcapint> &shp,
-                             const std::vector<tcapint> &s) {
+                            const std::vector<tcapint> &s) {
     tcapint st = 1U;
     for (size_t i = 0U; i < s.size(); ++i) {
       if (!s[i]) {

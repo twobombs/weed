@@ -25,12 +25,12 @@
 
 #define ADD_KERNEL()                                                           \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
-    pa->add(O_a + i * I_a, (*pb)[O_b + i * I_b]);                              \
+    pa->add(i, (*pb)[i]);                                                      \
   }
 
 #define SUB_KERNEL()                                                           \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
-    pa->add(O_a + i * I_a, -(*pb)[O_b + i * I_b]);                             \
+    pa->add(i, -(*pb)[i]);                                                     \
   }
 
 #define DISPATCH_GPU_KERNEL(type, type2, api_call)                             \

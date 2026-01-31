@@ -67,18 +67,18 @@
 
 #define REAL_ABS_GRAD_KERNEL()                                                 \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
-    const real1 tmp = (*pi)[O_i + i * I_i];                                    \
+    const real1 tmp = (*pi)[i];                                                \
     if (tmp != ZERO_R1) {                                                      \
-      const real1 tmp_o = (*po)[O_o + i * I_o];                                \
-      pdi->add(O_d + i * I_d, (tmp > ZERO_R1) ? tmp_o : -tmp_o);               \
+      const real1 tmp_o = (*po)[i];                                            \
+      pdi->add(i, (tmp > ZERO_R1) ? tmp_o : -tmp_o);                           \
     }                                                                          \
   }
 
 #define COMPLEX_ABS_GRAD_KERNEL()                                              \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
-    const complex tmp = (*pi)[O_i + i * I_i];                                  \
+    const complex tmp = (*pi)[i];                                              \
     if (tmp != ZERO_CMPLX) {                                                   \
-      pdi->add(O_d + i * I_d, tmp * ((*po)[O_o + i * I_o] / std::abs(tmp)));   \
+      pdi->add(i, tmp *((*po)[i] / std::abs(tmp)));                            \
     }                                                                          \
   }
 
@@ -86,15 +86,15 @@ namespace Weed {
 void AbsKernel::cpu_real(const Tensor &a, Tensor &out) {
   CPU_INIT_2(RealTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
-    real1 tmp = (*pa)[O_a + i * I_a];
-    po->write(i * I_o, (tmp < ZERO_R1) ? -tmp : tmp);
+    real1 tmp = (*pa)[i];
+    po->write(i, (tmp < ZERO_R1) ? -tmp : tmp);
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
 void AbsKernel::cpu_complex(const Tensor &a, Tensor &out) {
   CPU_INIT_2(ComplexTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
-    po->write(i * I_o, (real1)std::abs((*pa)[O_a + i * I_a]));
+    po->write(i, (real1)std::abs((*pa)[i]));
   };
   SPARSE_CPU_2_RUN(SparseCpuComplexStorage);
 }

@@ -24,8 +24,6 @@
 #define GET_STORAGE(type, i, o) type *o = static_cast<type *>(i.storage.get());
 
 #define GPU_INIT_2_SCALAR(storage1, storage2)                                  \
-  const tcapint O_a = a.offset;                                                \
-  const tcapint I_a = a.stride[0U];                                            \
   GET_STORAGE(storage1, a, pa);                                                \
   size_t n = a.get_size()
 

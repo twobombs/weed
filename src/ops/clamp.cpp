@@ -59,9 +59,9 @@
 
 #define CPU_GRAD_KERNEL()                                                      \
   const auto fn = [&](const tcapint &i, const unsigned &) {                    \
-    real1 ai = (*pi)[O_i + i * I_i];                                           \
+    real1 ai = (*pi)[i];                                                       \
     if (ai > l && ai < h) {                                                    \
-      pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);                           \
+      pdi->add(i, (*po)[i]);                                                   \
     }                                                                          \
   }
 
@@ -70,7 +70,7 @@ void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
                       Tensor &out) {
   CPU_INIT_2(RealTensor, RealStorage);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
-    po->write(i * I_o, std::min(std::max((*pa)[O_a + i * I_a], l), h));
+    po->write(i, std::min(std::max((*pa)[i], l), h));
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
