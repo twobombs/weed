@@ -647,6 +647,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->make_gradient();
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
     TensorPtr out_grad = out->grad;
+    out_grad->match_shape(out);
     if (a->requires_grad) {
       TensorPtr a_grad = a->grad;
       TensorPtr bt = transpose(b);
@@ -656,7 +657,6 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       Weed::matmul(*(out_grad.get()), *(bt.get()), *(tmp.get()));
       a_grad->upcast(dt);
       Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
-      a->reduce_grad_broadcast();
     }
     if (b->requires_grad) {
       TensorPtr b_grad = b->grad;
@@ -667,7 +667,6 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       Weed::matmul(*(at.get()), *(out_grad.get()), *(tmp.get()));
       b_grad->upcast(dt);
       Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
-      b->reduce_grad_broadcast();
     }
   });
 }
