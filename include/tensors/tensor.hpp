@@ -100,6 +100,14 @@ struct Tensor {
     grad = cp->grad;
   }
 
+  void clean_broadcast_indices() {
+    for (size_t i = 0; i < shape.size(); ++i) {
+      if (shape[i] == 1U) {
+        stride[i] = 0U;
+      }
+    }
+  }
+
   /**
    * How many elements are in this tensor?
    */
