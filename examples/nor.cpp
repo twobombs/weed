@@ -45,7 +45,7 @@ int main() {
   params.insert(params.begin(), params2.begin(), params2.end());
   params.insert(params.begin(), params3.begin(), params3.end());
 
-  Adam opt(R(0.1));
+  Adam opt(R(0.05));
   opt.register_parameters(params);
 
   size_t epoch = 1;
@@ -59,7 +59,7 @@ int main() {
 
     Tensor::backward(loss);
     adam_step(opt, params);
-    // sgd_step(params, 0.1);
+    // sgd_step(params, 1.0);
 
     loss_r = GET_REAL(loss);
     std::cout << "Epoch " << epoch << ", Loss: " << loss_r << std::endl;
