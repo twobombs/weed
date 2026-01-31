@@ -16,20 +16,24 @@
 namespace Weed {
 struct ClampKernel {
   void cpu(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void cpu_grad_real(const Tensor &, const Tensor &, const real1 &,
-                     const real1 &, Tensor &);
-  void cpu_grad_complex(const Tensor &, const Tensor &, const real1 &,
-                        const real1 &, Tensor &);
+  void cpu_grad_real(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                     const real1 &);
+  void cpu_grad_complex(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                        const real1 &);
+  void cpu_grad_mixed(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                      const real1 &);
 #if ENABLE_GPU
   void gpu(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void gpu_grad_real(const Tensor &, const Tensor &, const real1 &,
-                     const real1 &, Tensor &);
-  void gpu_grad_complex(const Tensor &, const Tensor &, const real1 &,
-                        const real1 &, Tensor &);
+  void gpu_grad_real(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                     const real1 &);
+  void gpu_grad_complex(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                        const real1 &);
+  void gpu_grad_mixed(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                      const real1 &);
 #endif
   void clamp(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void clamp_grad(const Tensor &, const Tensor &, const real1 &, const real1 &,
-                  Tensor &);
+  void clamp_grad(Tensor &, const Tensor &, const Tensor &, const real1 &,
+                  const real1 &);
 };
 
 extern ClampKernel clamp_kernel;
@@ -41,6 +45,6 @@ void clamp(const Tensor &a, const real1 &l, const real1 &h, Tensor &out);
 /**
  * Element-wise clamp gradient
  */
-void clamp_grad(const Tensor &dy, const Tensor &x, const real1 &l,
-                const real1 &h, Tensor &dx);
+void clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
+                const real1 &l, const real1 &h);
 } // namespace Weed

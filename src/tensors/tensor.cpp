@@ -480,11 +480,10 @@ void Tensor::make_clamp_node(TensorPtr a, real1 lo, real1 hi, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out, lo, hi]() {
-        TensorPtr dx = a->grad;
-        TensorPtr dy = out->grad;
-        dx->upcast(dy->storage->dtype);
-        dy->upcast(dx->storage->dtype);
-        Weed::clamp_grad(*(dy.get()), *(a.get()), lo, hi, *(dx.get()));
+        Tensor &out_grad = *(out->grad.get());
+        Tensor &a_grad = *(a->grad.get());
+        a_grad.upcast(out_grad.storage->dtype);
+        Weed::clamp_grad(a_grad, *(a.get()), out_grad, lo, hi);
       });
 }
 

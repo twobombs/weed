@@ -15,16 +15,16 @@
 
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
   GPU_GRAD_ARGS();                                                             \
-  std::shared_ptr<type1> dy_storage =                                          \
-      std::dynamic_pointer_cast<type1>(dy.storage);                            \
-  std::shared_ptr<type2> dx_storage =                                          \
-      std::dynamic_pointer_cast<type2>(dx.storage);                            \
-  std::shared_ptr<type3> x_storage =                                           \
-      std::dynamic_pointer_cast<type3>(x.storage);                             \
+  std::shared_ptr<type1> a_storage =                                           \
+      std::dynamic_pointer_cast<type1>(din.storage);                           \
+  std::shared_ptr<type2> b_storage =                                           \
+      std::dynamic_pointer_cast<type2>(in.storage);                            \
+  std::shared_ptr<type3> c_storage =                                           \
+      std::dynamic_pointer_cast<type3>(dout.storage);                          \
   const complex v = complex(l, h);                                             \
-  x_storage->dev->RequestKernel(                                               \
-      OCLAPI::api_call, args, x.get_size(),                                    \
-      {dy_storage->buffer, x_storage->buffer, dx_storage->buffer}, 0U, &v)
+  a_storage->dev->RequestKernel(                                               \
+      OCLAPI::api_call, args, din.get_size(),                                  \
+      {a_storage->buffer, b_storage->buffer, c_storage->buffer}, 0U, &v)
 
 #define DEVICE_SWITCH(cpu, gpu, a, l, h, out)                                  \
   switch (out.storage->device) {                                               \
@@ -36,14 +36,14 @@
     cpu(a, l, h, out);                                                         \
   }
 
-#define GRAD_DEVICE_SWITCH(cpu, gpu, dy, x, l, h, dx)                          \
-  switch (dy.storage->device) {                                                \
+#define GRAD_DEVICE_SWITCH(cpu, gpu, din, in, dout, l, h)                      \
+  switch (din.storage->device) {                                               \
   case DeviceTag::GPU:                                                         \
-    gpu(dy, x, l, h, dx);                                                      \
+    gpu(din, in, dout, l, h);                                                  \
     break;                                                                     \
   case DeviceTag::CPU:                                                         \
   default:                                                                     \
-    cpu(dy, x, l, h, dx);                                                      \
+    cpu(din, in, dout, l, h);                                                  \
   }
 
 #define GPU_ARGS()                                                             \
@@ -53,8 +53,8 @@
 
 #define GPU_GRAD_ARGS()                                                        \
   const tcapint args[10U] {                                                    \
-    dy.offset, dy.stride[0U], x.offset, x.stride[0U], dx.offset,               \
-        dx.stride[0U], 0U, 0U, 0U, 0U                                          \
+    din.offset, din.stride[0U], in.offset, in.stride[0U], dout.offset,         \
+        dout.stride[0U], 0U, 0U, 0U, 0U                                        \
   }
 
 #define CPU_GRAD_KERNEL()                                                      \
@@ -74,18 +74,26 @@ void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-void ClampKernel::cpu_grad_real(const Tensor &dout, const Tensor &in,
-                                const real1 &l, const real1 &h, Tensor &din) {
+void ClampKernel::cpu_grad_real(Tensor &din, const Tensor &in,
+                                const Tensor &dout, const real1 &l,
+                                const real1 &h) {
   CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
   CPU_GRAD_KERNEL();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-void ClampKernel::cpu_grad_complex(const Tensor &dout, const Tensor &in,
-                                   const real1 &l, const real1 &h,
-                                   Tensor &din) {
+void ClampKernel::cpu_grad_complex(Tensor &din, const Tensor &in,
+                                   const Tensor &dout, const real1 &l,
+                                   const real1 &h) {
   CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
   CPU_GRAD_KERNEL();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+}
+void ClampKernel::cpu_grad_mixed(Tensor &din, const Tensor &in,
+                                 const Tensor &dout, const real1 &l,
+                                 const real1 &h) {
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
+  CPU_GRAD_KERNEL();
+  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
 }
 #if ENABLE_GPU
 void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
@@ -99,15 +107,23 @@ void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_CLAMP, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer}, 0U, &v);
 }
-void ClampKernel::gpu_grad_real(const Tensor &dy, const Tensor &x,
-                                const real1 &l, const real1 &h, Tensor &dx) {
+void ClampKernel::gpu_grad_real(Tensor &din, const Tensor &in,
+                                const Tensor &dout, const real1 &l,
+                                const real1 &h) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_CLAMP_GRAD_REAL);
 }
-void ClampKernel::gpu_grad_complex(const Tensor &dy, const Tensor &x,
-                                   const real1 &l, const real1 &h, Tensor &dx) {
-  GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
+void ClampKernel::gpu_grad_complex(Tensor &din, const Tensor &in,
+                                   const Tensor &dout, const real1 &l,
+                                   const real1 &h) {
+  GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
            OCL_API_CLAMP_GRAD_COMPLEX);
+}
+void ClampKernel::gpu_grad_mixed(Tensor &din, const Tensor &in,
+                                 const Tensor &dout, const real1 &l,
+                                 const real1 &h) {
+  GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuRealStorage,
+           OCL_API_CLAMP_GRAD_MIXED);
 }
 #endif
 void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
@@ -129,30 +145,51 @@ void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
   cpu_real(a, l, h, out);
 #endif
 }
-void ClampKernel::clamp_grad(const Tensor &dy, const Tensor &x, const real1 &l,
-                             const real1 &h, Tensor &dx) {
-  if (x.storage->dtype != DType::REAL) {
+void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
+                             const real1 &l, const real1 &h) {
+  if ((din.storage->dtype == DType::REAL) &&
+      (dout.storage->dtype != DType::REAL)) {
     throw std::invalid_argument(
-        "In Weed::clamp_grad(dy, x, l, h, dx), x must be real-number!");
+        "In Weed::clamp_grad(din, in, dout, l, h), dout dtype "
+        "must upcast to dout dtype!");
   }
-  if (dy.storage->dtype != dy.storage->dtype) {
+  const tcapint dinSize = din.get_broadcast_size();
+  const tcapint inSize = in.get_broadcast_size();
+  const tcapint doutSize = dout.get_broadcast_size();
+  if ((dinSize != inSize) || (dinSize != doutSize)) {
     throw std::invalid_argument(
-        "In Weed::clamp_grad(dy, x, l, h, dx), dy dtype must match dx dtype!");
+        "In Weed::clamp_grad(din, in, dout, l, h), sizes do not match!");
   }
-  switch (dy.storage->dtype) {
+  if (in.storage->dtype != DType::REAL) {
+    throw std::invalid_argument("In Weed::clamp_grad(din, in, dout, l, h), "
+                                "'in' dtype must be real-number!");
+  }
+  switch (din.storage->dtype) {
   case DType::COMPLEX:
+    switch (dout.storage->dtype) {
+    case DType::COMPLEX:
 #if ENABLE_GPU
-    GRAD_DEVICE_SWITCH(cpu_grad_complex, gpu_grad_complex, dy, x, l, h, dx)
+      GRAD_DEVICE_SWITCH(cpu_grad_complex, gpu_grad_complex, din, in, dout, l,
+                         h);
 #else
-    cpu_grad_complex(dy, x, l, h, dx);
+      cpu_grad_complex(din, in, dout, l, h);
 #endif
+      break;
+    case DType::REAL:
+    default:
+#if ENABLE_GPU
+      GRAD_DEVICE_SWITCH(cpu_grad_mixed, gpu_grad_mixed, din, in, dout, l, h);
+#else
+      cpu_grad_complex(din, in, dout, l, h);
+#endif
+    }
     break;
   case DType::REAL:
   default:
 #if ENABLE_GPU
-    GRAD_DEVICE_SWITCH(cpu_grad_real, gpu_grad_real, dy, x, l, h, dx)
+    GRAD_DEVICE_SWITCH(cpu_grad_real, gpu_grad_real, din, in, dout, l, h);
 #else
-    cpu_grad_real(dy, x, l, h, dx);
+    cpu_grad_real(din, in, dout, l, h);
 #endif
   }
 }
@@ -162,8 +199,8 @@ ClampKernel clamp_kernel;
 void clamp(const Tensor &a, const real1 &l, const real1 &h, Tensor &out) {
   clamp_kernel.clamp(a, l, h, out);
 }
-void clamp_grad(const Tensor &dy, const Tensor &x, const real1 &l,
-                const real1 &h, Tensor &dx) {
-  clamp_kernel.clamp_grad(dy, x, l, h, dx);
+void clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
+                const real1 &l, const real1 &h) {
+  clamp_kernel.clamp_grad(din, in, dout, l, h);
 }
 } // namespace Weed

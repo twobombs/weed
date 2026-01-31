@@ -235,28 +235,28 @@ void kernel clamp_real(global real1* a, global real1* out, constant tcapint* vec
     const cmplx b = *p;
     out[i_X * I_B] = (tmp > b.x) ? ((tmp < b.y) ? tmp  : b.y) : b.x;
 }
-void kernel clamp_grad_real(global real1* dy, global real1* x, global real1* dx, constant tcapint* vecCapIntArgs, constant cmplx* p)
+void kernel clamp_grad_real(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant cmplx* p)
 {
-    const real1 xi = x[i_X * I_B + O_B];
+    const real1 xi = in[i_X * I_B + O_B];
     const cmplx b = *p;
     if (xi > b.x && xi < b.y) {
-      dx[i_X * I_C + O_C] += dy[i_X * I_A + O_A];
+      din[i_X * I_C + O_C] += dout[i_X * I_A + O_A];
     }
 }
-void kernel clamp_grad_complex(global cmplx* dy, global real1* x, global cmplx* dx, constant tcapint* vecCapIntArgs, constant cmplx* p)
+void kernel clamp_grad_complex(global cmplx* din, global real1* in, global cmplx* dout, constant tcapint* vecCapIntArgs, constant cmplx* p)
 {
-    const real1 xi = x[i_X * I_B + O_B];
+    const real1 xi = in[i_X * I_B + O_B];
     const cmplx b = *p;
     if (xi > b.x && xi < b.y) {
-      dx[i_X * I_C + O_C] += dy[i_X * I_A + O_A];
+      din[i_X * I_C + O_C] += dout[i_X * I_A + O_A];
     }
 }
-void kernel clamp_grad_mixed(global real1* dy, global real1* x, global cmplx* dx, constant tcapint* vecCapIntArgs, constant cmplx* p)
+void kernel clamp_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant cmplx* p)
 {
-    const real1 xi = x[i_X * I_B + O_B];
+    const real1 xi = in[i_X * I_B + O_B];
     const cmplx b = *p;
     if (xi > b.x && xi < b.y) {
-      dx[i_X * I_C + O_C].x += dy[i_X * I_A + O_A];
+      din[i_X * I_C + O_C].x += dout[i_X * I_A + O_A];
     }
 }
 

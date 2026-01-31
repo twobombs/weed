@@ -15,7 +15,8 @@
 #include "tensors/complex_tensor.hpp"
 #include "tensors/real_tensor.hpp"
 
-#define GET_CONST_FLAT_TENSOR(type, i, o) const type *o = static_cast<const type *>(&i);
+#define GET_CONST_FLAT_TENSOR(type, i, o)                                      \
+  const type *o = static_cast<const type *>(&i);
 #define GET_FLAT_TENSOR(type, i, o) type *o = static_cast<type *>(&i);
 
 #define CPU_INIT_2_SCALAR(ft, strg)                                            \
