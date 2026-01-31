@@ -377,7 +377,9 @@ TensorPtr Tensor::sum(TensorPtr a) {
 }
 
 void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
-  out->make_gradient();
+  out->grad = Tensor::make_gradient(
+      a->shape, a->storage->dtype, a->storage->device,
+      a->storage->get_device_id(), a->storage->is_sparse());
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
         TensorPtr a_grad = a->grad;
@@ -403,7 +405,9 @@ TensorPtr Tensor::mean(TensorPtr a) {
 }
 
 void Tensor::make_mean_node(TensorPtr a, TensorPtr out) {
-  out->make_gradient();
+  out->grad = Tensor::make_gradient(
+      a->shape, a->storage->dtype, a->storage->device,
+      a->storage->get_device_id(), a->storage->is_sparse());
   out->grad_node = std::make_shared<Node>(std::vector<TensorPtr>{a}, [a,
                                                                       out]() {
     TensorPtr a_grad = a->grad;
