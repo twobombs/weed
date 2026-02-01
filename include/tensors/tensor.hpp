@@ -365,6 +365,18 @@ struct Tensor {
   static void make_tanh_node(TensorPtr a, TensorPtr out);
 
   /**
+   * Maximum (real) extremum
+   */
+  static TensorPtr max(TensorPtr a);
+  static void make_max_node(TensorPtr a, TensorPtr out);
+
+  /**
+   * Minimum (real) extremum
+   */
+  static TensorPtr min(TensorPtr a);
+  static void make_min_node(TensorPtr a, TensorPtr out);
+
+  /**
    * Rectified linear activation function (with autograd)
    */
   static TensorPtr relu(TensorPtr a);
