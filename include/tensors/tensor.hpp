@@ -103,9 +103,11 @@ struct Tensor {
     cp->storage = storage;
     cp->shape = shape;
     cp->stride = stride;
+    cp->freeze = freeze;
     cp->offset = offset;
     cp->grad_node = grad_node;
     cp->grad = grad;
+    cp->requires_grad = requires_grad;
 
     return cp;
   }
@@ -118,9 +120,11 @@ struct Tensor {
     storage = cp->storage;
     shape = cp->shape;
     stride = cp->stride;
+    freeze = cp->freeze;
     offset = cp->offset;
     grad_node = cp->grad_node;
     grad = cp->grad;
+    requires_grad = cp->requires_grad;
   }
 
   /**
@@ -246,6 +250,18 @@ struct Tensor {
   }
 
   /**
+   * Compare the device of two tensors and return the higher-performance one
+   */
+  static DeviceTag get_dtag_by_presidence(const std::vector<TensorPtr> &v) {
+    for (const TensorPtr &p : v) {
+      if (p->storage->device == DeviceTag::GPU) {
+        return DeviceTag::GPU;
+      }
+    }
+    return DeviceTag::CPU;
+  }
+
+  /**
    * Validate the Tensor shape, for constructors
    */
   static bool is_contiguous(const std::vector<tcapint> &shp,
@@ -287,6 +303,21 @@ struct Tensor {
    * necessary)
    */
   void upcast(const DType &dt) { storage = storage->Upcast(dt); }
+
+  /**
+   * Cast this CPU-based tensor to a GPU-based one tensor or vice-versa (if
+   * necessary)
+   */
+  TensorPtr cast(const DeviceTag &dt) {
+    TensorPtr cp = copy();
+    if (dt == DeviceTag::CPU) {
+      cp->storage = cp->storage->cpu();
+    } else if (dt == DeviceTag::GPU) {
+      cp->storage = cp->storage->gpu();
+    }
+
+    return cp;
+  }
 
   /**
    * Make a gradient tensor (static)
