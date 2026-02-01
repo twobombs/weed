@@ -466,7 +466,7 @@ void Tensor::make_tanh_node(TensorPtr a, TensorPtr out) {
 
 TensorPtr Tensor::max(TensorPtr a) {
   const bool rg = a->requires_grad;
-  TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));
+  TensorPtr out = allocate_scalar_like(a, rg);
 
   Weed::max(*(a.get()), *(out.get()));
 
@@ -481,16 +481,18 @@ void Tensor::make_max_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::max_grad(a_grad, *(a.get()), out_grad, *(out.get()));
+        TensorPtr out_grad = out->grad;
+        TensorPtr a_grad = a->grad;
+        a_grad->upcast(out_grad->storage->dtype);
+        out_grad->match_shape(a_grad);
+        Weed::max_grad(*(a_grad.get()), *(a.get()), *(out_grad.get()),
+                       *(out.get()));
       });
 }
 
 TensorPtr Tensor::min(TensorPtr a) {
   const bool rg = a->requires_grad;
-  TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));
+  TensorPtr out = allocate_scalar_like(a, rg);
 
   Weed::min(*(a.get()), *(out.get()));
 
@@ -505,10 +507,12 @@ void Tensor::make_min_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::min_grad(a_grad, *(a.get()), out_grad, *(out.get()));
+        TensorPtr out_grad = out->grad;
+        TensorPtr a_grad = a->grad;
+        a_grad->upcast(out_grad->storage->dtype);
+        out_grad->match_shape(a_grad);
+        Weed::min_grad(*(a_grad.get()), *(a.get()), *(out_grad.get()),
+                       *(out.get()));
       });
 }
 

@@ -181,10 +181,6 @@ static void gpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
 #endif
 
 void RealExtremumKernel::extremum(const Tensor &a, Tensor &out) {
-  if (a.get_broadcast_size() != out.get_broadcast_size()) {
-    throw std::invalid_argument("In RealExtremumKernel::extremum(a, out), out "
-                                "size does not match input size!");
-  }
   if ((a.storage->dtype == DType::COMPLEX) ||
       (out.storage->dtype == DType::COMPLEX)) {
     throw std::invalid_argument(
