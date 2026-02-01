@@ -36,6 +36,23 @@ Much like `Qrack`, `Weed` is designed to make the correct thing the default—an
     $ python -m http.server
 ```
 
+## Directory Structure
+
+*   **cmake/**: CMake modules for build configuration.
+*   **debian/**: Debian packaging files.
+*   **examples/**: Example code demonstrating usage.
+*   **include/**: Public API header files, organized by module.
+    *   `autograd/`: Optimizers and loss functions.
+    *   `common/`: Common utilities and definitions.
+    *   `devices/`: Device abstraction.
+    *   `enums/`: Enumerations.
+    *   `modules/`: Neural network modules.
+    *   `ops/`: Tensor operations.
+    *   `storage/`: Tensor storage implementations.
+    *   `tensors/`: Tensor interface.
+*   **src/**: Source code implementations, mirroring the `include/` structure.
+*   **test/**: Unit tests.
+
 ## Copyright, License, and Acknowledgments
 
 Copyright (c) Daniel Strano and the Qrack contributors 2017-2026. All rights reserved.
