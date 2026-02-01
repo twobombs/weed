@@ -845,13 +845,13 @@ TEST_CASE("test_mixed_matmul") {
 TEST_CASE("test_matmul_gradient_sum_loss") {
   using namespace Weed;
 
-  // A: 2x3 (row-major)
+  // A: 2x3 (column-major)
   TensorPtr A = std::make_shared<Tensor>(
       std::vector<real1>{R(1), R(2), R(3), R(4), R(5), R(6)},
       std::vector<tcapint>{2, 3}, std::vector<tcapint>{1, 2},
       /*requires_grad=*/true, TEST_DTAG);
 
-  // B: 3x2 (row-major)
+  // B: 3x2 (column-major)
   TensorPtr B = std::make_shared<Tensor>(
       std::vector<real1>{R(7), R(8), R(9), R(10), R(11), R(12)},
       std::vector<tcapint>{3, 2}, std::vector<tcapint>{1, 3},
