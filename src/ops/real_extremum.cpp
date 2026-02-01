@@ -11,26 +11,12 @@
 
 #include "ops/real_extremum.hpp"
 #include "common/parallel_for.hpp"
-#include "storage/all_storage.hpp"
+#include "tensors/flat_tensors.hpp"
 #include "tensors/real_scalar.hpp"
 
-#define CPU_STORAGE_INIT()                                                     \
-  const tcapint O_a = a.offset;                                                \
-  const tcapint I_a = a.stride[0U];                                            \
-  GET_STORAGE(RealStorage, a, pa);                                             \
+#define CPU_INIT_1(ft)                                                         \
+  GET_CONST_FLAT_TENSOR(ft, a, pa);                                            \
   const size_t n = a.get_broadcast_size()
-
-#define CPU_GRAD_STORAGE_INIT_3(ft1, ft2, ft3)                                 \
-  const tcapint O_d = din.offset;                                              \
-  const tcapint I_d = din.stride[0U];                                          \
-  const tcapint O_i = in.offset;                                               \
-  const tcapint I_i = in.stride[0U];                                           \
-  const tcapint O_o = dout.offset;                                             \
-  const tcapint I_o = dout.stride[0U];                                         \
-  GET_STORAGE(ft1, din, pdi);                                                  \
-  GET_STORAGE(ft2, in, pi);                                                    \
-  GET_STORAGE(ft3, dout, po);                                                  \
-  const size_t n = din.get_broadcast_size()
 
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
   GPU_GRAD_ARGS();                                                             \
@@ -65,8 +51,8 @@
 #define CPU_GRAD()                                                             \
   const real1 m = static_cast<const RealScalar *>(&out)->get_item();           \
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {                 \
-    if ((*pi)[O_i + i * I_i] == m) {                                           \
-      pdi->add(O_d + i * I_d, (*po)[O_o + i * I_o]);                           \
+    if ((*pi)[i] == m) {                                                       \
+      pdi->add(i, (*po)[i]);                                                   \
     }                                                                          \
   };                                                                           \
   pfControl.par_for(0, n, fn)
@@ -74,9 +60,9 @@
 #define CPU_MAX()                                                              \
   const unsigned cpuCount =                                                    \
       (unsigned)std::min(n, (size_t)pfControl.GetNumCores());                  \
-  std::vector<real1> m(cpuCount, (*pa)[O_a]);                                  \
+  std::vector<real1> m(cpuCount, (*pa)[0U]);                                   \
   pfControl.par_for(1U, n, [&](const tcapint &i, const unsigned &cpu) {        \
-    const real1 v = (*pa)[O_a + i * I_a];                                      \
+    const real1 v = (*pa)[i];                                                  \
     if (v > m[cpu]) {                                                          \
       m[cpu] = v;                                                              \
     }                                                                          \
@@ -86,9 +72,9 @@
 #define CPU_MIN()                                                              \
   const unsigned cpuCount =                                                    \
       (unsigned)std::min(n, (size_t)pfControl.GetNumCores());                  \
-  std::vector<real1> m(cpuCount, (*pa)[O_a]);                                  \
+  std::vector<real1> m(cpuCount, (*pa)[0U]);                                   \
   pfControl.par_for(1U, n, [&](const tcapint &i, const unsigned &cpu) {        \
-    const real1 v = (*pa)[O_a + i * I_a];                                      \
+    const real1 v = (*pa)[i];                                                  \
     if (v < m[cpu]) {                                                          \
       m[cpu] = v;                                                              \
     }                                                                          \
@@ -117,38 +103,36 @@
 
 namespace Weed {
 static void cpu_max(const Tensor &a, Tensor &out) {
-  CPU_STORAGE_INIT();
+  CPU_INIT_2_SCALAR(RealTensor, RealStorage);
   CPU_MAX();
-  GET_STORAGE(RealStorage, out, po);
   po->write(0U, v);
 }
 
 static void cpu_min(const Tensor &a, Tensor &out) {
-  CPU_STORAGE_INIT();
+  CPU_INIT_2_SCALAR(RealTensor, RealStorage);
   CPU_MIN();
-  GET_STORAGE(RealStorage, out, po);
   po->write(0U, v);
 }
 
 static void cpu_grad_real(Tensor &din, const Tensor &in, const Tensor &dout,
                           const Tensor &out) {
-  CPU_GRAD_STORAGE_INIT_3(RealStorage, RealStorage, RealStorage);
+  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
   CPU_GRAD();
 }
 static void cpu_grad_complex(Tensor &din, const Tensor &in, const Tensor &dout,
                              const Tensor &out) {
-  CPU_GRAD_STORAGE_INIT_3(ComplexStorage, RealStorage, ComplexStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
   CPU_GRAD();
 }
 static void cpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
                            const Tensor &out) {
-  CPU_GRAD_STORAGE_INIT_3(ComplexStorage, RealStorage, RealStorage);
+  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
   CPU_GRAD();
 }
 
 #if ENABLE_GPU
 static void gpu_max(const Tensor &a, Tensor &out) {
-  CPU_STORAGE_INIT();
+  CPU_INIT_1(RealTensor);
   GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_HEADER();
   CPU_MAX();
@@ -156,7 +140,7 @@ static void gpu_max(const Tensor &a, Tensor &out) {
 }
 
 static void gpu_min(const Tensor &a, Tensor &out) {
-  CPU_STORAGE_INIT();
+  CPU_INIT_1(RealTensor);
   GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_HEADER();
   CPU_MIN();
