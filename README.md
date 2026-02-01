@@ -53,6 +53,9 @@ Much like `Qrack`, `Weed` is designed to make the correct thing the default—an
 *   **src/**: Source code implementations, mirroring the `include/` structure.
 *   **test/**: Unit tests.
 
+
+YT [explainer](https://youtu.be/lJvkaGy8QZg) 
+
 ## Copyright, License, and Acknowledgments
 
 Copyright (c) Daniel Strano and the Qrack contributors 2017-2026. All rights reserved.
