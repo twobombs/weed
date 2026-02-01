@@ -439,6 +439,30 @@ void Tensor::make_sigmoid_node(TensorPtr a, TensorPtr out) {
       });
 }
 
+TensorPtr Tensor::tanh(TensorPtr a) {
+  const bool rg = a->requires_grad;
+  TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));
+
+  Weed::tanh(*(a.get()), *(out.get()));
+
+  if (rg) {
+    make_tanh_node(a, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_tanh_node(TensorPtr a, TensorPtr out) {
+  out->make_gradient();
+  out->grad_node =
+      std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
+        Tensor &out_grad = *(out->grad.get());
+        Tensor &a_grad = *(a->grad.get());
+        a_grad.upcast(out_grad.storage->dtype);
+        Weed::tanh_grad(a_grad, *(out.get()), out_grad);
+      });
+}
+
 TensorPtr Tensor::relu(TensorPtr a) {
   const bool rg = a->requires_grad;
   TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));

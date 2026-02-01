@@ -229,6 +229,26 @@ void kernel sigmoid_grad_mixed(global cmplx* din, global real1* in, global real1
     din[i_X * I_A + O_A].x += yi * (ONE_R1 - yi) * dout[i_X * I_C + O_C];
 }
 
+void kernel wtanh(global real1* a, global real1* out, constant tcapint* vecCapIntArgs)
+{
+    out[i_X * I_B] = tanh(a[i_X * I_A + O_A]);
+}
+void kernel wtanh_grad_real(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+{
+    const real1 yi = in[i_X * I_B + O_B];
+    din[i_X * I_A + O_A] += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
+}
+void kernel wtanh_grad_complex(global cmplx* din, global real1* in, global cmplx* dout, constant tcapint* vecCapIntArgs)
+{
+    const real1 yi = in[i_X * I_B + O_B];
+    din[i_X * I_A + O_A] += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
+}
+void kernel wtanh_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+{
+    const real1 yi = in[i_X * I_B + O_B];
+    din[i_X * I_A + O_A].x += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
+}
+
 void kernel clamp_real(global real1* a, global real1* out, constant tcapint* vecCapIntArgs, constant cmplx* p)
 {
     const real1 tmp = a[i_X * I_A + O_A];

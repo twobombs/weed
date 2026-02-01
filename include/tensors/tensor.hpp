@@ -359,6 +359,12 @@ struct Tensor {
   static void make_sigmoid_node(TensorPtr a, TensorPtr out);
 
   /**
+   * Hyberbolic tangent activation function (with autograd)
+   */
+  static TensorPtr tanh(TensorPtr a);
+  static void make_tanh_node(TensorPtr a, TensorPtr out);
+
+  /**
    * Rectified linear activation function (with autograd)
    */
   static TensorPtr relu(TensorPtr a);

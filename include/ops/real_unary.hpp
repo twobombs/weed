@@ -31,6 +31,7 @@ struct RealUnaryKernel {
 
 extern RealUnaryKernel relu_kernel;
 extern RealUnaryKernel sigmoid_kernel;
+extern RealUnaryKernel tanh_kernel;
 
 /**
  * Rectified-linear activation function
@@ -49,4 +50,13 @@ void sigmoid(const Tensor &a, Tensor &out);
  * Sigmoid activation function gradient
  */
 void sigmoid_grad(Tensor &din, const Tensor &in, const Tensor &dout);
+
+/**
+ * Hyberbolic tangent activation function
+ */
+void tanh(const Tensor &a, Tensor &out);
+/**
+ * Hyberbolic tangent activation function gradient
+ */
+void tanh_grad(Tensor &din, const Tensor &in, const Tensor &dout);
 } // namespace Weed

@@ -214,6 +214,36 @@ TEST_CASE("test_scalar_sigmoid_mixed_grad") {
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(0.25));
 }
 
+TEST_CASE("test_scalar_tanh") {
+  TensorPtr x = std::make_shared<RealScalar>(R(0), true, TEST_DTAG);
+  TensorPtr y = Tensor::tanh(x);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(0));
+  REQUIRE(GET_REAL(x->grad) == R(1.0));
+}
+
+TEST_CASE("test_scalar_tanh_complex_grad") {
+  TensorPtr x = std::make_shared<RealScalar>(R(0), true, TEST_DTAG);
+  TensorPtr y = Tensor::tanh(x);
+  TensorPtr z = std::make_shared<ComplexScalar>(R(1), true, TEST_DTAG);
+  TensorPtr w = y * z;
+  Tensor::backward(w);
+
+  REQUIRE(GET_REAL(y) == R(0));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(1.0));
+}
+
+TEST_CASE("test_scalar_tanh_mixed_grad") {
+  TensorPtr x = std::make_shared<RealScalar>(R(0), true, TEST_DTAG);
+  TensorPtr y = Tensor::tanh(x);
+  x->grad->upcast(DType::COMPLEX);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(0));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(1.0));
+}
+
 TEST_CASE("test_scalar_clamp") {
   TensorPtr x = std::make_shared<RealScalar>(R(2), true, TEST_DTAG);
   TensorPtr y = Tensor::clamp(x, R(1), R(3));
