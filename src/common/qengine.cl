@@ -202,10 +202,10 @@ void kernel relu_grad_complex(global cmplx* din, global real1* in, global cmplx*
       din[i_X * I_A + O_A] += dout[i_X * I_C + O_C];
     }
 }
-void kernel relu_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+void kernel relu_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
 {
     if (in[i_X * I_B + O_B] > 0) {
-      din[i_X * I_A + O_A].x += dout[i_X * I_C + O_C];
+      din[(i_X * I_A + O_A) << 1U] += dout[i_X * I_C + O_C];
     }
 }
 
@@ -223,10 +223,10 @@ void kernel sigmoid_grad_complex(global cmplx* din, global real1* in, global cmp
     const real1 yi = in[i_X * I_B + O_B];
     din[i_X * I_A + O_A] += yi * (ONE_R1 - yi) * dout[i_X * I_C + O_C];
 }
-void kernel sigmoid_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+void kernel sigmoid_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
 {
     const real1 yi = in[i_X * I_B + O_B];
-    din[i_X * I_A + O_A].x += yi * (ONE_R1 - yi) * dout[i_X * I_C + O_C];
+    din[(i_X * I_A + O_A) << 1U] += yi * (ONE_R1 - yi) * dout[i_X * I_C + O_C];
 }
 
 void kernel wtanh(global real1* a, global real1* out, constant tcapint* vecCapIntArgs)
@@ -243,10 +243,29 @@ void kernel wtanh_grad_complex(global cmplx* din, global real1* in, global cmplx
     const real1 yi = in[i_X * I_B + O_B];
     din[i_X * I_A + O_A] += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
 }
-void kernel wtanh_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+void kernel wtanh_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
 {
     const real1 yi = in[i_X * I_B + O_B];
-    din[i_X * I_A + O_A].x += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
+    din[(i_X * I_A + O_A) << 1U] += (ONE_R1 - yi * yi) * dout[i_X * I_C + O_C];
+}
+
+void kernel match_grad_real(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant real1* m)
+{
+    if (*m == in[i_X * I_B + O_B]) {
+      din[i_X * I_A + O_A] += dout[i_X * I_C + O_C];
+    }
+}
+void kernel match_grad_complex(global cmplx* din, global real1* in, global cmplx* dout, constant tcapint* vecCapIntArgs, constant real1* m)
+{
+    if (*m == in[i_X * I_B + O_B]) {
+      din[i_X * I_A + O_A] += dout[i_X * I_C + O_C];
+    }
+}
+void kernel match_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant real1* m)
+{
+    if (*m == in[i_X * I_B + O_B]) {
+      din[(i_X * I_A + O_A) << 1U] += dout[i_X * I_C + O_C];
+    }
 }
 
 void kernel clamp_real(global real1* a, global real1* out, constant tcapint* vecCapIntArgs, constant cmplx* p)
@@ -271,12 +290,12 @@ void kernel clamp_grad_complex(global cmplx* din, global real1* in, global cmplx
       din[i_X * I_C + O_C] += dout[i_X * I_A + O_A];
     }
 }
-void kernel clamp_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant cmplx* p)
+void kernel clamp_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs, constant cmplx* p)
 {
     const real1 xi = in[i_X * I_B + O_B];
     const cmplx b = *p;
     if (xi > b.x && xi < b.y) {
-      din[i_X * I_C + O_C].x += dout[i_X * I_A + O_A];
+      din[(i_X * I_C + O_C) << 1U] += dout[i_X * I_A + O_A];
     }
 }
 
@@ -306,12 +325,12 @@ void kernel abs_real_grad_complex(global cmplx* din, global real1* in, global cm
       din[i_X * I_A + O_A] += (tmp > ZERO_R1) ? tmp_o : -tmp_o;
     }
 }
-void kernel abs_real_grad_mixed(global cmplx* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
+void kernel abs_real_grad_mixed(global real1* din, global real1* in, global real1* dout, constant tcapint* vecCapIntArgs)
 {
     const real1 tmp = in[i_X * I_B + O_B];
     if (tmp != ZERO_R1) {
       const real1 tmp_o = dout[i_X * I_C + O_C];
-      din[i_X * I_A + O_A].x += (tmp > ZERO_R1) ? tmp_o : -tmp_o;
+      din[(i_X * I_A + O_A) << 1U] += (tmp > ZERO_R1) ? tmp_o : -tmp_o;
     }
 }
 void kernel abs_complex_grad_real(global cmplx* din, global cmplx* in, global real1* dout, constant tcapint* vecCapIntArgs)

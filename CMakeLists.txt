@@ -31,6 +31,7 @@ add_library (weed STATIC
     src/ops/in_place.cpp
     src/ops/matmul.cpp
     src/ops/reduce.cpp
+    src/ops/real_extremum.cpp
     src/ops/real_unary.cpp
     src/ops/sub.cpp
     src/ops/sum.cpp
@@ -303,6 +304,7 @@ install (FILES
     include/ops/in_place.hpp
     include/ops/matmul.hpp
     include/ops/reduce.hpp
+    include/ops/real_extremum.hpp
     include/ops/real_unary.hpp
     include/ops/sub.hpp
     include/ops/sum.hpp

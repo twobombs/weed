@@ -65,6 +65,10 @@
     a_storage.array = nullptr;                                                 \
   }
 
+#define GPU_CAST(storage1, storage2)                                           \
+  storage1 a_storage = *static_cast<storage1 *>(a.storage.get());              \
+  storage2 o_storage = *static_cast<storage2 *>(out.storage.get())
+
 namespace Weed {
 static void cpu_sum_real(const Tensor &a, Tensor &out) {
   CPU_INIT_2_SCALAR(RealTensor, RealStorage);
@@ -89,34 +93,26 @@ static void cpu_mean_complex(const Tensor &a, Tensor &out) {
 #if ENABLE_GPU
 static void gpu_sum_real(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(RealStorage, RealStorage);
-  GpuRealStorage a_storage = *static_cast<GpuRealStorage *>(a.storage.get());
-  GpuRealStorage o_storage = *static_cast<GpuRealStorage *>(out.storage.get());
+  GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_SUM(real1);
   GPU_WRITE(SetReal);
 }
 static void gpu_mean_real(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(RealStorage, RealStorage);
-  GpuRealStorage a_storage = *static_cast<GpuRealStorage *>(a.storage.get());
-  GpuRealStorage o_storage = *static_cast<GpuRealStorage *>(out.storage.get());
+  GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_SUM(real1);
   t /= n;
   GPU_WRITE(SetReal);
 }
 static void gpu_sum_complex(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(ComplexStorage, ComplexStorage);
-  GpuComplexStorage a_storage =
-      *static_cast<GpuComplexStorage *>(a.storage.get());
-  GpuComplexStorage o_storage =
-      *static_cast<GpuComplexStorage *>(out.storage.get());
+  GPU_CAST(GpuComplexStorage, GpuComplexStorage);
   GPU_SUM(complex);
   GPU_WRITE(SetComplex);
 }
 static void gpu_mean_complex(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(ComplexStorage, ComplexStorage);
-  GpuComplexStorage a_storage =
-      *static_cast<GpuComplexStorage *>(a.storage.get());
-  GpuComplexStorage o_storage =
-      *static_cast<GpuComplexStorage *>(out.storage.get());
+  GPU_CAST(GpuComplexStorage, GpuComplexStorage);
   GPU_SUM(complex);
   t /= n;
   GPU_WRITE(SetComplex);
