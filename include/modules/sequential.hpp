@@ -32,7 +32,7 @@ struct Sequential : public Module {
   TensorPtr forward(TensorPtr x) override {
     TensorPtr tmp = x;
     for (size_t i = 0U; i < layers.size(); ++i) {
-      tmp = layers[i]->forward(x);
+      tmp = layers[i]->forward(tmp);
     }
 
     return tmp;
