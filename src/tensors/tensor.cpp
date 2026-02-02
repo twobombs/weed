@@ -34,6 +34,7 @@
   (a && a->storage->is_sparse() &&                                             \
    ((a->storage->get_sparse_size() << 1U) < a->storage->size))
 
+#if ENABLE_GPU
 #define INIT_DEVICE_STORAGE(val, GpuType, CpuType)                             \
   switch (dtag) {                                                              \
   case DeviceTag::GPU:                                                         \
@@ -43,6 +44,11 @@
   default:                                                                     \
     storage = std::make_shared<CpuType>(val);                                  \
   }
+#else
+// There is only one device type available:
+#define INIT_DEVICE_STORAGE(val, GpuType, CpuType)                             \
+  storage = std::make_shared<CpuType>(val);
+#endif
 
 namespace Weed {
 #if ENABLE_ENV_VARS

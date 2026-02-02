@@ -17,6 +17,7 @@ namespace Weed {
  */
 void validate_all_same_device(const std::vector<const Tensor *> &t,
                               const std::string cls) {
+#if ENABLE_GPU
   if (t.size() < 2U) {
     return;
   }
@@ -29,5 +30,6 @@ void validate_all_same_device(const std::vector<const Tensor *> &t,
           std::string(", tensor storage devices do not match!"));
     }
   }
+#endif
 }
 } // namespace Weed
