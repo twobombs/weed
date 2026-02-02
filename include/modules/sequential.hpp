@@ -11,16 +11,18 @@
 
 #pragma once
 
+#include "modules/module.hpp"
 #include "tensors/parameter.hpp"
 
 namespace Weed {
 /**
- * Composable module with forward function and parameters for autograd
- * optimization
+ * Standard interface for sequential models of multiple layers
  */
-struct Module {
-  virtual TensorPtr forward(const TensorPtr) = 0;
-  virtual std::vector<ParameterPtr> parameters() = 0;
+class Sequential : public Module {
+  std::vector<ModulePtr> layers;
+
+public:
+  TensorPtr forward(TensorPtr x);
+  std::vector<ParameterPtr> parameters();
 };
-typedef std::shared_ptr<Module> ModulePtr;
 } // namespace Weed

@@ -306,6 +306,7 @@ install (FILES
     include/enums/dtype.hpp
     include/modules/linear.hpp
     include/modules/module.hpp
+    include/modules/sequential.hpp
     include/ops/abs.hpp
     include/ops/clamp.hpp
     include/ops/div.hpp

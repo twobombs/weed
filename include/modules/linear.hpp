@@ -33,4 +33,5 @@ struct Linear : public Module {
   TensorPtr forward(const TensorPtr x) override;
   std::vector<ParameterPtr> parameters() override;
 };
+typedef std::shared_ptr<Linear> LinearPtr;
 } // namespace Weed
