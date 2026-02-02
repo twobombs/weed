@@ -51,6 +51,7 @@
 #endif
 
 namespace Weed {
+#if ENABLE_GPU
 #if ENABLE_ENV_VARS
 const tlenint PSTRIDEPOW_DEFAULT =
     (tlenint)(getenv("WEED_PSTRIDEPOW")
@@ -66,8 +67,13 @@ const tlenint PSTRIDEPOW_DEFAULT = PSTRIDEPOW;
 const tcapint GSTRIDE =
     (1 << PSTRIDEPOW_DEFAULT) * std::thread::hardware_concurrency();
 #endif
+#else
+// Never auto-switch to a GPU if we don't have one.
+const tcapint GSTRIDE = -1;
+#endif
 
 DeviceTag Tensor::get_dtag_by_presidence(const std::vector<TensorPtr> &v) {
+#if ENABLE_GPU
   for (const TensorPtr &p : v) {
     const tcapint sz = p->storage->size;
     const tcapint sp = p->storage->get_sparse_size();
@@ -81,6 +87,7 @@ DeviceTag Tensor::get_dtag_by_presidence(const std::vector<TensorPtr> &v) {
       }
     }
   }
+#endif
 
   return DeviceTag::CPU;
 }
