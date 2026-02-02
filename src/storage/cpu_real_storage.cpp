@@ -10,10 +10,13 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "storage/cpu_real_storage.hpp"
+#if ENABLE_GPU
 #include "storage/gpu_real_storage.hpp"
+#endif
 
 namespace Weed {
 StoragePtr CpuRealStorage::gpu(const int64_t &did) {
+#if ENABLE_GPU
   GpuRealStoragePtr cp = std::make_shared<GpuRealStorage>(size, did, false);
   cp->array = cp->Alloc(size);
   std::copy(data.get(), data.get() + size, cp->array.get());
@@ -24,5 +27,8 @@ StoragePtr CpuRealStorage::gpu(const int64_t &did) {
   }
 
   return cp;
+#else
+  return get_ptr();
+#endif
 }
 } // namespace Weed

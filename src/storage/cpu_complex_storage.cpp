@@ -10,10 +10,13 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "storage/cpu_complex_storage.hpp"
+#if ENABLE_GPU
 #include "storage/gpu_complex_storage.hpp"
+#endif
 
 namespace Weed {
 StoragePtr CpuComplexStorage::gpu(const int64_t &did) {
+#if ENABLE_GPU
   GpuComplexStoragePtr cp =
       std::make_shared<GpuComplexStorage>(size, did, false);
   cp->array = cp->Alloc(size);
@@ -25,5 +28,8 @@ StoragePtr CpuComplexStorage::gpu(const int64_t &did) {
   }
 
   return cp;
+#else
+  return get_ptr();
+#endif
 }
 } // namespace Weed
