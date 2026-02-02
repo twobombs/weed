@@ -11,6 +11,7 @@
 
 #include "ops/reduce.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define REDUCE_KERNEL(type)                                                    \
@@ -94,6 +95,7 @@ void ReduceKernel::gpu_complex(const size_t &index, const Tensor &a,
 #endif
 
 void ReduceKernel::reduce(const size_t &index, const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "ReduceKernel::reduce");
   if (a.storage->dtype != out.storage->dtype) {
     throw std::invalid_argument("Output tensor dtype mismatch!");
   }

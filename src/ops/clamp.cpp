@@ -11,6 +11,7 @@
 
 #include "ops/clamp.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
@@ -128,6 +129,7 @@ void ClampKernel::gpu_grad_mixed(Tensor &din, const Tensor &in,
 #endif
 void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
                         Tensor &out) {
+  validate_all_same_device({&a, &out}, "ClampKernel::clamp");
   if ((a.storage->dtype != DType::REAL) ||
       (out.storage->dtype != DType::REAL)) {
     throw std::invalid_argument(
@@ -147,6 +149,7 @@ void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
 }
 void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
                              const real1 &l, const real1 &h) {
+  validate_all_same_device({&din, &in, &dout}, "ClampKernel::clamp_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
     throw std::invalid_argument(

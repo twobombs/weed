@@ -11,6 +11,7 @@
 
 #include "ops/sum.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, out)                                        \
@@ -119,6 +120,7 @@ static void gpu_mean_complex(const Tensor &a, Tensor &out) {
 }
 #endif
 void SumKernel::sum(const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "ClampKernel::clamp");
   if (out.get_broadcast_size() != 1U) {
     throw std::invalid_argument("In Weed::sum(a, out) or Weed::mean(a, out), "
                                 "out parameter is not a scalar!");

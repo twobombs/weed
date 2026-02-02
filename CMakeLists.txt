@@ -36,6 +36,7 @@ add_library (weed STATIC
     src/ops/sub.cpp
     src/ops/sum.cpp
     src/ops/pow.cpp
+    src/ops/util.cpp
     src/storage/cpu_complex_storage.cpp
     src/storage/cpu_real_storage.cpp
     src/tensors/tensor.cpp
@@ -308,12 +309,13 @@ install (FILES
     include/ops/div.hpp
     include/ops/in_place.hpp
     include/ops/matmul.hpp
+    include/ops/pow.hpp
     include/ops/reduce.hpp
     include/ops/real_extremum.hpp
     include/ops/real_unary.hpp
     include/ops/sub.hpp
     include/ops/sum.hpp
-    include/ops/pow.hpp
+    include/ops/util.hpp
     include/storage/all_storage.hpp
     include/storage/complex_storage.hpp
     include/storage/cpu_complex_storage.hpp

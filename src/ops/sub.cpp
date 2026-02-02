@@ -11,6 +11,7 @@
 
 #include "ops/sub.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define SUB_KERNEL()                                                           \
@@ -88,6 +89,7 @@ void SubKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
 #endif
 
 void SubKernel::sub(const Tensor &a, const Tensor &b, Tensor &out) {
+  validate_all_same_device({&a, &b, &out}, "SubKernel::sub");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
   const bool isOutComplex = out.storage->dtype == DType::COMPLEX;

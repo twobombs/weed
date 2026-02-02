@@ -11,6 +11,7 @@
 
 #include "ops/real_extremum.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 #include "tensors/real_scalar.hpp"
 
@@ -176,6 +177,7 @@ static void gpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
 #endif
 
 void RealExtremumKernel::extremum(const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "RealExtremumKernel::extremum");
   if ((a.storage->dtype == DType::COMPLEX) ||
       (out.storage->dtype == DType::COMPLEX)) {
     throw std::invalid_argument(
@@ -197,6 +199,8 @@ void RealExtremumKernel::extremum(const Tensor &a, Tensor &out) {
 
 void RealExtremumKernel::extremum_grad(Tensor &din, const Tensor &in,
                                        const Tensor &dout, const Tensor &out) {
+  validate_all_same_device({&din, &in, &dout, &out},
+                           "RealExtremumKernel::extremum_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
     throw std::invalid_argument(

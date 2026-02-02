@@ -11,6 +11,7 @@
 
 #include "ops/pow.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define CPU_INIT(type, strg)                                                   \
@@ -115,6 +116,7 @@ static void gpu_complex_log(const Tensor &a, const real1 &b, Tensor &out) {
 }
 #endif
 void PowKernel::pow(const Tensor &a, const real1 &p, Tensor &out) {
+  validate_all_same_device({&a, &out}, "PowKernel::pow");
   const tcapint aSize = a.get_broadcast_size();
   const tcapint outSize = out.get_broadcast_size();
   if (aSize != outSize) {

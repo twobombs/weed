@@ -11,6 +11,7 @@
 
 #include "ops/abs.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define GPU(type1, type2, api_call)                                            \
@@ -107,6 +108,7 @@ void AbsKernel::gpu_complex(const Tensor &a, Tensor &out) {
 }
 #endif
 void AbsKernel::abs(const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "AbsKernel::abs");
   if (a.get_size() != out.get_size()) {
     throw std::invalid_argument(
         "In Weed::abs(a, out), out size does not match input size!");
@@ -198,6 +200,7 @@ void AbsKernel::gpu_complex_grad_mixed(Tensor &din, const Tensor &in,
 }
 #endif
 void AbsKernel::abs_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
+  validate_all_same_device({&din, &in, &dout}, "AbsKernel::abs_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
     throw std::invalid_argument("In Weed::abs_grad(din, in, dout), dout dtype "
