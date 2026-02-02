@@ -350,12 +350,14 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        TensorPtr a_grad = a->grad;
-        TensorPtr out_grad = out->grad;
+        DeviceTag dtag = get_dtag_by_presidence({a->grad, out->grad});
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
         // da += dout  (broadcast)
         a_grad->upcast(out_grad->storage->dtype);
         out_grad->match_shape(a_grad);
         Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
+        a->grad = a_grad;
         a->reduce_grad_broadcast();
       });
 }
@@ -375,21 +377,21 @@ TensorPtr Tensor::mean(TensorPtr a) {
 
 void Tensor::make_mean_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
-  out->grad_node = std::make_shared<Node>(std::vector<TensorPtr>{a}, [a,
-                                                                      out]() {
-    TensorPtr a_grad = a->grad;
-    TensorPtr out_grad = out->grad;
-    TensorPtr scale = std::make_shared<RealScalar>(
-        ONE_R1 / (real1)a->get_broadcast_size(), false, out->storage->device);
-    // da += dout / N   (broadcast)
-    a_grad->upcast(out_grad->storage->dtype);
-    TensorPtr s =
-        SCALAR((real1)(ONE_R1 / (real1)a->get_broadcast_size()), out_grad);
-    TensorPtr tmp = s * out_grad;
-    tmp->match_shape(a_grad);
-    Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
-    a->reduce_grad_broadcast();
-  });
+  out->grad_node =
+      std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
+        DeviceTag dtag = get_dtag_by_presidence({a->grad, out->grad});
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        // da += dout / N   (broadcast)
+        a_grad->upcast(out_grad->storage->dtype);
+        TensorPtr s =
+            SCALAR((real1)(ONE_R1 / (real1)a->get_broadcast_size()), out_grad);
+        TensorPtr tmp = s * out_grad;
+        tmp->match_shape(a_grad);
+        Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
+        a->grad = a_grad;
+        a->reduce_grad_broadcast();
+      });
 }
 
 TensorPtr Tensor::abs(TensorPtr a) {
@@ -409,10 +411,40 @@ void Tensor::make_abs_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::abs_grad(a_grad, *(a.get()), out_grad);
+        DeviceTag dtag = get_dtag_by_presidence({a, a->grad, out->grad});
+        TensorPtr _a = a->cast(dtag);
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        a_grad->upcast(out_grad->storage->dtype);
+        Weed::abs_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()));
+        a->grad = a_grad;
+      });
+}
+
+TensorPtr Tensor::relu(TensorPtr a) {
+  const bool rg = a->requires_grad;
+  TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));
+
+  Weed::relu(*(a.get()), *(out.get()));
+
+  if (rg) {
+    make_relu_node(a, out);
+  }
+
+  return out;
+}
+
+void Tensor::make_relu_node(TensorPtr a, TensorPtr out) {
+  out->make_gradient();
+  out->grad_node =
+      std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
+        DeviceTag dtag = get_dtag_by_presidence({a, a->grad, out->grad});
+        TensorPtr _a = a->cast(dtag);
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        a_grad->upcast(out_grad->storage->dtype);
+        Weed::relu_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()));
+        a->grad = a_grad;
       });
 }
 
@@ -433,10 +465,13 @@ void Tensor::make_sigmoid_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::sigmoid_grad(a_grad, *(out.get()), out_grad);
+        DeviceTag dtag = get_dtag_by_presidence({out, a->grad, out->grad});
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        TensorPtr _out = out->cast(dtag);
+        a_grad->upcast(out_grad->storage->dtype);
+        Weed::sigmoid_grad(*(a_grad.get()), *(_out.get()), *(out_grad.get()));
+        a->grad = a_grad;
       });
 }
 
@@ -457,10 +492,13 @@ void Tensor::make_tanh_node(TensorPtr a, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::tanh_grad(a_grad, *(out.get()), out_grad);
+        DeviceTag dtag = get_dtag_by_presidence({out, a->grad, out->grad});
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        TensorPtr _out = out->cast(dtag);
+        a_grad->upcast(out_grad->storage->dtype);
+        Weed::tanh_grad(*(a_grad.get()), *(_out.get()), *(out_grad.get()));
+        a->grad = a_grad;
       });
 }
 
@@ -484,12 +522,16 @@ void Tensor::make_max_node(TensorPtr a, TensorPtr out) {
                             a->storage->get_device_id(), true);
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        TensorPtr out_grad = out->grad;
-        TensorPtr a_grad = a->grad;
+        DeviceTag dtag = get_dtag_by_presidence({a, out, a->grad, out->grad});
+        TensorPtr _a = a->cast(dtag);
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        TensorPtr _out = out->cast(dtag);
         a_grad->upcast(out_grad->storage->dtype);
         out_grad->match_shape(a_grad);
-        Weed::max_grad(*(a_grad.get()), *(a.get()), *(out_grad.get()),
-                       *(out.get()));
+        Weed::max_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()),
+                       *(_out.get()));
+        a->grad = a_grad;
       });
 }
 
@@ -513,36 +555,16 @@ void Tensor::make_min_node(TensorPtr a, TensorPtr out) {
                             a->storage->get_device_id(), true);
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        TensorPtr out_grad = out->grad;
-        TensorPtr a_grad = a->grad;
+        DeviceTag dtag = get_dtag_by_presidence({a, out, a->grad, out->grad});
+        TensorPtr _a = a->cast(dtag);
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        TensorPtr _out = out->cast(dtag);
         a_grad->upcast(out_grad->storage->dtype);
         out_grad->match_shape(a_grad);
-        Weed::min_grad(*(a_grad.get()), *(a.get()), *(out_grad.get()),
-                       *(out.get()));
-      });
-}
-
-TensorPtr Tensor::relu(TensorPtr a) {
-  const bool rg = a->requires_grad;
-  TensorPtr out = allocate_like(a, a->storage->dtype, rg, IS_SPARSE(a));
-
-  Weed::relu(*(a.get()), *(out.get()));
-
-  if (rg) {
-    make_relu_node(a, out);
-  }
-
-  return out;
-}
-
-void Tensor::make_relu_node(TensorPtr a, TensorPtr out) {
-  out->make_gradient();
-  out->grad_node =
-      std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::relu_grad(a_grad, *(a.get()), out_grad);
+        Weed::min_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()),
+                       *(_out.get()));
+        a->grad = a_grad;
       });
 }
 
@@ -563,10 +585,14 @@ void Tensor::make_clamp_node(TensorPtr a, real1 lo, real1 hi, TensorPtr out) {
   out->make_gradient();
   out->grad_node =
       std::make_shared<Node>(std::vector<TensorPtr>{a}, [a, out, lo, hi]() {
-        Tensor &out_grad = *(out->grad.get());
-        Tensor &a_grad = *(a->grad.get());
-        a_grad.upcast(out_grad.storage->dtype);
-        Weed::clamp_grad(a_grad, *(a.get()), out_grad, lo, hi);
+        DeviceTag dtag = get_dtag_by_presidence({a, a->grad, out->grad});
+        TensorPtr _a = a->cast(dtag);
+        TensorPtr a_grad = a->grad->cast(dtag);
+        TensorPtr out_grad = out->grad->cast(dtag);
+        a_grad->upcast(out_grad->storage->dtype);
+        Weed::clamp_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()), lo,
+                         hi);
+        a->grad = a_grad;
       });
 }
 
