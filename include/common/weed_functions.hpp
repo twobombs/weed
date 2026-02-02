@@ -49,7 +49,7 @@ inline tlenint log2Gpu(tcapint n) {
 #endif
 #else
   tlenint pow = 0U;
-  bitCapIntOcl p = n >> 1U;
+  tcapint p = n >> 1U;
   while (p) {
     p >>= 1U;
     ++pow;
