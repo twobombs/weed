@@ -22,7 +22,7 @@ class Sequential : public Module {
   std::vector<ModulePtr> layers;
 
 public:
-  TensorPtr forward(TensorPtr x) {
+  TensorPtr forward(TensorPtr x) override {
     TensorPtr tmp = x;
     for (size_t i = 0U; i < layers.size(); ++i) {
       tmp = layers[i]->forward(x);
@@ -30,7 +30,7 @@ public:
 
     return tmp;
   }
-  std::vector<ParameterPtr> parameters() {
+  std::vector<ParameterPtr> parameters() override {
     std::vector<ParameterPtr> p;
     for (size_t i = 0U; i < layers.size(); ++i) {
       const std::vector<ParameterPtr> l = layers[i]->parameters();
