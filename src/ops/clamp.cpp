@@ -144,7 +144,7 @@ void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
 #if ENABLE_GPU
   DEVICE_SWITCH(cpu, gpu, a, l, h, out)
 #else
-  cpu_real(a, l, h, out);
+  cpu(a, l, h, out);
 #endif
 }
 void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
