@@ -24,8 +24,8 @@ struct Sequential : public Module {
 
   Sequential(const std::vector<ModulePtr>& l) : layers(l), param_vector() {
     for (size_t i = 0U; i < layers.size(); ++i) {
-      const std::vector<ParameterPtr> l = layers[i]->parameters();
-      param_vector.insert(param_vector.end(), l.begin(), l.end());
+      const std::vector<ParameterPtr> p = layers[i]->parameters();
+      param_vector.insert(param_vector.end(), p.begin(), p.end());
     }
   }
 
