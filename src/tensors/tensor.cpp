@@ -627,17 +627,27 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
 void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->make_gradient();
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
-    TensorPtr out_grad = out->grad;
+    std::vector<TensorPtr> p{out->grad};
     if (a->requires_grad) {
-      TensorPtr a_grad = a->grad;
+      p.push_back(a->grad);
+    }
+    if (b->requires_grad) {
+      p.push_back(b->grad);
+    }
+    DeviceTag dtag = get_dtag_by_presidence(p);
+    TensorPtr out_grad = out->grad->cast(dtag);
+    if (a->requires_grad) {
+      TensorPtr a_grad = a->grad->cast(dtag);
       a_grad->upcast(out_grad->storage->dtype);
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
+      a->grad = a_grad;
       a->reduce_grad_broadcast();
     }
     if (b->requires_grad) {
-      TensorPtr b_grad = b->grad;
+      TensorPtr b_grad = b->grad->cast(dtag);
       b_grad->upcast(out_grad->storage->dtype);
       Weed::add_in_place(*(b_grad.get()), *(out_grad.get()));
+      b->grad = b_grad;
       b->reduce_grad_broadcast();
     }
   });
@@ -674,23 +684,37 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
 void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
   out->make_gradient();
   out->grad_node = std::make_shared<Node>(filterParents({a, b}), [a, b, out]() {
-    TensorPtr out_grad = out->grad;
+    std::vector<TensorPtr> p{out->grad};
     if (a->requires_grad) {
-      TensorPtr a_grad = a->grad;
-      const DType &dt = get_dtype_by_presidence({b, out_grad});
+      p.push_back(a->grad);
+      p.push_back(b->grad);
+    }
+    if (b->requires_grad) {
+      p.push_back(b->grad);
+      p.push_back(a);
+    }
+    DeviceTag dtag = get_dtag_by_presidence(p);
+    TensorPtr out_grad = out->grad->cast(dtag);
+    if (a->requires_grad) {
+      TensorPtr _b = b->cast(dtag);
+      TensorPtr a_grad = a->grad->cast(dtag);
+      const DType &dt = get_dtype_by_presidence({_b, out_grad});
       TensorPtr tmp = Tensor::allocate_like(a_grad, dt, false, IS_SPARSE(b));
-      Weed::mul(*(out_grad.get()), *(b.get()), *(tmp.get()));
+      Weed::mul(*(out_grad.get()), *(_b.get()), *(tmp.get()));
       a_grad->upcast(dt);
       Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
+      a->grad = a_grad;
       a->reduce_grad_broadcast();
     }
     if (b->requires_grad) {
-      TensorPtr b_grad = b->grad;
-      const DType &dt = get_dtype_by_presidence({a, out_grad});
+      TensorPtr _a = a->cast(dtag);
+      TensorPtr b_grad = b->grad->cast(dtag);
+      const DType &dt = get_dtype_by_presidence({_a, out_grad});
       TensorPtr tmp = Tensor::allocate_like(b_grad, dt, false, IS_SPARSE(a));
-      Weed::mul(*(out_grad.get()), *(a.get()), *(tmp.get()));
+      Weed::mul(*(out_grad.get()), *(_a.get()), *(tmp.get()));
       b_grad->upcast(dt);
       Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
+      b->grad = b_grad;
       b->reduce_grad_broadcast();
     }
   });
