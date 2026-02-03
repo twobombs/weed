@@ -79,10 +79,7 @@ struct Tensor : BaseTensor {
    */
   void copy(const Tensor &cp) {
     // A tensor is a view on storage:
-    storage = cp.storage;
-    offset = cp.offset;
-    shape = cp.shape;
-    stride = cp.stride;
+    BaseTensor::copy(cp);
     freeze = cp.freeze;
     grad_node = cp.grad_node;
     grad = cp.grad;

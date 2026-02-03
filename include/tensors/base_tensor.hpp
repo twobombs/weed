@@ -32,6 +32,17 @@ struct BaseTensor {
       : storage(nullptr), offset(0U), shape(shp), stride(strd) {}
 
   /**
+   * Make this (base) tensor a shallow copy of another
+   */
+  void copy(const BaseTensor &cp) {
+    // A tensor is a view on storage:
+    storage = cp.storage;
+    offset = cp.offset;
+    shape = cp.shape;
+    stride = cp.stride;
+  }
+
+  /**
    * Validate the constructor parameters
    */
   virtual void validate_constructor() {
