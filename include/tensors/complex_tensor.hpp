@@ -27,7 +27,7 @@ namespace Weed {
  * documented feature.)
  */
 struct ComplexTensor : public Tensor {
-  ComplexTensor(TensorPtr orig) : Tensor(orig) {
+  ComplexTensor(const Tensor &orig) : Tensor(orig) {
     if (storage->dtype != DType::COMPLEX) {
       throw std::domain_error("ComplexTensor constructor must copy from a "
                               "complex-valued generic Tensor!");

@@ -27,7 +27,7 @@ namespace Weed {
  * documented feature.)
  */
 struct RealTensor : public Tensor {
-  RealTensor(TensorPtr orig) : Tensor(orig) {
+  RealTensor(const Tensor &orig) : Tensor(orig) {
     if (storage->dtype != DType::REAL) {
       throw std::domain_error("RealTensor constructor must copy from a "
                               "real-valued generic Tensor!");

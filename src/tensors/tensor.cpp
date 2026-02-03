@@ -276,7 +276,7 @@ TensorPtr Tensor::operator[](const tcapint &idx) const {
     throw std::invalid_argument("Tensor index out-of-range!");
   }
 
-  TensorPtr v = copy();
+  TensorPtr v = std::make_shared<Tensor>(*this);
   v->offset += idx * stride.back();
   v->shape.pop_back();
   v->stride.pop_back();
@@ -372,7 +372,7 @@ TensorPtr Tensor::transpose(const TensorPtr a) {
                                 "vectors and covectors)!");
   }
 
-  TensorPtr out = a->copy();
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
 
   if (out->shape.size() == 1U) {
     // Treat input as column vector, and transpose to row vector
@@ -452,7 +452,7 @@ void Tensor::make_mean_node(TensorPtr a, TensorPtr out) {
 TensorPtr Tensor::sum(TensorPtr a, const tcapint &axis) {
   const bool rg = a->requires_grad;
 
-  TensorPtr acp = a->copy();
+  TensorPtr acp = std::make_shared<Tensor>(*(a.get()));
   std::vector<tcapint> &sh = acp->shape;
   std::vector<tcapint> &st = acp->stride;
 
@@ -489,7 +489,7 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out, const tcapint &axis) {
         DeviceTag dtag = get_dtag_by_presidence({a->grad, out->grad});
 
         TensorPtr dx = a->grad->cast(dtag);
-        TensorPtr dy = out->grad->copy()->cast(dtag);
+        TensorPtr dy = std::make_shared<Tensor>(*(out->grad.get()))->cast(dtag);
 
         // re-insert reduced axis
         dy->shape.insert(dy->shape.begin() + axis, a->shape[axis]);

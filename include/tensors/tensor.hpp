@@ -13,7 +13,6 @@
 
 #include "enums/device_tag.hpp"
 #include "enums/dtype.hpp"
-#include "storage/storage.hpp"
 #include "tensors/base_tensor.hpp"
 
 #include <vector>
@@ -64,7 +63,7 @@ struct Tensor : BaseTensor {
          const std::vector<tcapint> &strd, const bool &rg = false);
   Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
          const std::vector<tcapint> &strd, const bool &rg = false);
-  Tensor(TensorPtr orig) { copy(orig); }
+  Tensor(const Tensor &orig) { copy(orig); }
 
   void validate_constructor() override {
     BaseTensor::validate_constructor();
@@ -76,36 +75,18 @@ struct Tensor : BaseTensor {
   }
 
   /**
-   * Make a shallow copy of this tensor
-   */
-  TensorPtr copy() const {
-    TensorPtr cp = std::make_shared<Tensor>();
-    // A tensor is a view on storage:
-    cp->storage = storage;
-    cp->offset = offset;
-    cp->shape = shape;
-    cp->stride = stride;
-    cp->freeze = freeze;
-    cp->grad_node = grad_node;
-    cp->grad = grad;
-    cp->requires_grad = requires_grad;
-
-    return cp;
-  }
-
-  /**
    * Make this tensor a shallow copy of another
    */
-  void copy(const TensorPtr cp) {
+  void copy(const Tensor &cp) {
     // A tensor is a view on storage:
-    storage = cp->storage;
-    offset = cp->offset;
-    shape = cp->shape;
-    stride = cp->stride;
-    freeze = cp->freeze;
-    grad_node = cp->grad_node;
-    grad = cp->grad;
-    requires_grad = cp->requires_grad;
+    storage = cp.storage;
+    offset = cp.offset;
+    shape = cp.shape;
+    stride = cp.stride;
+    freeze = cp.freeze;
+    grad_node = cp.grad_node;
+    grad = cp.grad;
+    requires_grad = cp.requires_grad;
   }
 
   void make_gradient(const bool &force_sparse = false);
@@ -171,7 +152,7 @@ struct Tensor : BaseTensor {
    * necessary)
    */
   TensorPtr cast(const DeviceTag &dt) const {
-    TensorPtr cp = copy();
+    TensorPtr cp = std::make_shared<Tensor>(*this);
     if (dt == DeviceTag::CPU) {
       cp->storage = cp->storage->cpu();
     } else if (dt == DeviceTag::GPU) {
