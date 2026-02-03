@@ -147,8 +147,8 @@ Tensor::Tensor(const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg,
                const DType &dtype, const DeviceTag &_dtag, const int64_t &did,
                const bool &s)
-    : shape(shp), stride(strd), freeze(shp.size(), false), offset(0U),
-      grad_node(nullptr), requires_grad(rg) {
+    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
+      freeze(shp.size(), false) {
 
   validate_constructor();
 
@@ -194,8 +194,8 @@ Tensor::Tensor(const std::vector<tcapint> &shp,
 Tensor::Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg,
                const DeviceTag &_dtag, const int64_t &did)
-    : shape(shp), stride(strd), freeze(shp.size(), false), offset(0U),
-      grad_node(nullptr), requires_grad(rg) {
+    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
+      freeze(shp.size(), false) {
 
   validate_constructor();
 
@@ -224,8 +224,8 @@ Tensor::Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
 Tensor::Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg,
                const DeviceTag &_dtag, const int64_t &did)
-    : shape(shp), stride(strd), freeze(shp.size(), false), offset(0U),
-      grad_node(nullptr), requires_grad(rg) {
+    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
+      freeze(shp.size(), false) {
 
   validate_constructor();
 
@@ -254,8 +254,8 @@ Tensor::Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
 
 Tensor::Tensor(const RealSparseVector &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg)
-    : shape(shp), stride(strd), freeze(shp.size(), false), offset(0U),
-      grad_node(nullptr), requires_grad(rg) {
+    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
+      freeze(shp.size(), false) {
 
   validate_constructor();
 
@@ -263,8 +263,8 @@ Tensor::Tensor(const RealSparseVector &val, const std::vector<tcapint> &shp,
 }
 Tensor::Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg)
-    : shape(shp), stride(strd), freeze(shp.size(), false), offset(0U),
-      grad_node(nullptr), requires_grad(rg) {
+    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
+      freeze(shp.size(), false) {
 
   validate_constructor();
 

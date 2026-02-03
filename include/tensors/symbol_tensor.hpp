@@ -11,18 +11,12 @@
 
 #pragma once
 
-#include "common/weed_types.hpp"
-
-#include <vector>
+#include "tensors/base_tensor.hpp"
 
 namespace Weed {
 /**
  * Non-mathematical tensor, solely for indexing (by integer enumeration)
  */
-struct SymbolTensor {
-  std::vector<tcapint> data;
-  std::vector<tcapint> shape;
-  std::vector<tcapint> stride;
-};
+struct SymbolTensor : BaseTensor {};
 typedef std::shared_ptr<SymbolTensor> SymbolTensorPtr;
 } // namespace Weed
