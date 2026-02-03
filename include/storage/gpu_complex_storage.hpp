@@ -54,6 +54,8 @@ struct GpuComplexStorage : public ComplexStorage, public GpuStorage {
     SubtractAlloc(sizeof(complex) * size);
   }
 
+  int64_t get_device_id() const override { return dev->deviceID; }
+
   void FillZeros() override { dev->ClearRealBuffer(buffer, size << 1U); }
   void FillOnes() override { dev->FillOnesComplex(buffer, size); }
   void FillValue(const complex &v) override {
