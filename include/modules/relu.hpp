@@ -18,6 +18,6 @@ namespace Weed {
  * Convenience wrapper on ReLU as a module
  */
 struct ReLU : public Module {
-  TensorPtr forward(TensorPtr x) override { return Tensor::relu(x); }
+  TensorPtr forward(const TensorPtr x) override { return Tensor::relu(x); }
 };
 } // namespace Weed

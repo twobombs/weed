@@ -18,6 +18,6 @@ namespace Weed {
  * Convenience wrapper on sigmoid as a module
  */
 struct Sigmoid : public Module {
-  TensorPtr forward(TensorPtr x) override { return Tensor::sigmoid(x); }
+  TensorPtr forward(const TensorPtr x) override { return Tensor::sigmoid(x); }
 };
 } // namespace Weed

@@ -23,6 +23,7 @@ endif (PACK_DEBIAN)
 add_library (weed STATIC
     src/common/functions.cpp
     src/common/parallel_for.cpp
+    src/modules/dropout.cpp
     src/modules/linear.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
@@ -304,6 +305,7 @@ install (FILES
     include/devices/queue_item.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
+    include/modules/dropout.hpp
     include/modules/linear.hpp
     include/modules/module.hpp
     include/modules/relu.hpp

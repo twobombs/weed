@@ -23,6 +23,8 @@ struct Module {
   virtual std::vector<ParameterPtr> parameters() {
     return std::vector<ParameterPtr>();
   }
+  virtual void train() {}
+  virtual void eval() {}
   virtual ~Module() {}
 };
 typedef std::shared_ptr<Module> ModulePtr;

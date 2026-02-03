@@ -18,6 +18,6 @@ namespace Weed {
  * Convenience wrapper on sigmoid as a module
  */
 struct Tanh : public Module {
-  TensorPtr forward(TensorPtr x) override { return Tensor::tanh(x); }
+  TensorPtr forward(const TensorPtr x) override { return Tensor::tanh(x); }
 };
 } // namespace Weed
