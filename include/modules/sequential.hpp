@@ -29,6 +29,17 @@ struct Sequential : public Module {
     }
   }
 
+  void train() {
+    for (const ModulePtr &m : layers) {
+      m->train();
+    }
+  }
+  void eval() {
+    for (const ModulePtr &m : layers) {
+      m->eval();
+    }
+  }
+
   TensorPtr forward(const TensorPtr x) override {
     TensorPtr tmp = x;
     for (size_t i = 0U; i < layers.size(); ++i) {
