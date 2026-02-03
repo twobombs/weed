@@ -330,38 +330,7 @@ void Tensor::reduce_grad_broadcast() {
       continue;
     }
 
-    bool is_skip = grad->shape[i] == 1U;
-
-    TensorPtr gcp = grad->copy();
-    std::vector<tcapint> &sh = gcp->shape;
-    std::vector<tcapint> &st = gcp->stride;
-
-    if (sh.size() == 1U) {
-      sh[0U] = 1U;
-      st[0U] = 0U;
-    } else {
-      const size_t p_stride = gcp->stride[i];
-
-      sh.erase(sh.begin() + i);
-      st.erase(st.begin() + i);
-
-      const size_t o_stride = gcp->stride[i] / p_stride;
-
-      for (size_t j = i; j < gcp->stride.size(); ++j) {
-        gcp->stride[j] /= o_stride;
-      }
-    }
-
-    if (is_skip) {
-      // Already reduced
-      grad = gcp;
-      continue;
-    }
-
-    TensorPtr tmp =
-        allocate_like(gcp, gcp->storage->dtype, false, IS_SPARSE(grad));
-    Weed::reduce(i, *(grad.get()), *(tmp.get()));
-    grad = tmp;
+    grad = sum(grad, i);
   }
 }
 
