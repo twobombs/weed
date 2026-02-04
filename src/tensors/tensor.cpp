@@ -151,7 +151,6 @@ Tensor::Tensor(const std::vector<tcapint> &shp,
       freeze(shp.size(), false) {
 
   validate_dtype(dtype);
-  freeze_init_broadcast();
 
   const tcapint size = get_size();
   DeviceTag dtag = _dtag;
@@ -205,8 +204,6 @@ Tensor::Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
                                 "same size as implied by shape and stride!");
   }
 
-  freeze_init_broadcast();
-
   DeviceTag dtag = _dtag;
   if (dtag == DEFAULT_DEVICE) {
     if (size > GSTRIDE) {
@@ -235,8 +232,6 @@ Tensor::Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
                                 "same size as implied by shape and stride!");
   }
 
-  freeze_init_broadcast();
-
   DeviceTag dtag = _dtag;
   if (dtag == DEFAULT_DEVICE) {
     if (size > GSTRIDE) {
@@ -257,14 +252,14 @@ Tensor::Tensor(const RealSparseVector &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg)
     : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
       freeze(shp.size(), false) {
-  freeze_init_broadcast();
+
   storage = std::make_shared<SparseCpuRealStorage>(val, get_size());
 }
 Tensor::Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg)
     : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
       freeze(shp.size(), false) {
-  freeze_init_broadcast();
+
   storage = std::make_shared<SparseCpuComplexStorage>(val, get_size());
 }
 
