@@ -137,6 +137,12 @@ TensorPtr Tensor::allocate_like(const Tensor &orig, const DType &dt,
 }
 
 TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shp,
+                                const Tensor &orig, const DType &dt,
+                                const bool &rg, const bool &s) {
+  return allocate_like(shp, full_contiguous_stride(shp), orig, dt, rg, s);
+}
+
+TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shp,
                                 const std::vector<tcapint> &strd,
                                 const Tensor &orig, const DType &dt,
                                 const bool &rg, const bool &s) {
@@ -347,9 +353,8 @@ void Tensor::materialize_broadcast() {
     return;
   }
 
-  TensorPtr tmp =
-      Tensor::allocate_like(shape, Tensor::full_contiguous_stride(shape), *this,
-                            storage->dtype, requires_grad, false);
+  TensorPtr tmp = Tensor::allocate_like(shape, *this, storage->dtype,
+                                        requires_grad, storage->is_sparse());
 
   // copy via kernel (broadcast-aware read)
   Weed::copy_broadcast(*tmp, *this);
@@ -757,15 +762,11 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  TensorPtr out;
-  if (a->match_shape(b)) {
-    out = allocate_like(*(b.get()), dt, rg, s);
-  } else if (b->match_shape(a)) {
-    out = allocate_like(*(a.get()), dt, rg, s);
-  } else {
+  if (!a->match_shape(b) && !b->match_shape(a)) {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
+  TensorPtr out = Tensor::allocate_like(a->shape, *(a.get()), dt, rg, s);
 
   Weed::add(*(a.get()), *(b.get()), *(out.get()));
 
@@ -813,15 +814,11 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  TensorPtr out;
-  if (a->match_shape(b)) {
-    out = allocate_like(*(b.get()), dt, rg, s);
-  } else if (b->match_shape(a)) {
-    out = allocate_like(*(a.get()), dt, rg, s);
-  } else {
+  if (!a->match_shape(b) && !b->match_shape(a)) {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
+  TensorPtr out = Tensor::allocate_like(a->shape, *(a.get()), dt, rg, s);
 
   Weed::mul(*(a.get()), *(b.get()), *(out.get()));
 
@@ -944,15 +941,11 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  TensorPtr out;
-  if (a->match_shape(b)) {
-    out = allocate_like(*(b.get()), dt, rg, s);
-  } else if (b->match_shape(a)) {
-    out = allocate_like(*(a.get()), dt, rg, s);
-  } else {
+  if (!a->match_shape(b) && !b->match_shape(a)) {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
+  TensorPtr out = Tensor::allocate_like(a->shape, *(a.get()), dt, rg, s);
 
   Weed::sub(*(a.get()), *(b.get()), *(out.get()));
 
@@ -1000,15 +993,11 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  TensorPtr out;
-  if (a->match_shape(b)) {
-    out = allocate_like(*(b.get()), dt, rg, s);
-  } else if (b->match_shape(a)) {
-    out = allocate_like(*(a.get()), dt, rg, s);
-  } else {
+  if (!a->match_shape(b) && !b->match_shape(a)) {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
+  TensorPtr out = Tensor::allocate_like(a->shape, *(a.get()), dt, rg, s);
 
   Weed::div(*(a.get()), *(b.get()), *(out.get()));
 

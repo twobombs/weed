@@ -202,6 +202,14 @@ struct Tensor : public BaseTensor {
    */
   static TensorPtr allocate_like(const Tensor &orig, const DType &dt,
                                  const bool &rg, const bool &s);
+
+  /**
+   * Create a new Tensor like the original, without Storage value initialization
+   */
+  static TensorPtr allocate_like(const std::vector<tcapint> &shape,
+                                 const Tensor &orig, const DType &dt,
+                                 const bool &rg, const bool &s);
+
   /**
    * Create a new Tensor like the original, without Storage value initialization
    */
