@@ -73,10 +73,14 @@ struct Tensor : BaseTensor {
   }
 
   void freeze_init_broadcast() {
-    if ((stride.size() == 1U) && (stride[0U] == 0U)) {
+    if (stride.size() == 1U) {
+      // Never freeze a single (broadcast) index
+      // (or else the index isn't broadcast anyway)
       return;
     }
+
     for (size_t i = 0U; i < stride.size(); ++i) {
+      // Freeze all initial broadcast indices
       freeze[i] = !stride[i];
     }
   }
