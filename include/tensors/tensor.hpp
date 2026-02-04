@@ -65,20 +65,19 @@ struct Tensor : BaseTensor {
          const std::vector<tcapint> &strd, const bool &rg = false);
   Tensor(const Tensor &orig) { copy(orig); }
 
-  void validate_constructor() override {
-    BaseTensor::validate_constructor();
-    if ((stride.size() == 1U) && (stride[0U] == 0U)) {
-      return;
-    }
-    for (size_t i = 0U; i < stride.size(); ++i) {
-      freeze[i] = stride[i] == 0U;
-    }
-  }
-
   void validate_dtype(const DType &dtype) {
     if (dtype == DType::INT) {
       throw std::invalid_argument("Tensor cannot have DType::INT! (INT is only "
                                   "for SymbolTensor, not arithmetic Tensor.)");
+    }
+  }
+
+  void freeze_init_broadcast() {
+    if ((stride.size() == 1U) && (stride[0U] == 0U)) {
+      return;
+    }
+    for (size_t i = 0U; i < stride.size(); ++i) {
+      freeze[i] = !stride[i];
     }
   }
 
