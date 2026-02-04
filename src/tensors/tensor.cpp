@@ -730,12 +730,15 @@ TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  if (!a->match_shape(b) && !b->match_shape(a)) {
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    out = allocate_like(*(b.get()), dt, rg, s);
+  } else if (b->match_shape(a)) {
+    out = allocate_like(*(a.get()), dt, rg, s);
+  } else {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
-  TensorPtr out = allocate_like(a->shape, full_contiguous_stride(a->shape),
-                                *(a.get()), dt, rg, s);
 
   Weed::add(*(a.get()), *(b.get()), *(out.get()));
 
@@ -779,12 +782,15 @@ TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  if (!a->match_shape(b) && !b->match_shape(a)) {
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    out = allocate_like(*(b.get()), dt, rg, s);
+  } else if (b->match_shape(a)) {
+    out = allocate_like(*(a.get()), dt, rg, s);
+  } else {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
-  TensorPtr out = allocate_like(a->shape, full_contiguous_stride(a->shape),
-                                *(a.get()), dt, rg, s);
 
   Weed::mul(*(a.get()), *(b.get()), *(out.get()));
 
@@ -903,12 +909,15 @@ TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  if (!a->match_shape(b) && !b->match_shape(a)) {
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    out = allocate_like(*(b.get()), dt, rg, s);
+  } else if (b->match_shape(a)) {
+    out = allocate_like(*(a.get()), dt, rg, s);
+  } else {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
-  TensorPtr out = allocate_like(a->shape, full_contiguous_stride(a->shape),
-                                *(a.get()), dt, rg, s);
 
   Weed::sub(*(a.get()), *(b.get()), *(out.get()));
 
@@ -952,12 +961,15 @@ TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
-  if (!a->match_shape(b) && !b->match_shape(a)) {
+  TensorPtr out;
+  if (a->match_shape(b)) {
+    out = allocate_like(*(b.get()), dt, rg, s);
+  } else if (b->match_shape(a)) {
+    out = allocate_like(*(a.get()), dt, rg, s);
+  } else {
     throw std::invalid_argument("Tensor::match_shape() failed! (You tried to "
                                 "alter an index that was not broadcast.)");
   }
-  TensorPtr out = allocate_like(a->shape, full_contiguous_stride(a->shape),
-                                *(a.get()), dt, rg, s);
 
   Weed::div(*(a.get()), *(b.get()), *(out.get()));
 
