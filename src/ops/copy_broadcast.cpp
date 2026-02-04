@@ -61,11 +61,11 @@ void CopyKernel::gpu_complex(Tensor &a, const Tensor &b) {
 #endif
 
 void CopyKernel::copy_broadcast(Tensor &a, const Tensor &b) {
-  validate_all_same_device({&a, &b}, "InPlaceKernel::in_place");
-  const tcapint aSize = a.get_broadcast_size();
-  const tcapint bSize = b.get_size();
+  validate_all_same_device({&a, &b}, "CopyKernel::copy_broadcast");
+  const tcapint aSize = a.get_size();
+  const tcapint bSize = b.get_broadcast_size();
   if (aSize != bSize) {
-    throw std::invalid_argument("In InPlaceKernel::in_place(a, b, out), 'a' "
+    throw std::invalid_argument("In CopyKernel::copy_broadcast(a, b), 'a' "
                                 "size does not match 'b' size!");
   }
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;

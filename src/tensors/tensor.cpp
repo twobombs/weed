@@ -305,15 +305,32 @@ bool Tensor::match_shape(const TensorPtr a) {
     return false;
   }
 
-  for (size_t i = 0U; i < shape.size(); ++i) {
-    if ((shape[i] != a->shape[i]) && stride[i]) {
+  std::vector<tcapint> osh = shape;
+  std::vector<tcapint> ost = stride;
+  std::vector<tcapint> nsh = a->shape;
+
+  std::reverse(osh.begin(), osh.end());
+  std::reverse(ost.begin(), ost.end());
+  std::reverse(nsh.begin(), nsh.end());
+
+  for (size_t i = 0U; i < osh.size(); ++i) {
+    if ((osh[i] != nsh[i]) && ost[i]) {
       return false;
     }
   }
 
+  std::vector<bool> frz = freeze;
+  std::reverse(frz.begin(), frz.end());
+
+  ost.resize(nsh.size());
+  frz.resize(nsh.size());
+
+  std::reverse(ost.begin(), ost.end());
+  std::reverse(frz.begin(), frz.end());
+
   shape = a->shape;
-  stride.resize(shape.size());
-  freeze.resize(shape.size());
+  stride = ost;
+  freeze = frz;
 
   return true;
 }
@@ -346,7 +363,7 @@ void Tensor::reduce_grad_broadcast() {
         "gradient Tensor! (This should be called only during autograd.)");
   }
 
-  for (int64_t i = stride.size() - 1U; i >= 0; --i) {
+  for (symint i = stride.size() - 1; i >= 0; --i) {
     if (freeze[i] || stride[i]) {
       continue;
     }
@@ -430,8 +447,10 @@ void Tensor::make_sum_node(TensorPtr a, TensorPtr out) {
         TensorPtr a_grad = a->grad->cast(dtag);
         TensorPtr out_grad = out->grad->cast(dtag);
         // da += dout  (broadcast)
-        a_grad->upcast(out_grad->storage->dtype);
         out_grad->match_shape(a_grad);
+        a_grad->upcast(out_grad->storage->dtype);
+        a_grad->match_shape(out_grad);
+        a_grad->materialize_broadcast();
         Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
         a->grad = a_grad;
         a->reduce_grad_broadcast();
@@ -460,10 +479,12 @@ void Tensor::make_mean_node(TensorPtr a, TensorPtr out) {
         TensorPtr out_grad = out->grad->cast(dtag);
         // da += dout / N   (broadcast)
         a_grad->upcast(out_grad->storage->dtype);
+        out_grad->match_shape(a_grad);
+        a_grad->match_shape(out_grad);
+        a_grad->materialize_broadcast();
         TensorPtr s =
             SCALAR((real1)(ONE_R1 / (real1)a->get_broadcast_size()), out_grad);
         TensorPtr tmp = s * out_grad;
-        tmp->match_shape(a_grad);
         Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
         a->grad = a_grad;
         a->reduce_grad_broadcast();
@@ -482,12 +503,9 @@ TensorPtr Tensor::sum(TensorPtr a, const tcapint &axis) {
     st[0U] = 0U;
   } else {
     const size_t p_stride = acp->stride[axis];
-
     sh.erase(sh.begin() + axis);
     st.erase(st.begin() + axis);
-
     const size_t o_stride = acp->stride[axis] / p_stride;
-
     for (size_t j = axis; j < acp->stride.size(); ++j) {
       acp->stride[j] /= o_stride;
     }
@@ -764,6 +782,8 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     if (a->requires_grad) {
       TensorPtr a_grad = a->grad->cast(dtag);
       a_grad->upcast(out_grad->storage->dtype);
+      a_grad->match_shape(out_grad);
+      a_grad->materialize_broadcast();
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
       a->grad = a_grad;
       a->reduce_grad_broadcast();
@@ -771,6 +791,8 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     if (b->requires_grad) {
       TensorPtr b_grad = b->grad->cast(dtag);
       b_grad->upcast(out_grad->storage->dtype);
+      b_grad->match_shape(out_grad);
+      b_grad->materialize_broadcast();
       Weed::add_in_place(*(b_grad.get()), *(out_grad.get()));
       b->grad = b_grad;
       b->reduce_grad_broadcast();
@@ -823,6 +845,8 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           Tensor::allocate_like(*(a_grad.get()), dt, false, IS_SPARSE(b));
       Weed::mul(*(out_grad.get()), *(_b.get()), *(tmp.get()));
       a_grad->upcast(dt);
+      a_grad->match_shape(out_grad);
+      a_grad->materialize_broadcast();
       Weed::add_in_place(*(a_grad.get()), *(tmp.get()));
       a->grad = a_grad;
       a->reduce_grad_broadcast();
@@ -835,6 +859,8 @@ void Tensor::make_mul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
           Tensor::allocate_like(*(b_grad.get()), dt, false, IS_SPARSE(a));
       Weed::mul(*(out_grad.get()), *(_a.get()), *(tmp.get()));
       b_grad->upcast(dt);
+      b_grad->match_shape(out_grad);
+      b_grad->materialize_broadcast();
       Weed::add_in_place(*(b_grad.get()), *(tmp.get()));
       b->grad = b_grad;
       b->reduce_grad_broadcast();
@@ -943,6 +969,8 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     if (a->requires_grad) {
       TensorPtr a_grad = a->grad->cast(dtag);
       a_grad->upcast(out_grad->storage->dtype);
+      a_grad->match_shape(out_grad);
+      a_grad->materialize_broadcast();
       Weed::add_in_place(*(a_grad.get()), *(out_grad.get()));
       a->grad = a_grad;
       a->reduce_grad_broadcast();
@@ -950,6 +978,8 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     if (b->requires_grad) {
       TensorPtr b_grad = b->grad->cast(dtag);
       b_grad->upcast(out_grad->storage->dtype);
+      b_grad->match_shape(out_grad);
+      b_grad->materialize_broadcast();
       Weed::sub_in_place(*(b_grad.get()), *(out_grad.get()));
       b->grad = b_grad;
       b->reduce_grad_broadcast();
@@ -998,6 +1028,8 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       TensorPtr a_grad = a->grad->cast(dtag);
       const DType &dt = get_dtype_by_presidence({_b, out_grad});
       a_grad->upcast(dt);
+      a_grad->match_shape(out_grad);
+      a_grad->materialize_broadcast();
       TensorPtr tmp =
           Tensor::allocate_like(*(_b.get()), dt, false, IS_SPARSE(b));
       Weed::div(*(out_grad.get()), *(_b.get()), *(tmp.get()));
@@ -1013,6 +1045,8 @@ void Tensor::make_div_node(TensorPtr a, TensorPtr b, TensorPtr out) {
       Weed::mul(*(_b.get()), *(_b.get()), *(b_sqr.get()));
       const DType &dt = get_dtype_by_presidence({a, b_sqr});
       b_grad->upcast(dt);
+      b_grad->match_shape(out_grad);
+      b_grad->materialize_broadcast();
       TensorPtr tmp =
           Tensor::allocate_like(*(_a.get()), dt, false, IS_SPARSE(a));
       Weed::div(*(_a.get()), *(b_sqr.get()), *(tmp.get()));

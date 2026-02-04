@@ -94,6 +94,8 @@ void adam_step(Adam &opt, const std::vector<ParameterPtr> &params) {
                     (bias_correction1 *
                      (((s.v / bias_correction2) ^ ((real1)0.5)) + opt.eps));
 
+    p->match_shape(tmp);
+    tmp->match_shape(p);
     Weed::sub_in_place(*(p.get()), *(tmp.get()));
   }
 }
