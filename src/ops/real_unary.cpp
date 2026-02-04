@@ -14,6 +14,8 @@
 #include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
+#include <iostream>
+
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
   GPU_GRAD_ARGS();                                                             \
   std::shared_ptr<type1> a_storage =                                           \
@@ -271,6 +273,7 @@ void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
   const tcapint inSize = in.get_broadcast_size();
   const tcapint doutSize = dout.get_broadcast_size();
   if ((dinSize != inSize) || (dinSize != doutSize)) {
+    std::cout << dinSize << " " << inSize << " " << doutSize << std::endl;
     throw std::invalid_argument(
         "In Weed::unary_grad(din, in, dout), sizes do not match!");
   }

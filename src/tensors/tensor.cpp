@@ -338,13 +338,14 @@ bool Tensor::match_shape(const TensorPtr a) {
 void Tensor::materialize_broadcast() {
   bool needs = false;
   for (size_t i = 0; i < shape.size(); ++i) {
-    if (shape[i] > 1 && stride[i] == 0) {
+    if (shape[i] > 1U && stride[i] == 0) {
       needs = true;
       break;
     }
   }
-  if (!needs)
+  if (!needs) {
     return;
+  }
 
   TensorPtr tmp =
       Tensor::allocate_like(shape, Tensor::full_contiguous_stride(shape), *this,
@@ -564,6 +565,8 @@ void Tensor::make_abs_node(TensorPtr a, TensorPtr out) {
         TensorPtr a_grad = a->grad->cast(dtag);
         TensorPtr out_grad = out->grad->cast(dtag);
         a_grad->upcast(out_grad->storage->dtype);
+        a_grad->materialize_broadcast();
+        out_grad->match_shape(a_grad);
         Weed::abs_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()));
         a->grad = a_grad;
       });
@@ -592,6 +595,8 @@ void Tensor::make_relu_node(TensorPtr a, TensorPtr out) {
         TensorPtr a_grad = a->grad->cast(dtag);
         TensorPtr out_grad = out->grad->cast(dtag);
         a_grad->upcast(out_grad->storage->dtype);
+        a_grad->materialize_broadcast();
+        out_grad->match_shape(a_grad);
         Weed::relu_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()));
         a->grad = a_grad;
       });
@@ -620,6 +625,8 @@ void Tensor::make_sigmoid_node(TensorPtr a, TensorPtr out) {
     TensorPtr out_grad = out->grad->cast(dtag);
     TensorPtr _out = out->cast(dtag);
     a_grad->upcast(out_grad->storage->dtype);
+    a_grad->materialize_broadcast();
+    out_grad->match_shape(a_grad);
     Weed::sigmoid_grad(*(a_grad.get()), *(_out.get()), *(out_grad.get()));
     a->grad = a_grad;
   });
@@ -648,6 +655,8 @@ void Tensor::make_tanh_node(TensorPtr a, TensorPtr out) {
     TensorPtr out_grad = out->grad->cast(dtag);
     TensorPtr _out = out->cast(dtag);
     a_grad->upcast(out_grad->storage->dtype);
+    a_grad->materialize_broadcast();
+    out_grad->match_shape(a_grad);
     Weed::tanh_grad(*(a_grad.get()), *(_out.get()), *(out_grad.get()));
     a->grad = a_grad;
   });
