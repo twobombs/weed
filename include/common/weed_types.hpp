@@ -51,25 +51,22 @@ using std::size_t;
 
 #if TCAPPOW < 4
 #define tcapint uint8_t
+#define symint int8_t
 #elif TCAPPOW < 5
 #define tcapint uint16_t
+#define symint int16_t
 #elif TCAPPOW < 6
 #define tcapint uint32_t
+#define symint int32_t
 #define WEED_MAX_DIM_POW 32
 #elif TCAPPOW < 7
 #define tcapint uint64_t
+#define symint int64_t
 #define WEED_MAX_DIM_POW 64
-#elif (TCAPPOW < 8) && defined(__SIZEOF_INT128__)
-#define tcapint unsigned __int128
-#define WEED_MAX_DIM_POW 128
-#elif BOOST_AVAILABLE
-#include <boost/multiprecision/cpp_int.hpp>
-typedef boost::multiprecision::cpp_int tcapint;
-constexpr size_t WEED_MAX_DIM_POW = (1 << TCAPPOW);
 #else
-#include "big_integer.hpp"
-#define tcapint BigInteger
-constexpr size_t WEED_MAX_DIM_POW = (1 << TCAPPOW);
+#define tcapint unsigned __int128
+#define symint __int128
+#define WEED_MAX_DIM_POW 128
 #endif
 
 #if FPPOW < 5
@@ -129,8 +126,9 @@ constexpr tlenint bitsInCap = ((tlenint)1U) << ((tlenint)TCAPPOW);
 
 struct Node;
 typedef std::shared_ptr<Node> NodePtr;
-typedef std::shared_ptr<real1[]> RealPtr;
-typedef std::shared_ptr<complex[]> ComplexPtr;
+typedef std::unique_ptr<tcapint[], void (*)(tcapint *)> IntPtr;
+typedef std::unique_ptr<real1[], void (*)(real1 *)> RealPtr;
+typedef std::unique_ptr<complex[], void (*)(complex *)> ComplexPtr;
 
 #define bitsInByte 8U
 #define WEED_ALIGN_SIZE 64U
@@ -237,6 +235,7 @@ WEED_CONST real1 ADAM_EPSILON_DEFAULT = (real1)1e-8;
 #endif
 #endif
 
+typedef std::unordered_map<tcapint, tcapint> IntSparseVector;
 typedef std::unordered_map<tcapint, real1> RealSparseVector;
 typedef std::unordered_map<tcapint, complex> ComplexSparseVector;
 

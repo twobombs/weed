@@ -11,10 +11,9 @@
 
 #pragma once
 
-#include "common/weed_types.hpp"
 #include "enums/device_tag.hpp"
 #include "enums/dtype.hpp"
-#include "storage/storage.hpp"
+#include "tensors/base_tensor.hpp"
 
 #include <vector>
 
@@ -30,18 +29,14 @@ typedef std::shared_ptr<Tensor> TensorPtr;
 /**
  * Tensor with arbitrary dimensions and autograd
  */
-struct Tensor {
-  StoragePtr storage;
-
-  std::vector<tcapint> shape;
-  std::vector<tcapint> stride;
-  std::vector<bool> freeze;
-  tcapint offset;
-
+struct Tensor : public BaseTensor {
   NodePtr grad_node;
   TensorPtr grad;
   bool requires_grad;
 
+  std::vector<bool> freeze;
+
+  Tensor() {}
   Tensor(const std::vector<tcapint> &shp, const std::vector<tcapint> &strd,
          const bool &rg = false, const DType &dtype = DType::REAL,
          const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
@@ -68,156 +63,51 @@ struct Tensor {
          const std::vector<tcapint> &strd, const bool &rg = false);
   Tensor(const ComplexSparseVector &val, const std::vector<tcapint> &shp,
          const std::vector<tcapint> &strd, const bool &rg = false);
-  Tensor(TensorPtr orig) { copy(orig); }
+  Tensor(const Tensor &orig) { copy(orig); }
 
-  /**
-   * Validate the constructor parameters
-   */
-  void validate_constructor() {
-    if (shape.size() != stride.size()) {
-      throw std::invalid_argument(
-          "Tensor shape vector must have same length as stride vector!");
-    }
-
-    if ((shape.size() == 1U) && (shape[0U] == 1U)) {
-      stride[0U] = 0U;
-    } else {
-      if (!is_contiguous()) {
-        throw std::invalid_argument(
-            "Initial tensor shape and stride must be contiguous!");
-      }
-      for (size_t i = 0U; i < stride.size(); ++i) {
-        freeze[i] = stride[i] == 0U;
-      }
+  void validate_dtype(const DType &dtype) {
+    if (dtype == DType::INT) {
+      throw std::invalid_argument("Tensor cannot have DType::INT! (INT is only "
+                                  "for SymbolTensor, not arithmetic Tensor.)");
     }
   }
 
-  /**
-   * Make a shallow copy of this tensor
-   */
-  TensorPtr copy() const {
-    TensorPtr cp = std::make_shared<Tensor>(
-        shape, stride, requires_grad, storage->dtype, storage->device,
-        storage->get_device_id(), storage->is_sparse());
-    // A tensor is a view on storage:
-    cp->storage = storage;
-    cp->shape = shape;
-    cp->stride = stride;
-    cp->offset = offset;
-    cp->grad_node = grad_node;
-    cp->grad = grad;
+  void freeze_init_broadcast() {
+    if (stride.size() == 1U) {
+      // Never freeze a single (broadcast) index
+      // (or else the index isn't broadcast anyway)
+      return;
+    }
 
-    return cp;
+    for (size_t i = 0U; i < stride.size(); ++i) {
+      // Freeze all initial broadcast indices
+      freeze[i] = !stride[i];
+    }
   }
 
   /**
    * Make this tensor a shallow copy of another
    */
-  void copy(const TensorPtr cp) {
+  void copy(const Tensor &cp) {
     // A tensor is a view on storage:
-    storage = cp->storage;
-    shape = cp->shape;
-    stride = cp->stride;
-    offset = cp->offset;
-    grad_node = cp->grad_node;
-    grad = cp->grad;
+    BaseTensor::copy(cp);
+    freeze = cp.freeze;
+    grad_node = cp.grad_node;
+    grad = cp.grad;
+    requires_grad = cp.requires_grad;
   }
 
-  /**
-   * How many elements are in this tensor?
-   */
-  tcapint get_size() const {
-    if (shape.empty()) {
-      return 0U;
-    }
-
-    tcapint max_index = 0U;
-    for (size_t i = 0U; i < shape.size(); ++i) {
-      max_index += (shape[i] - 1U) * stride[i];
-    }
-
-    return max_index + 1U;
-  }
-
-  /**
-   * How many elements are broadcast in this tensor?
-   */
-  tcapint get_broadcast_size() const {
-    if (shape.empty()) {
-      return 0U;
-    }
-
-    tcapint max_index = 1U;
-    for (size_t i = 0U; i < shape.size(); ++i) {
-      max_index *= shape[i];
-    }
-
-    return max_index;
-  }
-
-  /**
-   * Is the Tensor Storage contiguous (i.e., densely packed in a traversable
-   * order)?
-   */
-  bool is_contiguous() const { return is_contiguous(shape, stride); }
-
-  /**
-   * Is this Tensor a Scalar (i.e., has only a single storage element that's
-   * broadcast)?
-   */
-  bool is_scalar() const {
-    if (shape.empty()) {
-      return false;
-    }
-
-    for (size_t i = 0U; i < shape.size(); ++i) {
-      if (((shape[i] - 1U) * stride[i]) != 0U) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   *  Look up an index in Storage based on shape and stride
-   */
-  tcapint get_storage_index(const tcapint &idx) const {
-    if (is_scalar()) {
-      return offset;
-    }
-
-    tcapint curr = idx;
-    tcapint stor = offset;
-
-    for (size_t i = 0U; (i < shape.size()) && curr; ++i) {
-      const tcapint &l = shape[i];
-      stor += (curr % l) * stride[i];
-      curr /= l;
-    }
-
-    if (curr) {
-      throw std::invalid_argument("Tensor index out-of-range!");
-    }
-
-    return stor;
-  }
-
-  void make_gradient() {
-    if (!requires_grad) {
-      throw std::domain_error("Called Tensor::make_gradient() on a node "
-                              "instance that does not require autograd!");
-    }
-
-    grad =
-        Tensor::make_gradient(shape, storage->dtype, storage->device,
-                              storage->get_device_id(), storage->is_sparse());
-  }
+  void make_gradient(const bool &force_sparse = false);
 
   /**
    * For broadcast, make this scalar match the shape of a target Tensor
    */
   bool match_shape(const TensorPtr a);
+
+  /**
+   * Materialize all broadcast indices
+   */
+  void materialize_broadcast();
 
   /**
    * For internal use, sum the gradient over all broadcast indices
@@ -242,28 +132,15 @@ struct Tensor {
   }
 
   /**
-   * Validate the Tensor shape, for constructors
+   * Compare the device of two tensors and return the higher-performance one
    */
-  static bool is_contiguous(const std::vector<tcapint> &shp,
-                            const std::vector<tcapint> &s) {
-    tcapint st = 1U;
-    for (size_t i = 0U; i < s.size(); ++i) {
-      if (!s[i]) {
-        continue;
-      }
-      if (s[i] != st) {
-        return false;
-      }
-      st *= shp[i];
-    }
-
-    return true;
-  }
+  static DeviceTag get_dtag_by_presidence(const std::vector<TensorPtr> &v);
 
   /**
    * Find the gradient stride (before reduction), for constructors
    */
-  static std::vector<tcapint> gradient_stride(const std::vector<tcapint> &shp) {
+  static std::vector<tcapint>
+  full_contiguous_stride(const std::vector<tcapint> &shp) {
     if ((shp.size() == 1U) && (shp[0U] == 1U)) {
       return std::vector<tcapint>{0U};
     }
@@ -285,6 +162,21 @@ struct Tensor {
   void upcast(const DType &dt) { storage = storage->Upcast(dt); }
 
   /**
+   * Cast this CPU-based tensor to a GPU-based one tensor or vice-versa (if
+   * necessary)
+   */
+  TensorPtr cast(const DeviceTag &dt) const {
+    TensorPtr cp = std::make_shared<Tensor>(*this);
+    if (dt == DeviceTag::CPU) {
+      cp->storage = cp->storage->cpu();
+    } else if (dt == DeviceTag::GPU) {
+      cp->storage = cp->storage->gpu();
+    }
+
+    return cp;
+  }
+
+  /**
    * Make a gradient tensor (static)
    */
   static TensorPtr make_gradient(const std::vector<tcapint> &shp,
@@ -292,35 +184,38 @@ struct Tensor {
                                  const int64_t did, const bool &s) {
     // This must be reduced along broadcast dimensions
     // during the backward() step.
-    TensorPtr g = std::make_shared<Tensor>(shp, gradient_stride(shp), false,
-                                           dtype, dtag, did, s);
+    TensorPtr g = std::make_shared<Tensor>(shp, full_contiguous_stride(shp),
+                                           false, dtype, dtag, did, s);
     g->storage->FillZeros();
 
     return g;
   }
 
   /**
-   * Ensure that all tensors in a list are on the same device
-   */
-  static bool all_same_device(const std::vector<TensorPtr> &);
-
-  /**
    * Create a new Tensor like the original, but a Scalar, and without Storage
    * value initialization
    */
-  static TensorPtr allocate_scalar_like(const TensorPtr orig, const bool &rg);
+  static TensorPtr allocate_scalar_like(const Tensor &orig, const bool &rg);
 
   /**
    * Create a new Tensor like the original, without Storage value initialization
    */
-  static TensorPtr allocate_like(const TensorPtr orig, const DType &dt,
+  static TensorPtr allocate_like(const Tensor &orig, const DType &dt,
                                  const bool &rg, const bool &s);
+
+  /**
+   * Create a new Tensor like the original, without Storage value initialization
+   */
+  static TensorPtr allocate_like(const std::vector<tcapint> &shape,
+                                 const Tensor &orig, const DType &dt,
+                                 const bool &rg, const bool &s);
+
   /**
    * Create a new Tensor like the original, without Storage value initialization
    */
   static TensorPtr allocate_like(const std::vector<tcapint> &shape,
                                  const std::vector<tcapint> &stride,
-                                 const TensorPtr orig, const DType &dt,
+                                 const Tensor &orig, const DType &dt,
                                  const bool &rg, const bool &s);
 
   /**
@@ -347,6 +242,19 @@ struct Tensor {
   static void make_mean_node(TensorPtr a, TensorPtr out);
 
   /**
+   * Average of all elements by axis (with autograd)
+   */
+  static TensorPtr mean(TensorPtr a, const tcapint &axis) {
+    return div(sum(a, axis), SCALAR(a->shape[axis], a));
+  }
+
+  /**
+   * Sum of all elements by axis (with autograd)
+   */
+  static TensorPtr sum(TensorPtr a, const tcapint &axis);
+  static void make_sum_node(TensorPtr a, TensorPtr out, const tcapint &axis);
+
+  /**
    * Absolute value (with autograd)
    */
   static TensorPtr abs(TensorPtr a);
@@ -363,6 +271,18 @@ struct Tensor {
    */
   static TensorPtr tanh(TensorPtr a);
   static void make_tanh_node(TensorPtr a, TensorPtr out);
+
+  /**
+   * Maximum (real) extremum
+   */
+  static TensorPtr max(TensorPtr a);
+  static void make_max_node(TensorPtr a, TensorPtr out);
+
+  /**
+   * Minimum (real) extremum
+   */
+  static TensorPtr min(TensorPtr a);
+  static void make_min_node(TensorPtr a, TensorPtr out);
 
   /**
    * Rectified linear activation function (with autograd)

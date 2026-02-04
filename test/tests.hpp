@@ -12,6 +12,10 @@
 
 #pragma once
 
+#include "common/weed_types.hpp"
+#if ENABLE_GPU
+#include "common/oclengine.hpp"
+#endif
 #include "enums/device_tag.hpp"
 #include "tensors/parameter.hpp"
 

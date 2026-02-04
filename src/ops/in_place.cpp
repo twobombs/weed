@@ -11,6 +11,7 @@
 
 #include "ops/in_place.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, b)                                          \
@@ -106,6 +107,7 @@ static void gpu_mixed_sub(Tensor &a, const Tensor &b) {
 #endif
 
 void InPlaceKernel::in_place(Tensor &a, const Tensor &b) {
+  validate_all_same_device({&a, &b}, "InPlaceKernel::in_place");
   const tcapint aSize = a.get_broadcast_size();
   const tcapint bSize = b.get_broadcast_size();
   if (aSize != bSize) {

@@ -11,7 +11,10 @@
 
 #include "ops/real_unary.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
+
+#include <iostream>
 
 #define GPU_GRAD(type1, type2, type3, api_call)                                \
   GPU_GRAD_ARGS();                                                             \
@@ -233,6 +236,7 @@ static void gpu_tanh_grad_mixed(Tensor &din, const Tensor &in,
 #endif
 
 void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "RealUnaryKernel::unary");
   if (a.get_broadcast_size() != out.get_broadcast_size()) {
     throw std::invalid_argument(
         "In Weed::unary(a, out), out size does not match input size!");
@@ -258,6 +262,7 @@ void RealUnaryKernel::unary(const Tensor &a, Tensor &out) {
 
 void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
                                  const Tensor &dout) {
+  validate_all_same_device({&din, &in, &dout}, "RealUnaryKernel::unary_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
     throw std::invalid_argument(
@@ -268,6 +273,7 @@ void RealUnaryKernel::unary_grad(Tensor &din, const Tensor &in,
   const tcapint inSize = in.get_broadcast_size();
   const tcapint doutSize = dout.get_broadcast_size();
   if ((dinSize != inSize) || (dinSize != doutSize)) {
+    std::cout << dinSize << " " << inSize << " " << doutSize << std::endl;
     throw std::invalid_argument(
         "In Weed::unary_grad(din, in, dout), sizes do not match!");
   }

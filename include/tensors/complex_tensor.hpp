@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "storage/complex_storage.hpp"
+#include "storage/typed_storage.hpp"
 #include "tensors/tensor.hpp"
 
 namespace Weed {
@@ -27,7 +27,7 @@ namespace Weed {
  * documented feature.)
  */
 struct ComplexTensor : public Tensor {
-  ComplexTensor(TensorPtr orig) : Tensor(orig) {
+  ComplexTensor(const Tensor &orig) : Tensor(orig) {
     if (storage->dtype != DType::COMPLEX) {
       throw std::domain_error("ComplexTensor constructor must copy from a "
                               "complex-valued generic Tensor!");
@@ -38,15 +38,15 @@ struct ComplexTensor : public Tensor {
    * Select element at flattened position
    */
   complex operator[](const tcapint &idx) const {
-    return (
-        *static_cast<ComplexStorage *>(storage.get()))[get_storage_index(idx)];
+    return (*static_cast<TypedStorage<complex> *>(
+        storage.get()))[get_storage_index(idx)];
   }
 
   /**
    * Set the real element at the position
    */
   void write(const tcapint &idx, const complex &val) {
-    static_cast<ComplexStorage *>(storage.get())
+    static_cast<TypedStorage<complex> *>(storage.get())
         ->write(get_storage_index(idx), val);
   }
 
@@ -54,7 +54,7 @@ struct ComplexTensor : public Tensor {
    * Add to the real element at the position
    */
   void add(const tcapint &idx, const complex &val) {
-    static_cast<ComplexStorage *>(storage.get())
+    static_cast<TypedStorage<complex> *>(storage.get())
         ->add(get_storage_index(idx), val);
   }
 };

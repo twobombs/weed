@@ -11,6 +11,7 @@
 
 #include "ops/div.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define DIV_KERNEL()                                                           \
@@ -88,6 +89,7 @@ void DivKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
 #endif
 
 void DivKernel::div(const Tensor &a, const Tensor &b, Tensor &out) {
+  validate_all_same_device({&a, &b, &out}, "DivKernel::div");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
   const bool isOutComplex = out.storage->dtype == DType::COMPLEX;

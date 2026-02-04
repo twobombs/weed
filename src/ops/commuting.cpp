@@ -11,6 +11,7 @@
 
 #include "ops/commuting.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, b, out)                                     \
@@ -107,6 +108,7 @@ static void gpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
 #endif
 
 void CommutingKernel::commuting(const Tensor &a, const Tensor &b, Tensor &out) {
+  validate_all_same_device({&a, &b, &out}, "CommutingKernel::commuting");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
   const bool isOutComplex = out.storage->dtype == DType::COMPLEX;

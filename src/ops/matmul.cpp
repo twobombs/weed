@@ -11,6 +11,7 @@
 
 #include "ops/matmul.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define CPU_HEADER(storage1, storage2, storage3)                               \
@@ -139,6 +140,7 @@ void MatMulKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
 #endif
 
 void MatMulKernel::matmul(const Tensor &a, const Tensor &b, Tensor &out) {
+  validate_all_same_device({&a, &b, &out}, "MatMulKernel::matmul");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
   const bool isOutComplex = out.storage->dtype == DType::COMPLEX;

@@ -66,9 +66,12 @@ DeviceContextPtr OCLEngine::GetDeviceContextPtr(const int64_t &dev) {
 
 // clang-format off
 const std::vector<OCLKernelHandle> OCLEngine::kernelHandles{
+    OCLKernelHandle(OCL_API_CLEAR_BUFFER_INT, "clear_buffer_int"),
     OCLKernelHandle(OCL_API_CLEAR_BUFFER_REAL, "clear_buffer_real"),
+    OCLKernelHandle(OCL_API_FILL_ONES_INT, "fill_ones_int"),
     OCLKernelHandle(OCL_API_FILL_ONES_REAL, "fill_ones_real"),
     OCLKernelHandle(OCL_API_FILL_ONES_COMPLEX, "fill_ones_complex"),
+    OCLKernelHandle(OCL_API_FILL_VALUE_INT, "fill_value_int"),
     OCLKernelHandle(OCL_API_FILL_VALUE_REAL, "fill_value_real"),
     OCLKernelHandle(OCL_API_FILL_VALUE_COMPLEX, "fill_value_complex"),
     OCLKernelHandle(OCL_API_REAL_TO_COMPLEX_BUFFER, "real_to_complex_buffer"),
@@ -86,6 +89,9 @@ const std::vector<OCLKernelHandle> OCLEngine::kernelHandles{
     OCLKernelHandle(OCL_API_TANH_GRAD_REAL, "wtanh_grad_real"),
     OCLKernelHandle(OCL_API_TANH_GRAD_COMPLEX, "wtanh_grad_complex"),
     OCLKernelHandle(OCL_API_TANH_GRAD_MIXED, "wtanh_grad_mixed"),
+    OCLKernelHandle(OCL_API_MATCH_GRAD_REAL, "match_grad_real"),
+    OCLKernelHandle(OCL_API_MATCH_GRAD_COMPLEX, "match_grad_complex"),
+    OCLKernelHandle(OCL_API_MATCH_GRAD_MIXED, "match_grad_mixed"),
     OCLKernelHandle(OCL_API_CLAMP, "clamp_real"),
     OCLKernelHandle(OCL_API_CLAMP_GRAD_REAL, "clamp_grad_real"),
     OCLKernelHandle(OCL_API_CLAMP_GRAD_COMPLEX, "clamp_grad_complex"),
@@ -127,7 +133,13 @@ const std::vector<OCLKernelHandle> OCLEngine::kernelHandles{
     OCLKernelHandle(OCL_API_EXP_REAL, "exp_real"),
     OCLKernelHandle(OCL_API_EXP_COMPLEX, "exp_complex"),
     OCLKernelHandle(OCL_API_LOG_REAL, "log_real"),
-    OCLKernelHandle(OCL_API_LOG_COMPLEX, "log_complex")
+    OCLKernelHandle(OCL_API_LOG_COMPLEX, "log_complex"),
+    OCLKernelHandle(OCL_API_EMBEDDING_REAL, "embedding_real"),
+    OCLKernelHandle(OCL_API_EMBEDDING_COMPLEX, "embedding_complex"),
+    OCLKernelHandle(OCL_API_EMBEDDING_GRAD_REAL, "embedding_grad_real"),
+    OCLKernelHandle(OCL_API_EMBEDDING_GRAD_COMPLEX, "embedding_grad_complex"),
+    OCLKernelHandle(OCL_API_COPY_REAL, "copy_real"),
+    OCLKernelHandle(OCL_API_COPY_COMPLEX, "copy_complex")
 };
 // clang-format on
 

@@ -11,6 +11,7 @@
 
 #include "ops/sum.hpp"
 #include "common/parallel_for.hpp"
+#include "ops/util.hpp"
 #include "tensors/flat_tensors.hpp"
 
 #define DEVICE_SWITCH(cpu, gpu, a, out)                                        \
@@ -49,21 +50,25 @@
   }
 
 #define GPU_SUM(type)                                                          \
-  if (!(a_storage.array)) {                                                    \
-    a_storage.array = a_storage.Alloc(n);                                      \
+  if (!(a_storage->data)) {                                                    \
+    a_storage->data = a_storage->Alloc(n);                                     \
   }                                                                            \
-  type *gpa = a_storage.array.get();                                           \
+  type *gpa = a_storage->data.get();                                           \
   const bool isMapped =                                                        \
-      a_storage.dev->LockSync(a_storage.buffer, sizeof(type) * n, gpa);        \
+      a_storage->dev->LockSync(a_storage->buffer, sizeof(type) * n, gpa);      \
   CPU_SUM(type)
 
 #define GPU_WRITE(SetType)                                                     \
-  o_storage.dev->SetType(t, o_storage.buffer, 0U);                             \
+  o_storage->dev->SetType(t, o_storage->buffer, 0U);                           \
   if (isMapped) {                                                              \
-    a_storage.dev->UnlockSync(a_storage.buffer, a_storage.array.get());        \
+    a_storage->dev->UnlockSync(a_storage->buffer, a_storage->data.get());      \
   } else {                                                                     \
-    a_storage.array = nullptr;                                                 \
+    a_storage->data = nullptr;                                                 \
   }
+
+#define GPU_CAST(storage1, storage2)                                           \
+  storage1 *a_storage = static_cast<storage1 *>(a.storage.get());              \
+  storage2 *o_storage = static_cast<storage2 *>(out.storage.get())
 
 namespace Weed {
 static void cpu_sum_real(const Tensor &a, Tensor &out) {
@@ -89,40 +94,33 @@ static void cpu_mean_complex(const Tensor &a, Tensor &out) {
 #if ENABLE_GPU
 static void gpu_sum_real(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(RealStorage, RealStorage);
-  GpuRealStorage a_storage = *static_cast<GpuRealStorage *>(a.storage.get());
-  GpuRealStorage o_storage = *static_cast<GpuRealStorage *>(out.storage.get());
+  GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_SUM(real1);
   GPU_WRITE(SetReal);
 }
 static void gpu_mean_real(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(RealStorage, RealStorage);
-  GpuRealStorage a_storage = *static_cast<GpuRealStorage *>(a.storage.get());
-  GpuRealStorage o_storage = *static_cast<GpuRealStorage *>(out.storage.get());
+  GPU_CAST(GpuRealStorage, GpuRealStorage);
   GPU_SUM(real1);
   t /= n;
   GPU_WRITE(SetReal);
 }
 static void gpu_sum_complex(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(ComplexStorage, ComplexStorage);
-  GpuComplexStorage a_storage =
-      *static_cast<GpuComplexStorage *>(a.storage.get());
-  GpuComplexStorage o_storage =
-      *static_cast<GpuComplexStorage *>(out.storage.get());
+  GPU_CAST(GpuComplexStorage, GpuComplexStorage);
   GPU_SUM(complex);
   GPU_WRITE(SetComplex);
 }
 static void gpu_mean_complex(const Tensor &a, Tensor &out) {
   GPU_INIT_2_SCALAR(ComplexStorage, ComplexStorage);
-  GpuComplexStorage a_storage =
-      *static_cast<GpuComplexStorage *>(a.storage.get());
-  GpuComplexStorage o_storage =
-      *static_cast<GpuComplexStorage *>(out.storage.get());
+  GPU_CAST(GpuComplexStorage, GpuComplexStorage);
   GPU_SUM(complex);
   t /= n;
   GPU_WRITE(SetComplex);
 }
 #endif
 void SumKernel::sum(const Tensor &a, Tensor &out) {
+  validate_all_same_device({&a, &out}, "ClampKernel::clamp");
   if (out.get_broadcast_size() != 1U) {
     throw std::invalid_argument("In Weed::sum(a, out) or Weed::mean(a, out), "
                                 "out parameter is not a scalar!");

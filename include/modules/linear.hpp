@@ -12,7 +12,6 @@
 #pragma once
 
 #include "modules/module.hpp"
-#include "tensors/parameter.hpp"
 
 namespace Weed {
 /**
@@ -28,9 +27,10 @@ struct Linear : public Module {
   Linear(tcapint in_f, tcapint out_f, bool use_bias = true,
          DType dtype = DType::REAL,
          DeviceTag device = DeviceTag::DEFAULT_DEVICE, int64_t device_id = -1,
-         bool init_rand = false);
+         bool init_rand = true);
 
   TensorPtr forward(const TensorPtr x) override;
   std::vector<ParameterPtr> parameters() override;
 };
+typedef std::shared_ptr<Linear> LinearPtr;
 } // namespace Weed

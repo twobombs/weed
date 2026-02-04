@@ -23,20 +23,29 @@ endif (PACK_DEBIAN)
 add_library (weed STATIC
     src/common/functions.cpp
     src/common/parallel_for.cpp
+    src/modules/dropout.cpp
+    src/modules/embedding.cpp
     src/modules/linear.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
+    src/ops/copy_broadcast.cpp
     src/ops/div.cpp
+    src/ops/embedding.cpp
     src/ops/in_place.cpp
     src/ops/matmul.cpp
     src/ops/reduce.cpp
+    src/ops/real_extremum.cpp
     src/ops/real_unary.cpp
     src/ops/sub.cpp
     src/ops/sum.cpp
     src/ops/pow.cpp
+    src/ops/util.cpp
     src/storage/cpu_complex_storage.cpp
+    src/storage/cpu_int_storage.cpp
     src/storage/cpu_real_storage.cpp
+    src/storage/sparse_cpu_complex_storage.cpp
+    src/storage/sparse_cpu_real_storage.cpp
     src/tensors/tensor.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -52,13 +61,18 @@ if (ENABLE_PTHREAD)
 endif (ENABLE_PTHREAD)
 
 if (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
-    # Declare the unittest executable
     add_executable (unittest
         test/test_main.cpp
         test/tests.cpp
         )
 
+    add_executable (benchmarks
+        test/test_main.cpp
+        test/benchmarks.cpp
+        )
+
     target_link_libraries (unittest ${WEED_LIBS})
+    target_link_libraries (benchmarks ${WEED_LIBS})
 endif (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
 
 # Included after the library and other modules have been declared
@@ -295,35 +309,49 @@ install (FILES
     include/devices/queue_item.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
+    include/modules/dropout.hpp
+    include/modules/embedding.hpp
     include/modules/linear.hpp
     include/modules/module.hpp
+    include/modules/relu.hpp
+    include/modules/sequential.hpp
+    include/modules/sigmoid.hpp
+    include/modules/tanh.hpp
     include/ops/abs.hpp
     include/ops/clamp.hpp
+    include/ops/commuting.hpp
+    include/ops/copy_broadcast.hpp
     include/ops/div.hpp
+    include/ops/embedding.hpp
     include/ops/in_place.hpp
     include/ops/matmul.hpp
+    include/ops/pow.hpp
     include/ops/reduce.hpp
+    include/ops/real_extremum.hpp
     include/ops/real_unary.hpp
     include/ops/sub.hpp
     include/ops/sum.hpp
-    include/ops/pow.hpp
+    include/ops/util.hpp
     include/storage/all_storage.hpp
-    include/storage/complex_storage.hpp
     include/storage/cpu_complex_storage.hpp
     include/storage/cpu_real_storage.hpp
+    include/storage/cpu_storage.hpp
     include/storage/gpu_complex_storage.hpp
     include/storage/gpu_real_storage.hpp
     include/storage/gpu_storage.hpp
-    include/storage/real_storage.hpp
     include/storage/sparse_cpu_complex_storage.hpp
     include/storage/sparse_cpu_real_storage.hpp
+    include/storage/sparse_cpu_storage.hpp
     include/storage/storage.hpp
+    include/storage/typed_storage.hpp
+    include/tensors/base_tensor.hpp
     include/tensors/complex_scalar.hpp
     include/tensors/complex_tensor.hpp
     include/tensors/parameter.hpp
     include/tensors/real_scalar.hpp
     include/tensors/real_tensor.hpp
     include/tensors/scalar.hpp
+    include/tensors/symbol_tensor.hpp
     include/tensors/tensor.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed
     )
