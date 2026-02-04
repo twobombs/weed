@@ -45,7 +45,7 @@ template <typename T> struct SparseCpuStorage : TypedStorage<T> {
   }
 
   void write(const tcapint &idx, const T &val) override {
-    if (std::abs(val - default_value) <= FP_NORM_EPSILON) {
+    if (std::abs(val - default_value) <= REAL1_EPSILON) {
       data.erase(idx);
     } else {
       data[idx] = val;
@@ -53,7 +53,7 @@ template <typename T> struct SparseCpuStorage : TypedStorage<T> {
   }
 
   void add(const tcapint &idx, const T &val) override {
-    if (std::abs(val - default_value) <= FP_NORM_EPSILON) {
+    if (std::abs(val - default_value) <= REAL1_EPSILON) {
       return;
     }
 
@@ -64,7 +64,7 @@ template <typename T> struct SparseCpuStorage : TypedStorage<T> {
       return;
     }
 
-    if (std::abs(val + it->second - default_value) <= FP_NORM_EPSILON) {
+    if (std::abs(val + it->second - default_value) <= REAL1_EPSILON) {
       data.erase(it);
       return;
     }
