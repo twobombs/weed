@@ -13,7 +13,9 @@
 #include "common/parallel_for.hpp"
 #include "ops/util.hpp"
 #include "storage/all_storage.hpp"
+#if ENABLE_GPU
 #include "storage/gpu_int_storage.hpp"
+#endif
 
 #define DEVICE_SWITCH(cpu, gpu, a, b, o)                                       \
   switch (a.storage->device) {                                                 \
