@@ -127,57 +127,62 @@
       {a_storage->buffer, b_storage->buffer, shapeBuffer, strideBuffer})
 
 namespace Weed {
-void ReduceKernel::cpu_real(const tcapint &index, const Tensor &a,
+template <typename T1, typename T2, typename T3>
+static void cpu(const tcapint &index, const Tensor &a, Tensor &out) {
+  GET_CONST_FLAT_TENSOR(T1, a, pa);
+  GET_STORAGE(T2, out, po);
+  REDUCE_KERNEL(T3);
+}
+static inline void cpu_real(const tcapint &index, const Tensor &a,
                             Tensor &out) {
-  GET_CONST_FLAT_TENSOR(RealTensor, a, pa);
-  GET_STORAGE(RealStorage, out, po);
-
-  REDUCE_KERNEL(real1);
+  cpu<RealTensor, RealStorage, real1>(index, a, out);
 }
-void ReduceKernel::cpu_complex(const tcapint &index, const Tensor &a,
+static inline void cpu_complex(const tcapint &index, const Tensor &a,
                                Tensor &out) {
-  GET_CONST_FLAT_TENSOR(ComplexTensor, a, pa);
-  GET_STORAGE(ComplexStorage, out, po);
-
-  REDUCE_KERNEL(complex);
+  cpu<ComplexTensor, ComplexStorage, complex>(index, a, out);
 }
-void ReduceKernel::cpu_grad_real(const tcapint &index, Tensor &din,
+template <typename T1, typename T2, typename T3>
+static void cpu_grad(const tcapint &index, Tensor &din, const Tensor &in,
+                     const Tensor &dout) {
+  CPU_GRAD(T1, T2, T3);
+}
+static inline void cpu_grad_real(const tcapint &index, Tensor &din,
                                  const Tensor &in, const Tensor &dout) {
-  CPU_GRAD(RealTensor, RealTensor, real1);
+  cpu_grad<RealTensor, RealTensor, real1>(index, din, in, dout);
 }
-void ReduceKernel::cpu_grad_complex(const tcapint &index, Tensor &din,
+static inline void cpu_grad_complex(const tcapint &index, Tensor &din,
                                     const Tensor &in, const Tensor &dout) {
-  CPU_GRAD(ComplexTensor, ComplexTensor, complex);
+  cpu_grad<ComplexTensor, ComplexTensor, complex>(index, din, in, dout);
 }
-void ReduceKernel::cpu_grad_mixed(const tcapint &index, Tensor &din,
+static inline void cpu_grad_mixed(const tcapint &index, Tensor &din,
                                   const Tensor &in, const Tensor &dout) {
-  CPU_GRAD(ComplexTensor, RealTensor, complex);
+  cpu_grad<ComplexTensor, RealTensor, complex>(index, din, in, dout);
 }
 
 #if ENABLE_GPU
-void ReduceKernel::gpu_real(const tcapint &index, const Tensor &a,
+static inline void gpu_real(const tcapint &index, const Tensor &a,
                             Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, OCL_API_REDUCE_REAL);
 }
-void ReduceKernel::gpu_complex(const tcapint &index, const Tensor &a,
+static inline void gpu_complex(const tcapint &index, const Tensor &a,
                                Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, OCL_API_REDUCE_COMPLEX);
 }
-void ReduceKernel::gpu_grad_real(const tcapint &index, Tensor &din,
+static inline void gpu_grad_real(const tcapint &index, Tensor &din,
                                  const Tensor &in, const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, OCL_API_REDUCE_GRAD_REAL);
 }
-void ReduceKernel::gpu_grad_complex(const tcapint &index, Tensor &din,
+static inline void gpu_grad_complex(const tcapint &index, Tensor &din,
                                     const Tensor &in, const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuComplexStorage, OCL_API_REDUCE_GRAD_COMPLEX);
 }
-void ReduceKernel::gpu_grad_mixed(const tcapint &index, Tensor &din,
+static inline void gpu_grad_mixed(const tcapint &index, Tensor &din,
                                   const Tensor &in, const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuComplexStorage, OCL_API_REDUCE_GRAD_MIXED);
 }
 #endif
 
-void ReduceKernel::reduce(const tcapint &index, const Tensor &a, Tensor &out) {
+void reduce(const tcapint &index, const Tensor &a, Tensor &out) {
   validate_all_same_device({&a, &out}, "ReduceKernel::reduce");
   if (a.storage->dtype != out.storage->dtype) {
     throw std::invalid_argument("Output tensor dtype mismatch!");
@@ -197,8 +202,8 @@ void ReduceKernel::reduce(const tcapint &index, const Tensor &a, Tensor &out) {
   }
 }
 
-void ReduceKernel::reduce_grad(const tcapint &index, Tensor &din,
-                               const Tensor &in, const Tensor &dout) {
+void reduce_grad(const tcapint &index, Tensor &din, const Tensor &in,
+                 const Tensor &dout) {
   validate_all_same_device({&din, &dout}, "ReduceKernel::reduce_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
@@ -240,15 +245,5 @@ void ReduceKernel::reduce_grad(const tcapint &index, Tensor &din,
     cpu_grad_real(index, din, in, dout);
 #endif
   }
-}
-
-ReduceKernel reduce_kernel;
-
-void reduce(const tcapint &index, const Tensor &a, Tensor &out) {
-  reduce_kernel.reduce(index, a, out);
-}
-void reduce_grad(const tcapint &index, Tensor &din, const Tensor &a,
-                 const Tensor &dout) {
-  reduce_kernel.reduce_grad(index, din, a, dout);
 }
 } // namespace Weed
