@@ -70,21 +70,19 @@ static inline void cpu_mixed_c_right(const Tensor &a, const Tensor &b,
 }
 
 #if ENABLE_GPU
-static inline void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_SUB_REAL);
 }
-static inline void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_SUB_COMPLEX);
 }
-static inline void gpu_mixed_c_left(const Tensor &a, const Tensor &b,
-                                    Tensor &out) {
+static void gpu_mixed_c_left(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
                       OCL_API_SUB_MIXED_C_LEFT);
 }
-static inline void gpu_mixed_c_right(const Tensor &a, const Tensor &b,
-                                     Tensor &out) {
+static void gpu_mixed_c_right(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_SUB_MIXED_C_RIGHT);
 }

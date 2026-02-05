@@ -116,24 +116,22 @@ static inline void cpu_mixed_c_right(const Tensor &a, const Tensor &b,
 }
 
 #if ENABLE_GPU
-static inline void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuRealStorage, GpuRealStoragePtr, GpuRealStorage,
               GpuRealStoragePtr, GpuRealStorage, GpuRealStoragePtr,
               OCL_API_MATMUL_REAL);
 }
-static inline void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuComplexStorage, GpuComplexStoragePtr, GpuComplexStorage,
               GpuComplexStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
               OCL_API_MATMUL_COMPLEX);
 }
-static inline void gpu_mixed_c_left(const Tensor &a, const Tensor &b,
-                                    Tensor &out) {
+static void gpu_mixed_c_left(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuComplexStorage, GpuComplexStoragePtr, GpuRealStorage,
               GpuRealStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
               OCL_API_MATMUL_MIXED_C_LEFT);
 }
-static inline void gpu_mixed_c_right(const Tensor &a, const Tensor &b,
-                                     Tensor &out) {
+static void gpu_mixed_c_right(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuRealStorage, GpuRealStoragePtr, GpuComplexStorage,
               GpuComplexStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
               OCL_API_MATMUL_MIXED_C_RIGHT);

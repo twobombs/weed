@@ -102,8 +102,7 @@ static inline void cpu_grad_mixed(Tensor &din, const Tensor &in,
            SparseCpuRealStorage>(din, in, dout, l, h);
 }
 #if ENABLE_GPU
-static inline void gpu(const Tensor &a, const real1 &l, const real1 &h,
-                       Tensor &out) {
+static void gpu(const Tensor &a, const real1 &l, const real1 &h, Tensor &out) {
   GPU_ARGS();
   GpuRealStoragePtr a_storage =
       std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
@@ -113,21 +112,18 @@ static inline void gpu(const Tensor &a, const real1 &l, const real1 &h,
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_CLAMP, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer}, 0U, &v);
 }
-static inline void gpu_grad_real(Tensor &din, const Tensor &in,
-                                 const Tensor &dout, const real1 &l,
-                                 const real1 &h) {
+static void gpu_grad_real(Tensor &din, const Tensor &in, const Tensor &dout,
+                          const real1 &l, const real1 &h) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_CLAMP_GRAD_REAL);
 }
-static inline void gpu_grad_complex(Tensor &din, const Tensor &in,
-                                    const Tensor &dout, const real1 &l,
-                                    const real1 &h) {
+static void gpu_grad_complex(Tensor &din, const Tensor &in, const Tensor &dout,
+                             const real1 &l, const real1 &h) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
            OCL_API_CLAMP_GRAD_COMPLEX);
 }
-static inline void gpu_grad_mixed(Tensor &din, const Tensor &in,
-                                  const Tensor &dout, const real1 &l,
-                                  const real1 &h) {
+static void gpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
+                           const real1 &l, const real1 &h) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_CLAMP_GRAD_MIXED);
 }

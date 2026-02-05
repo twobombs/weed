@@ -53,10 +53,10 @@ static inline void cpu_complex(Tensor &a, const Tensor &b) {
   cpu_real<ComplexTensor, SparseCpuComplexStorage>(a, b);
 }
 #if ENABLE_GPU
-static inline void gpu_real(Tensor &a, const Tensor &b) {
+static void gpu_real(Tensor &a, const Tensor &b) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, OCL_API_COPY_REAL);
 }
-static inline void gpu_complex(Tensor &a, const Tensor &b) {
+static void gpu_complex(Tensor &a, const Tensor &b) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage,
                       OCL_API_COPY_COMPLEX);
 }

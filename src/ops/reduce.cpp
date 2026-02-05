@@ -160,24 +160,22 @@ static inline void cpu_grad_mixed(const tcapint &index, Tensor &din,
 }
 
 #if ENABLE_GPU
-static inline void gpu_real(const tcapint &index, const Tensor &a,
-                            Tensor &out) {
+static void gpu_real(const tcapint &index, const Tensor &a, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, OCL_API_REDUCE_REAL);
 }
-static inline void gpu_complex(const tcapint &index, const Tensor &a,
-                               Tensor &out) {
+static void gpu_complex(const tcapint &index, const Tensor &a, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, OCL_API_REDUCE_COMPLEX);
 }
-static inline void gpu_grad_real(const tcapint &index, Tensor &din,
-                                 const Tensor &in, const Tensor &dout) {
+static void gpu_grad_real(const tcapint &index, Tensor &din, const Tensor &in,
+                          const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, OCL_API_REDUCE_GRAD_REAL);
 }
-static inline void gpu_grad_complex(const tcapint &index, Tensor &din,
-                                    const Tensor &in, const Tensor &dout) {
+static void gpu_grad_complex(const tcapint &index, Tensor &din,
+                             const Tensor &in, const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuComplexStorage, OCL_API_REDUCE_GRAD_COMPLEX);
 }
-static inline void gpu_grad_mixed(const tcapint &index, Tensor &din,
-                                  const Tensor &in, const Tensor &dout) {
+static void gpu_grad_mixed(const tcapint &index, Tensor &din, const Tensor &in,
+                           const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuComplexStorage, OCL_API_REDUCE_GRAD_MIXED);
 }
 #endif

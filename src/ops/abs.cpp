@@ -173,33 +173,33 @@ static inline void cpu_complex_grad_mixed(Tensor &din, const Tensor &in,
                                                                     dout);
 }
 #if ENABLE_GPU
-static inline void gpu_real_grad_real(Tensor &din, const Tensor &in,
-                                      const Tensor &dout) {
+static void gpu_real_grad_real(Tensor &din, const Tensor &in,
+                               const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_ABS_REAL_GRAD_REAL);
 }
-static inline void gpu_real_grad_complex(Tensor &din, const Tensor &in,
-                                         const Tensor &dout) {
+static void gpu_real_grad_complex(Tensor &din, const Tensor &in,
+                                  const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
            OCL_API_ABS_REAL_GRAD_COMPLEX);
 }
-static inline void gpu_real_grad_mixed(Tensor &din, const Tensor &in,
-                                       const Tensor &dout) {
+static void gpu_real_grad_mixed(Tensor &din, const Tensor &in,
+                                const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_ABS_REAL_GRAD_MIXED);
 }
-static inline void gpu_complex_grad_real(Tensor &din, const Tensor &in,
-                                         const Tensor &dout) {
+static void gpu_complex_grad_real(Tensor &din, const Tensor &in,
+                                  const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
            OCL_API_ABS_COMPLEX_GRAD_REAL);
 }
-static inline void gpu_complex_grad_complex(Tensor &din, const Tensor &in,
-                                            const Tensor &dout) {
+static void gpu_complex_grad_complex(Tensor &din, const Tensor &in,
+                                     const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuComplexStorage,
            OCL_API_ABS_COMPLEX_GRAD_COMPLEX);
 }
-static inline void gpu_complex_grad_mixed(Tensor &din, const Tensor &in,
-                                          const Tensor &dout) {
+static void gpu_complex_grad_mixed(Tensor &din, const Tensor &in,
+                                   const Tensor &dout) {
   GPU_GRAD(GpuComplexStorage, GpuComplexStorage, GpuRealStorage,
            OCL_API_ABS_COMPLEX_GRAD_MIXED);
 }
