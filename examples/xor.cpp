@@ -13,10 +13,7 @@
 
 #include "autograd/adam.hpp"
 #include "autograd/bci_loss.hpp"
-// #include "autograd/mse_loss.hpp"
-// #include "autograd/sgd.hpp"
 #include "autograd/zero_grad.hpp"
-#include "modules/gru.hpp"
 #include "modules/linear.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
@@ -58,11 +55,9 @@ int main() {
   while ((epoch <= 200) && (loss_r > 0.01)) {
     TensorPtr y_pred = model.forward(x);
     TensorPtr loss = bci_loss(y_pred, y);
-    // TensorPtr loss = mse_loss(y_pred, y);
 
     Tensor::backward(loss);
     adam_step(opt, params);
-    // sgd_step(params, 1.0);
 
     loss_r = GET_REAL(loss);
     if ((epoch % 10) == 0U) {
