@@ -28,12 +28,12 @@ struct Sequential : public Module {
     }
   }
 
-  void train() {
+  void train() override {
     for (const ModulePtr &m : layers) {
       m->train();
     }
   }
-  void eval() {
+  void eval() override {
     for (const ModulePtr &m : layers) {
       m->eval();
     }
