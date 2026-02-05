@@ -50,7 +50,7 @@
 
 namespace Weed {
 template <typename T>
-void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
+static void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
                  Tensor &out) {
   const tcapint D = weight.shape[1];
   const size_t N = indices.get_broadcast_size();
@@ -77,7 +77,7 @@ void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
 }
 
 template <typename T1, typename T2>
-void cpu_backward(Tensor &dW, const SymbolTensor &indices, const Tensor &dout) {
+static void cpu_backward(Tensor &dW, const SymbolTensor &indices, const Tensor &dout) {
   const tcapint D = dW.shape[1];
   const size_t N = indices.get_broadcast_size();
 
@@ -103,27 +103,27 @@ void cpu_backward(Tensor &dW, const SymbolTensor &indices, const Tensor &dout) {
 }
 
 #if ENABLE_GPU
-void gpu_forward_real(const SymbolTensor &indices, const Tensor &weight,
+static void gpu_forward_real(const SymbolTensor &indices, const Tensor &weight,
                       Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_REAL);
 }
-void gpu_forward_complex(const SymbolTensor &indices, const Tensor &weight,
+static void gpu_forward_complex(const SymbolTensor &indices, const Tensor &weight,
                          Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_EMBEDDING_COMPLEX);
 }
-void gpu_backward_real(Tensor &out, const SymbolTensor &indices,
+static void gpu_backward_real(Tensor &out, const SymbolTensor &indices,
                        const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
 }
-void gpu_backward_complex(Tensor &out, const SymbolTensor &indices,
+static void gpu_backward_complex(Tensor &out, const SymbolTensor &indices,
                           const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
 }
-void gpu_backward_mixed(Tensor &out, const SymbolTensor &indices,
+static void gpu_backward_mixed(Tensor &out, const SymbolTensor &indices,
                         const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
