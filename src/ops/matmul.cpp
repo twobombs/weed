@@ -66,7 +66,7 @@ struct MatrixDim {
   tcapint O_s0, O_s1;
 };
 
-MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
+static MatrixDim get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
   if ((a.shape.size() != 2U) || (b.shape.size() != 2U) ||
       (out.shape.size() != 2U)) {
     throw std::invalid_argument("MatMul is only for matrices with 2 indices!");
@@ -95,43 +95,44 @@ MatrixDim MatMulKernel::get_dim(const Tensor &a, const Tensor &b, Tensor &out) {
   return d;
 }
 
-void MatMulKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_HEADER(RealStorage, RealStorage, RealStorage);
-  CPU_BY_TYPE(real1);
+template <typename T1, typename T2, typename T3, typename T4>
+static void cpu(const Tensor &a, const Tensor &b, Tensor &out) {
+  CPU_HEADER(T1, T2, T3);
+  CPU_BY_TYPE(T4);
 }
-void MatMulKernel::cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_HEADER(ComplexStorage, ComplexStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+static inline void cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+  cpu<RealStorage, RealStorage, RealStorage, real1>(a, b, out);
 }
-void MatMulKernel::cpu_mixed_c_left(const Tensor &a, const Tensor &b,
+static inline void cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+  cpu<ComplexStorage, ComplexStorage, ComplexStorage, complex>(a, b, out);
+}
+static inline void cpu_mixed_c_left(const Tensor &a, const Tensor &b,
                                     Tensor &out) {
-  CPU_HEADER(ComplexStorage, RealStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+  cpu<ComplexStorage, RealStorage, ComplexStorage, complex>(a, b, out);
 }
-void MatMulKernel::cpu_mixed_c_right(const Tensor &a, const Tensor &b,
+static inline void cpu_mixed_c_right(const Tensor &a, const Tensor &b,
                                      Tensor &out) {
-  CPU_HEADER(RealStorage, ComplexStorage, ComplexStorage);
-  CPU_BY_TYPE(complex);
+  cpu<RealStorage, ComplexStorage, ComplexStorage, complex>(a, b, out);
 }
 
 #if ENABLE_GPU
-void MatMulKernel::gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuRealStorage, GpuRealStoragePtr, GpuRealStorage,
               GpuRealStoragePtr, GpuRealStorage, GpuRealStoragePtr,
               OCL_API_MATMUL_REAL);
 }
-void MatMulKernel::gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
   GPU_BY_TYPE(GpuComplexStorage, GpuComplexStoragePtr, GpuComplexStorage,
               GpuComplexStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
               OCL_API_MATMUL_COMPLEX);
 }
-void MatMulKernel::gpu_mixed_c_left(const Tensor &a, const Tensor &b,
+static inline void gpu_mixed_c_left(const Tensor &a, const Tensor &b,
                                     Tensor &out) {
   GPU_BY_TYPE(GpuComplexStorage, GpuComplexStoragePtr, GpuRealStorage,
               GpuRealStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
               OCL_API_MATMUL_MIXED_C_LEFT);
 }
-void MatMulKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
+static inline void gpu_mixed_c_right(const Tensor &a, const Tensor &b,
                                      Tensor &out) {
   GPU_BY_TYPE(GpuRealStorage, GpuRealStoragePtr, GpuComplexStorage,
               GpuComplexStoragePtr, GpuComplexStorage, GpuComplexStoragePtr,
@@ -139,7 +140,7 @@ void MatMulKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
 }
 #endif
 
-void MatMulKernel::matmul(const Tensor &a, const Tensor &b, Tensor &out) {
+void matmul(const Tensor &a, const Tensor &b, Tensor &out) {
   validate_all_same_device({&a, &b, &out}, "MatMulKernel::matmul");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
@@ -176,11 +177,5 @@ void MatMulKernel::matmul(const Tensor &a, const Tensor &b, Tensor &out) {
     cpu_real(a, b, out);
 #endif
   }
-}
-
-MatMulKernel matmul_kernel;
-
-void matmul(const Tensor &a, const Tensor &b, Tensor &out) {
-  matmul_kernel.matmul(a, b, out);
 }
 } // namespace Weed
