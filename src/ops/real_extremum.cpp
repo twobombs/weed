@@ -132,16 +132,16 @@ static void cpu_grad(Tensor &din, const Tensor &in, const Tensor &dout,
   CPU_GRAD_INIT_3(T1, RealTensor, T2);
   CPU_GRAD();
 }
-static void cpu_grad_real(Tensor &din, const Tensor &in, const Tensor &dout,
-                          const Tensor &out) {
+static inline void cpu_grad_real(Tensor &din, const Tensor &in,
+                                 const Tensor &dout, const Tensor &out) {
   cpu_grad<RealTensor, RealTensor>(din, in, dout, out);
 }
-static void cpu_grad_complex(Tensor &din, const Tensor &in, const Tensor &dout,
-                             const Tensor &out) {
+static inline void cpu_grad_complex(Tensor &din, const Tensor &in,
+                                    const Tensor &dout, const Tensor &out) {
   cpu_grad<ComplexTensor, ComplexTensor>(din, in, dout, out);
 }
-static void cpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
-                           const Tensor &out) {
+static inline void cpu_grad_mixed(Tensor &din, const Tensor &in,
+                                  const Tensor &dout, const Tensor &out) {
   cpu_grad<ComplexTensor, RealTensor>(din, in, dout, out);
 }
 

@@ -55,15 +55,17 @@ static void cpu_add(const Tensor &a, const Tensor &b, Tensor &out) {
   ADD_KERNEL();
   SPARSE_CPU_3_RUN(T3, T4);
 }
-static void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_real_add(const Tensor &a, const Tensor &b, Tensor &out) {
   cpu_add<RealTensor, RealTensor, SparseCpuRealStorage, SparseCpuRealStorage>(
       a, b, out);
 }
-static void cpu_complex_add(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_complex_add(const Tensor &a, const Tensor &b,
+                                   Tensor &out) {
   cpu_add<ComplexTensor, ComplexTensor, SparseCpuComplexStorage,
           SparseCpuComplexStorage>(a, b, out);
 }
-static void cpu_mixed_add(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_mixed_add(const Tensor &a, const Tensor &b,
+                                 Tensor &out) {
   cpu_add<ComplexTensor, RealTensor, SparseCpuComplexStorage,
           SparseCpuRealStorage>(a, b, out);
 }
@@ -87,15 +89,17 @@ static void cpu_mul(const Tensor &a, const Tensor &b, Tensor &out) {
   MUL_KERNEL();
   SPARSE_CPU_3_RUN(T3, T4);
 }
-static void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_real_mul(const Tensor &a, const Tensor &b, Tensor &out) {
   cpu_mul<RealTensor, RealTensor, SparseCpuRealStorage, SparseCpuRealStorage>(
       a, b, out);
 }
-static void cpu_complex_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_complex_mul(const Tensor &a, const Tensor &b,
+                                   Tensor &out) {
   cpu_mul<ComplexTensor, ComplexTensor, SparseCpuComplexStorage,
           SparseCpuComplexStorage>(a, b, out);
 }
-static void cpu_mixed_mul(const Tensor &a, const Tensor &b, Tensor &out) {
+static inline void cpu_mixed_mul(const Tensor &a, const Tensor &b,
+                                 Tensor &out) {
   cpu_mul<ComplexTensor, RealTensor, SparseCpuComplexStorage,
           SparseCpuRealStorage>(a, b, out);
 }

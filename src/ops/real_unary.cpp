@@ -77,16 +77,16 @@ static void cpu_relu_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
   CPU_RELU_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_relu_grad_real(Tensor &din, const Tensor &in,
-                               const Tensor &dout) {
+static inline void cpu_relu_grad_real(Tensor &din, const Tensor &in,
+                                      const Tensor &dout) {
   cpu_relu_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
+static inline void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
   cpu_relu_grad<ComplexTensor, ComplexTensor>(din, in, dout);
 }
-static void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
-                                const Tensor &dout) {
+static inline void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
+                                       const Tensor &dout) {
   cpu_relu_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
@@ -133,16 +133,16 @@ static void cpu_sigmoid_grad(Tensor &din, const Tensor &in,
   CPU_SIGMOID_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
+static inline void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
   cpu_sigmoid_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
-                                     const Tensor &dout) {
+static inline void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
+                                            const Tensor &dout) {
   cpu_sigmoid_grad<ComplexTensor, ComplexTensor>(din, in, dout);
 }
-static void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
-                                   const Tensor &dout) {
+static inline void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
+                                          const Tensor &dout) {
   cpu_sigmoid_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
@@ -188,16 +188,16 @@ static void cpu_tanh_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
   CPU_TANH_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_tanh_grad_real(Tensor &din, const Tensor &in,
-                               const Tensor &dout) {
+static inline void cpu_tanh_grad_real(Tensor &din, const Tensor &in,
+                                      const Tensor &dout) {
   cpu_tanh_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_tanh_grad_complex(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
+static inline void cpu_tanh_grad_complex(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
   cpu_tanh_grad<ComplexTensor, ComplexTensor>(din, in, dout);
 }
-static void cpu_tanh_grad_mixed(Tensor &din, const Tensor &in,
-                                const Tensor &dout) {
+static inline void cpu_tanh_grad_mixed(Tensor &din, const Tensor &in,
+                                       const Tensor &dout) {
   cpu_tanh_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
