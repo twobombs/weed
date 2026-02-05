@@ -59,8 +59,6 @@ template <typename T> struct CpuStorage : TypedStorage<T> {
     std::fill(data.get(), data.get() + TypedStorage<T>::size, v);
   }
 
-  virtual StoragePtr Upcast(const DType &dt) = 0;
-
   StoragePtr cpu() override { return TypedStorage<T>::get_ptr(); }
 };
 } // namespace Weed
