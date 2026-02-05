@@ -30,10 +30,6 @@
 #define VCI_ARG_LEN 10
 
 namespace Weed {
-#if ENABLE_CUDA
-typedef std::shared_ptr<void> BufferPtr;
-#endif
-
 /**
  * OpenCL bad_alloc wrapper with informative error message
  */

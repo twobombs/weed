@@ -21,6 +21,10 @@
 #include <list>
 
 namespace Weed {
+#if ENABLE_CUDA
+typedef cudaError_t cl_int;
+#endif
+
 /**
  * Manages a GPU (or accelerator) device context, per discrete (or integrated)
  * device, or per device queue of dependent events

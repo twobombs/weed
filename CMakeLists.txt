@@ -291,6 +291,7 @@ install (FILES
     include/common/weed_types.hpp
     include/common/complex16x2simd.hpp
     include/common/complex8x2simd.hpp
+    include/common/cudaengine.cuh
     include/common/oclapi.hpp
     include/common/oclengine.hpp
     include/common/parallel_for.hpp
