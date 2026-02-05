@@ -84,7 +84,7 @@
   }
 
 namespace Weed {
-static inline void cpu_real(const Tensor &a, Tensor &out) {
+static void cpu_real(const Tensor &a, Tensor &out) {
   CPU_INIT_2(RealTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     const real1 tmp = (*pa)[i];
@@ -92,7 +92,7 @@ static inline void cpu_real(const Tensor &a, Tensor &out) {
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-static inline void cpu_complex(const Tensor &a, Tensor &out) {
+static void cpu_complex(const Tensor &a, Tensor &out) {
   CPU_INIT_2(ComplexTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i, (real1)std::abs((*pa)[i]));
