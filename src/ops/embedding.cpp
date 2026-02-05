@@ -134,9 +134,17 @@ void embedding_gather(const SymbolTensor &a, const Tensor &b, Tensor &o) {
   validate_all_same_device({&a, &b, &o}, "embedding_gather");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   if (isAComplex) {
+#if ENABLE_GPU
     DEVICE_SWITCH(cpu_forward<ComplexStorage>, gpu_forward_complex, a, b, o);
+#else
+    cpu_forward<ComplexStorage>(a, b, o);
+#endif
   } else {
+#if ENABLE_GPU
     DEVICE_SWITCH(cpu_forward<RealStorage>, gpu_forward_real, a, b, o);
+#else
+    cpu_forward<RealStorage>(a, b, o);
+#endif
   }
 }
 
