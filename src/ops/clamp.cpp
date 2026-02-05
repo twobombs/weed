@@ -183,7 +183,7 @@ void clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
 #if ENABLE_GPU
       GRAD_DEVICE_SWITCH(cpu_grad_mixed, gpu_grad_mixed, din, in, dout, l, h);
 #else
-      cpu_grad_complex(din, in, dout, l, h);
+      cpu_grad_mixed(din, in, dout, l, h);
 #endif
     }
     break;
