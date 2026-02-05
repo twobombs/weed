@@ -150,24 +150,36 @@ void embedding_scatter_add(Tensor &o, const SymbolTensor &a, const Tensor &b) {
   }
   if (isOComplex) {
     if (isAComplex) {
+#if ENABLE_GPU
       if (o.storage->device == DeviceTag::GPU) {
         cpu_backward<ComplexStorage, ComplexStorage>(o, a, b);
       } else {
         gpu_backward_complex(o, a, b);
       }
+#else
+      cpu_backward<ComplexStorage, ComplexStorage>(o, a, b);
+#endif
     } else {
+#if ENABLE_GPU
       if (o.storage->device == DeviceTag::GPU) {
         cpu_backward<ComplexStorage, RealStorage>(o, a, b);
       } else {
         gpu_backward_mixed(o, a, b);
       }
+#else
+      cpu_backward<ComplexStorage, RealStorage>(o, a, b);
+#endif
     }
   } else {
+#if ENABLE_GPU
     if (o.storage->device == DeviceTag::GPU) {
       cpu_backward<RealStorage, RealStorage>(o, a, b);
     } else {
       gpu_backward_real(o, a, b);
     }
+#else
+    cpu_backward<RealStorage, RealStorage>(o, a, b);
+#endif
   }
 }
 } // namespace Weed
