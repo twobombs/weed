@@ -231,7 +231,7 @@ void reduce_grad(const tcapint &index, Tensor &din, const Tensor &in,
 #if ENABLE_GPU
       DEVICE_SWITCH_GRAD(cpu_grad_mixed, gpu_grad_mixed);
 #else
-      cpu_grad_complex(index, din, in, dout);
+      cpu_grad_mixed(index, din, in, dout);
 #endif
     }
     break;
