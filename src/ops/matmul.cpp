@@ -32,7 +32,7 @@
                         const auto b_idx = d.B_o + k * d.B_s0 + j * d.B_s1;    \
                         sum += (*pa)[a_idx] * (*pb)[b_idx];                    \
                       }                                                        \
-                      const auto o_idx = i * d.O_s0 + j * d.O_s1;              \
+                      const auto o_idx = d.O_o + i * d.O_s0 + j * d.O_s1;      \
                       po->write(o_idx, sum);                                   \
                     })
 
