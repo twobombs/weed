@@ -19,8 +19,6 @@
 
 #if ENABLE_OPENCL
 #include "common/oclengine.hpp"
-#else
-#include "common/cudaengine.cuh"
 #endif
 
 #include <algorithm>

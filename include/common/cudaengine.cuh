@@ -29,7 +29,6 @@ class CUDADeviceContext;
 typedef std::shared_ptr<CUDADeviceContext> DeviceContextPtr;
 typedef std::vector<cudaEvent_t> EventVec;
 typedef std::shared_ptr<std::vector<cudaEvent_t>> EventVecPtr;
-typedef std::shared_ptr<void> BufferPtr;
 typedef cudaError_t cl_int;
 
 class CUDADeviceContext {

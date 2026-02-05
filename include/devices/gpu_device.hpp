@@ -18,6 +18,16 @@
 #error GPU files were included without either OpenCL and CUDA enabled.
 #endif
 
+#if ENABLE_CUDA
+#include "common/cudaengine.cuh"
+#endif
+
+#if ENABLE_OPENCL
+#define WEED_GPU_SINGLETON (OCLEngine::Instance())
+#elif ENABLE_CUDA
+#define WEED_GPU_SINGLETON (CUDAEngine::Instance())
+#endif
+
 #include <list>
 
 namespace Weed {
@@ -51,7 +61,7 @@ struct GpuDevice {
    */
   GpuDevice(const int64_t &did = -1)
       : deviceID(did), callbackError(CL_SUCCESS), totalOclAllocSize(0U) {
-    const size_t deviceCount = OCLEngine::Instance().GetDeviceCount();
+    const size_t deviceCount = WEED_GPU_SINGLETON.GetDeviceCount();
 
     if (!deviceCount) {
       throw std::runtime_error("GpuDevice::GpuDevice(): No available devices.");
@@ -64,7 +74,7 @@ struct GpuDevice {
 
     clFinish();
 
-    device_context = OCLEngine::Instance().GetDeviceContextPtr(did);
+    device_context = WEED_GPU_SINGLETON.GetDeviceContextPtr(did);
     context = device_context->context;
     queue = device_context->queue;
   }
@@ -117,10 +127,10 @@ struct GpuDevice {
    */
   void AddAlloc(const size_t &size) {
     size_t currentAlloc =
-        OCLEngine::Instance().AddToActiveAllocSize(deviceID, size);
+        WEED_GPU_SINGLETON.AddToActiveAllocSize(deviceID, size);
     if (device_context &&
         (currentAlloc > device_context->GetGlobalAllocLimit())) {
-      OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+      WEED_GPU_SINGLETON.SubtractFromActiveAllocSize(deviceID, size);
       throw bad_alloc("VRAM limits exceeded in QEngineOCL::AddAlloc()");
     }
     totalOclAllocSize += size;
@@ -130,7 +140,7 @@ struct GpuDevice {
    * Subtract byte count to manual GPU memory tracking
    */
   void SubtractAlloc(const size_t &size) {
-    OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+    WEED_GPU_SINGLETON.SubtractFromActiveAllocSize(deviceID, size);
     totalOclAllocSize -= size;
   }
 
