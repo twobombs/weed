@@ -13,7 +13,10 @@
 #include "common/serializer.hpp"
 
 #include "modules/linear.hpp"
+#include "modules/relu.hpp"
 #include "modules/sequential.hpp"
+#include "modules/sigmoid.hpp"
+#include "modules/tanh.hpp"
 
 namespace Weed {
 void Module::save(std::ostream &os) const {
@@ -54,6 +57,15 @@ ModulePtr Module::load(std::istream &is) {
     l->bias = bias;
 
     return l;
+  }
+  case ModuleType::RELU_T: {
+    return std::make_shared<ReLU>();
+  }
+  case ModuleType::SIGMOID_T: {
+    return std::make_shared<Sigmoid>();
+  }
+  case ModuleType::TANH_T: {
+    return std::make_shared<Tanh>();
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:
