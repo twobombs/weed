@@ -10,10 +10,44 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "tensors/parameter.hpp"
+#include "common/serializer.hpp"
 
 namespace Weed {
-void Parameter::save(std::ostream &out) const {}
+void Parameter::save(std::ostream &out) const {
+  Serializer::write_tcapint(out, offset);
+  Serializer::write_tcapint(out, (tcapint)(shape.size()));
+  for (size_t i = 0U; i < shape.size(); ++i) {
+    Serializer::write_tcapint(out, shape[i]);
+    Serializer::write_tcapint(out, stride[i]);
+  }
+  storage->save(out);
+}
 ParameterPtr Parameter::load(std::istream &in, DeviceTag dtag_override) {
-  return nullptr;
+  tcapint offset;
+  Serializer::read_tcapint(in, offset);
+
+  tcapint sz;
+  Serializer::read_tcapint(in, sz);
+
+  std::vector<tcapint> shape(sz);
+  std::vector<tcapint> stride(sz);
+
+  for (size_t i = 0U; i < shape.size(); ++i) {
+    Serializer::read_tcapint(in, shape[i]);
+    Serializer::read_tcapint(in, stride[i]);
+  }
+
+  StoragePtr storage = Storage::load(in);
+
+  const DeviceTag dtag =
+      (dtag_override != NONE_DEVICE) ? dtag_override : storage->device;
+
+  storage->device = dtag;
+
+  ParameterPtr p =
+      std::make_shared<Parameter>(shape, stride, storage->dtype, dtag);
+  p->storage = storage;
+
+  return p;
 }
 } // namespace Weed

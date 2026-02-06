@@ -24,6 +24,7 @@
 namespace Weed {
 void Storage::save(std::ostream &os) const {
   write_storage_type(os, stype);
+  write_device_tag(os, device);
   Serializer::write_tcapint(os, size);
   // Needs the inheriting struct to do the rest
 }
@@ -31,6 +32,9 @@ void Storage::save(std::ostream &os) const {
 StoragePtr Storage::load(std::istream &is) {
   StorageType stype;
   read_storage_type(is, stype);
+
+  DeviceTag dtag;
+  read_device_tag(is, dtag);
 
   tcapint size;
   Serializer::read_tcapint(is, size);

@@ -114,5 +114,13 @@ struct Storage : public std::enable_shared_from_this<Storage> {
   static void read_storage_type(std::istream &in, StorageType &x) {
     in.read(reinterpret_cast<char *>(&x), sizeof(StorageType));
   }
+
+  static void write_device_tag(std::ostream &out, const DeviceTag &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(DeviceTag));
+  }
+
+  static void read_device_tag(std::istream &in, DeviceTag &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(DeviceTag));
+  }
 };
 } // namespace Weed
