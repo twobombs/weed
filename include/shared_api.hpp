@@ -46,4 +46,10 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
                                     _In_ uintw n, _In_reads_(n) uintw *shape,
                                     _In_reads_(n) uintw *stride,
                                     _In_ real1_s *d);
+MICROSOFT_QUANTUM_DECL uintw get_result_index_count(_In_ uintw mid);
+MICROSOFT_QUANTUM_DECL void get_result_dims(_In_ uintw mid, uintw *shape,
+                                            uintw *stride);
+MICROSOFT_QUANTUM_DECL uintw get_result_size(_In_ uintw mid);
+MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid);
+MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, real1_s *d);
 }

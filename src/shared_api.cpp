@@ -11,6 +11,7 @@
 // "qfactory.hpp" pulls in all headers needed to create any type of
 // "Qrack::QInterface."
 #include "modules/module.hpp"
+#include "storage/cpu_storage.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -28,6 +29,22 @@
                                                std::adopt_lock);               \
     module_lock = std::make_unique<const std::lock_guard<std::mutex>>(         \
         module_results[mid]->mtx, std::adopt_lock);                            \
+  }
+
+#define MODULE_LOCK_GUARD_VOID(mid)                                            \
+  MODULE_LOCK_GUARD(mid);                                                      \
+  if ((mid >= module_results.size()) || !module_results[mid]) {                \
+    std::cout << "Invalid argument: module ID not found!" << std::endl;        \
+    meta_error = 2;                                                            \
+    return;                                                                    \
+  }
+
+#define MODULE_LOCK_GUARD_INT(mid)                                             \
+  MODULE_LOCK_GUARD(mid);                                                      \
+  if ((mid >= module_results.size()) || !module_results[mid]) {                \
+    std::cout << "Invalid argument: module ID not found!" << std::endl;        \
+    meta_error = 2;                                                            \
+    return 0U;                                                                 \
   }
 
 using namespace Weed;
@@ -57,6 +74,11 @@ extern "C" {
 MICROSOFT_QUANTUM_DECL int get_error(_In_ const uintw mid) {
   if (meta_error) {
     meta_error = 0;
+    return 2;
+  }
+
+  if ((mid >= module_results.size()) || !module_results[mid]) {
+    std::cout << "Invalid argument: module ID not found!" << std::endl;
     return 2;
   }
 
@@ -96,14 +118,7 @@ MICROSOFT_QUANTUM_DECL uintw load_module(_In_ const char *f) {
 }
 
 MICROSOFT_QUANTUM_DECL void free_module(_In_ uintw mid) {
-  META_LOCK_GUARD();
-
-  if (mid >= module_results.size()) {
-    std::cout << "Invalid argument: module ID not found!" << std::endl;
-    meta_error = 2;
-    return;
-  }
-
+  MODULE_LOCK_GUARD_VOID(mid);
   module_results[mid] = nullptr;
 }
 
@@ -111,7 +126,7 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
                                     _In_ uintw n, _In_reads_(n) uintw *shape,
                                     _In_reads_(n) uintw *stride,
                                     _In_ real1_s *d) {
-  MODULE_LOCK_GUARD(mid);
+  MODULE_LOCK_GUARD_VOID(mid);
 
   TensorPtr x;
   try {
@@ -145,7 +160,7 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
     }
   } catch (const std::exception &ex) {
     std::cout << ex.what() << std::endl;
-    meta_error = 1;
+    meta_error = 2;
   }
 
   try {
@@ -153,6 +168,97 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
   } catch (const std::exception &ex) {
     std::cout << ex.what() << std::endl;
     module_results[mid]->error = 1;
+  }
+}
+
+MICROSOFT_QUANTUM_DECL uintw get_result_index_count(_In_ uintw mid) {
+  MODULE_LOCK_GUARD_INT(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return 0U;
+  }
+
+  return (uintw)(t->shape.size());
+}
+
+MICROSOFT_QUANTUM_DECL void get_result_dims(_In_ uintw mid, uintw *shape,
+                                            uintw *stride) {
+  MODULE_LOCK_GUARD_VOID(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return;
+  }
+
+  const size_t max_lcv = t->shape.size();
+  for (size_t i = 0U; i < max_lcv; ++i) {
+    shape[i] = t->shape[i];
+    stride[i] = t->stride[i];
+  }
+}
+
+MICROSOFT_QUANTUM_DECL uintw get_result_size(_In_ uintw mid) {
+  MODULE_LOCK_GUARD_INT(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return 0U;
+  }
+
+  return (uintw)(t->storage->size);
+}
+
+MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid) {
+  MODULE_LOCK_GUARD_INT(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return 0U;
+  }
+
+  return (uintw)(t->storage->dtype);
+}
+
+MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, real1_s *d) {
+  MODULE_LOCK_GUARD_VOID(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return;
+  }
+
+  const StoragePtr sp = t->storage->cpu();
+  const size_t max_lcv = sp->size;
+  if (sp->dtype == DType::COMPLEX) {
+    const CpuStorage<complex> &s =
+        *static_cast<CpuStorage<complex> *>(sp.get());
+    for (size_t i = 0U; i < max_lcv; ++i) {
+      size_t j = i << 1U;
+      const complex v = s[i];
+      d[j] = v.real();
+      d[j + 1] = v.imag();
+    }
+  } else {
+    const CpuStorage<real1> &s = *static_cast<CpuStorage<real1> *>(sp.get());
+    for (size_t i = 0U; i < max_lcv; ++i) {
+      d[i] = s[i];
+    }
   }
 }
 }
