@@ -14,20 +14,19 @@
 
 namespace Weed {
 TensorPtr LSTM::forward(const TensorPtr x) {
-  const LSTMState &prev = state.back();
-  if (prev.h->shape.size() == 1U) {
-    prev.h->shape.insert(prev.h->shape.begin(), x->shape[0U]);
-    prev.h->stride.insert(prev.h->stride.begin(), 0U);
-    prev.h->materialize_broadcast();
+  if (state.h->shape.size() == 1U) {
+    state.h->shape.insert(state.h->shape.begin(), x->shape[0U]);
+    state.h->stride.insert(state.h->stride.begin(), 0U);
+    state.h->materialize_broadcast();
   }
-  if (prev.c->shape.size() == 1U) {
-    prev.c->shape.insert(prev.c->shape.begin(), x->shape[0U]);
-    prev.c->stride.insert(prev.c->stride.begin(), 0U);
-    prev.c->materialize_broadcast();
+  if (state.c->shape.size() == 1U) {
+    state.c->shape.insert(state.c->shape.begin(), x->shape[0U]);
+    state.c->stride.insert(state.c->stride.begin(), 0U);
+    state.c->materialize_broadcast();
   }
 
   // z = W_x(x) + W_h(h_{t-1})
-  TensorPtr z = W_x->forward(x) + W_h->forward(prev.h);
+  TensorPtr z = W_x->forward(x) + W_h->forward(state.h);
 
   // Split z into 4 chunks
   const std::vector<TensorPtr> zc = z->chunk(4, -1);
@@ -37,10 +36,13 @@ TensorPtr LSTM::forward(const TensorPtr x) {
   TensorPtr g = Tensor::tanh(zc[2U]);
   TensorPtr o = Tensor::sigmoid(zc[3U]);
 
-  TensorPtr c = f * prev.c + i * g;
+  TensorPtr c = f * state.c + i * g;
   TensorPtr h = o * Tensor::tanh(c);
 
-  state.push_back({h, c});
+  state.h = h;
+  state.c = c;
+
+  history.push_back(h);
 
   return h;
 }

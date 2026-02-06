@@ -34,15 +34,17 @@ struct LSTM : public Module {
   LinearPtr W_x; // input -> 4H
   LinearPtr W_h; // hidden -> 4H
 
-  std::vector<LSTMState> state;
+  LSTMState state;
+  std::vector<TensorPtr> history;
 
   LSTM() : Module(LSTM_T) {}
   LSTM(tcapint in, tcapint hid, DeviceTag dtag = DEFAULT_DEVICE)
       : Module(LSTM_T), input_dim(in), hidden_dim(hid),
         W_x(std::make_shared<Linear>(in, 4 * hid, true, DType::REAL, dtag)),
         W_h(std::make_shared<Linear>(hid, 4 * hid, true, DType::REAL, dtag)),
-        state{LSTMState{Tensor::zeros(std::vector<tcapint>{hidden_dim}),
-                        Tensor::zeros(std::vector<tcapint>{hidden_dim})}} {}
+        state{Tensor::zeros(std::vector<tcapint>{hidden_dim}),
+              Tensor::zeros(std::vector<tcapint>{hidden_dim})},
+        history{state.h} {}
 
   std::vector<ParameterPtr> parameters() override {
     auto px = W_x->parameters();
