@@ -43,4 +43,11 @@ StoragePtr CpuRealStorage::Upcast(const DType &dt) {
 
   return n;
 }
+
+void CpuRealStorage::save(std::ostream &os) const {
+  Storage::save(os);
+  for (tcapint i = 0U; i < size; ++i) {
+    Serializer::write_real(os, data[i]);
+  }
+}
 } // namespace Weed

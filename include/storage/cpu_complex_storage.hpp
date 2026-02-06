@@ -28,6 +28,7 @@ struct CpuComplexStorage : CpuStorage<complex> {
     return TypedStorage<complex>::get_ptr();
   }
   StoragePtr gpu(const int64_t &did = -1) override;
+  void save(std::ostream &) const override;
 };
 typedef std::shared_ptr<CpuComplexStorage> CpuComplexStoragePtr;
 } // namespace Weed

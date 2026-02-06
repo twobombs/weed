@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "common/serializer.hpp"
 #include "storage/cpu_storage.hpp"
 
 #include <vector>
@@ -25,6 +26,7 @@ struct CpuRealStorage : CpuStorage<real1> {
       : CpuStorage<real1>(REAL_CPU_DENSE, i) {}
   StoragePtr Upcast(const DType &dt) override;
   StoragePtr gpu(const int64_t &did = -1) override;
+  void save(std::ostream &) const override;
 };
 typedef std::shared_ptr<CpuRealStorage> CpuRealStoragePtr;
 } // namespace Weed

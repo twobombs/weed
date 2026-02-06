@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "storage/cpu_complex_storage.hpp"
+#include "common/serializer.hpp"
 #if ENABLE_GPU
 #include "storage/gpu_complex_storage.hpp"
 #endif
@@ -30,5 +31,11 @@ StoragePtr CpuComplexStorage::gpu(const int64_t &did) {
 #else
   return get_ptr();
 #endif
+}
+void CpuComplexStorage::save(std::ostream &os) const {
+  Storage::save(os);
+  for (tcapint i = 0U; i < size; ++i) {
+    Serializer::write_complex(os, data[i]);
+  }
 }
 } // namespace Weed
