@@ -24,7 +24,7 @@ namespace Weed {
 struct GpuIntStorage : public GpuStorage<symint> {
   GpuIntStorage(const tcapint &n, const int64_t &did, const bool &alloc = true)
       : GpuStorage<symint>(n, did, alloc) {}
-  GpuIntStorage(const std::vector<symint> &val, const int64_t &did)
+  GpuIntStorage(const std::vector<symint> &val, const int64_t &did = -1)
       : GpuStorage<symint>(val, did) {}
 
   void FillZeros() override { dev->ClearIntBuffer(buffer, size); }

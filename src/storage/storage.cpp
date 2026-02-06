@@ -9,8 +9,6 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#include "enums/storage_type.hpp"
-
 #include "storage/cpu_complex_storage.hpp"
 #include "storage/cpu_int_storage.hpp"
 #include "storage/cpu_real_storage.hpp"
@@ -24,31 +22,81 @@
 
 namespace Weed {
 StoragePtr Storage::load(std::istream &is) {
-  char stype_char;
-  is >> stype_char;
-  const StorageType stype = (StorageType)stype_char;
+  StorageType stype;
+  read_storage_type(is, stype);
 
-  uint64_t size_i64;
-  is >> size_i64;
-  // const tcapint size = (tcapint)size_i64;
+  tcapint size;
+  read_tcapint(is, size);
 
   switch (stype) {
-  case StorageType::REAL_CPU_DENSE:
-    break;
-  case StorageType::REAL_GPU_DENSE:
-    break;
-  case StorageType::COMPLEX_CPU_DENSE:
-    break;
-  case StorageType::COMPLEX_GPU_DENSE:
-    break;
-  case StorageType::INT_CPU_DENSE:
-    break;
-  case StorageType::INT_GPU_DENSE:
-    break;
-  case StorageType::REAL_CPU_SPARSE:
-    break;
-  case StorageType::COMPLEX_CPU_SPARSE:
-    break;
+  case StorageType::REAL_CPU_DENSE: {
+    std::vector<real1> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_real(is, v[i]);
+    }
+    return std::make_shared<CpuRealStorage>(v);
+  }
+  case StorageType::REAL_GPU_DENSE: {
+    std::vector<real1> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_real(is, v[i]);
+    }
+    return std::make_shared<GpuRealStorage>(v);
+  }
+  case StorageType::COMPLEX_CPU_DENSE: {
+    std::vector<complex> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_complex(is, v[i]);
+    }
+    return std::make_shared<CpuComplexStorage>(v);
+  }
+  case StorageType::COMPLEX_GPU_DENSE: {
+    std::vector<complex> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_complex(is, v[i]);
+    }
+    return std::make_shared<GpuComplexStorage>(v);
+  }
+  case StorageType::INT_CPU_DENSE: {
+    std::vector<symint> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_symint(is, v[i]);
+    }
+    return std::make_shared<CpuIntStorage>(v);
+  }
+  case StorageType::INT_GPU_DENSE: {
+    std::vector<symint> v(size);
+    for (tcapint i = 0U; i < size; ++i) {
+      read_symint(is, v[i]);
+    }
+    return std::make_shared<GpuIntStorage>(v);
+  }
+  case StorageType::REAL_CPU_SPARSE: {
+    tcapint ksize;
+    read_tcapint(is, ksize);
+    RealSparseVector s;
+    tcapint k;
+    real1 v;
+    for (tcapint i = 0U; i < ksize; ++i) {
+      read_tcapint(is, k);
+      read_real(is, v);
+      s[k] = v;
+    }
+    return std::make_shared<SparseCpuRealStorage>(s, size);
+  }
+  case StorageType::COMPLEX_CPU_SPARSE: {
+    tcapint ksize;
+    read_tcapint(is, ksize);
+    ComplexSparseVector s;
+    tcapint k;
+    complex v;
+    for (tcapint i = 0U; i < ksize; ++i) {
+      read_tcapint(is, k);
+      read_complex(is, v);
+      s[k] = v;
+    }
+    return std::make_shared<SparseCpuComplexStorage>(s, size);
+  }
   case StorageType::NONE_STORAGE_TYPE:
   default:
     throw std::domain_error("Can't recognize StorageType in Storage::load!");

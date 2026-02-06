@@ -25,7 +25,7 @@ struct GpuComplexStorage : public GpuStorage<complex> {
   GpuComplexStorage(const tcapint &n, const int64_t &did,
                     const bool &alloc = true)
       : GpuStorage<complex>(n, did, alloc) {}
-  GpuComplexStorage(const std::vector<complex> &val, const int64_t &did)
+  GpuComplexStorage(const std::vector<complex> &val, const int64_t &did = -1)
       : GpuStorage<complex>(val, did) {}
 
   void FillZeros() override { dev->ClearRealBuffer(buffer, size << 1U); }

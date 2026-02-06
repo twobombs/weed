@@ -14,6 +14,7 @@
 #include "common/weed_types.hpp"
 #include "enums/device_tag.hpp"
 #include "enums/dtype.hpp"
+#include "enums/storage_type.hpp"
 
 namespace Weed {
 struct Storage;
@@ -100,5 +101,49 @@ struct Storage : public std::enable_shared_from_this<Storage> {
    * Load serialized storage from istream
    */
   static StoragePtr load(std::istream &);
+
+  static void write_storage_type(std::ostream &out, const StorageType &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(StorageType));
+  }
+
+  static void read_storage_type(std::istream &in, StorageType &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(StorageType));
+  }
+
+  static void write_tcapint(std::ostream &out, const tcapint &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(tcapint));
+  }
+
+  static void read_tcapint(std::istream &in, tcapint &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(tcapint));
+  }
+
+  static void write_symint(std::ostream &out, const symint &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(symint));
+  }
+
+  static void read_symint(std::istream &in, symint &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(symint));
+  }
+
+  static void write_real(std::ostream &out, const real1 &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(real1));
+  }
+
+  static void read_real(std::istream &in, real1 &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(real1));
+  }
+
+  static void write_complex(std::ostream &out, const std::complex<real1> &z) {
+    write_real(out, z.real());
+    write_real(out, z.imag());
+  }
+
+  static void read_complex(std::istream &in, std::complex<real1> &z) {
+    real1 r, i;
+    read_real(in, r);
+    read_real(in, i);
+    z = std::complex<real1>(r, i);
+  }
 };
 } // namespace Weed
