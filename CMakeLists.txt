@@ -21,7 +21,6 @@ endif (PACK_DEBIAN)
 
 # Declare the library
 add_library (weed STATIC
-    src/shared_api.cpp
     src/common/functions.cpp
     src/common/parallel_for.cpp
     src/modules/dropout.cpp
@@ -255,6 +254,12 @@ if (NOT PACK_DEBIAN)
     target_compile_options (unittest PUBLIC ${TEST_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
 endif (NOT PACK_DEBIAN)
 
+add_library (weed_shared SHARED src/shared_api.cpp)
+set_property(TARGET weed_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries (weed_shared ${WEED_LIBS})
+target_compile_options (weed_shared PUBLIC ${WEED_COMPILE_OPTS})
+set_target_properties (weed_shared PROPERTIES VERSION ${PROJECT_VERSION})
+
 # Declare the OCL precompilation executable
 add_executable (weed_cl_precompile
     src/weed_cl_precompile.cpp
@@ -350,6 +355,11 @@ install (TARGETS weed
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/weed
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
+install (TARGETS weed_shared
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/weed
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE
+        )
 
 # Install the pkg-config file
 configure_file (libweed.pc.in libweed.pc @ONLY)
