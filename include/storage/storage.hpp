@@ -134,16 +134,16 @@ struct Storage : public std::enable_shared_from_this<Storage> {
     in.read(reinterpret_cast<char *>(&x), sizeof(real1));
   }
 
-  static void write_complex(std::ostream &out, const std::complex<real1> &z) {
+  static void write_complex(std::ostream &out, const complex &z) {
     write_real(out, z.real());
     write_real(out, z.imag());
   }
 
-  static void read_complex(std::istream &in, std::complex<real1> &z) {
+  static void read_complex(std::istream &in, complex &z) {
     real1 r, i;
     read_real(in, r);
     read_real(in, i);
-    z = std::complex<real1>(r, i);
+    z = complex(r, i);
   }
 };
 } // namespace Weed
