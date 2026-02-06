@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "modules/lstm.hpp"
+#include "common/serializer.hpp"
 
 namespace Weed {
 TensorPtr LSTM::forward(const TensorPtr x) {
@@ -26,7 +27,7 @@ TensorPtr LSTM::forward(const TensorPtr x) {
   }
 
   // z = W_x(x) + W_h(h_{t-1})
-  TensorPtr z = W_x.forward(x) + W_h.forward(prev.h);
+  TensorPtr z = W_x->forward(x) + W_h->forward(prev.h);
 
   // Split z into 4 chunks
   const std::vector<TensorPtr> zc = z->chunk(4, -1);
@@ -42,5 +43,12 @@ TensorPtr LSTM::forward(const TensorPtr x) {
   state.push_back({h, c});
 
   return h;
+}
+void LSTM::save(std::ostream &os) const {
+  Module::save(os);
+  Serializer::write_tcapint(os, input_dim);
+  Serializer::write_tcapint(os, hidden_dim);
+  W_x->save(os);
+  W_h->save(os);
 }
 } // namespace Weed

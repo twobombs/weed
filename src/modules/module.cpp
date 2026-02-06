@@ -14,8 +14,10 @@
 
 #include "modules/dropout.hpp"
 #include "modules/embedding.hpp"
+#include "modules/gru.hpp"
 #include "modules/layernorm.hpp"
 #include "modules/linear.hpp"
+#include "modules/lstm.hpp"
 #include "modules/relu.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
@@ -88,14 +90,28 @@ ModulePtr Module::load(std::istream &is) {
 
     return l;
   }
-  case ModuleType::GRU_T:
-    throw std::domain_error(
-        "Can't serialize GRU! (This layer depends on transient state; are you "
-        "sure you want transient state saved in your model?)");
-  case ModuleType::LSTM_T:
-    throw std::domain_error(
-        "Can't serialize LSTM! (This layer depends on transient state; are you "
-        "sure you want transient state saved in your model?)");
+  case ModuleType::GRU_T: {
+    GRUPtr g = std::make_shared<GRU>();
+    Serializer::read_tcapint(is, g->input_dim);
+    Serializer::read_tcapint(is, g->hidden_dim);
+    g->W_x = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    g->W_h = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    g->state.push_back(Tensor::zeros({g->hidden_dim}));
+
+    return g;
+  }
+  case ModuleType::LSTM_T: {
+    LSTMPtr l = std::make_shared<LSTM>();
+    Serializer::read_tcapint(is, l->input_dim);
+    Serializer::read_tcapint(is, l->hidden_dim);
+    l->W_x = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    l->W_h = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    l->state.push_back(
+        LSTMState{Tensor::zeros(std::vector<tcapint>{l->hidden_dim}),
+                  Tensor::zeros(std::vector<tcapint>{l->hidden_dim})});
+
+    return l;
+  }
   case ModuleType::NONE_MODULE_TYPE:
   default:
     throw std::domain_error("Can't recognize ModuleType in Module::load!");
