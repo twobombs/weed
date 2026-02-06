@@ -65,30 +65,29 @@
 
 namespace Weed {
 static void cpu_relu(const Tensor &a, Tensor &out) {
-  CPU_INIT_2(RealTensor, RealStorage);
+  CPU_INIT_2(RealTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i, std::max((*pa)[i], ZERO_R1));
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-
-static void cpu_relu_grad_real(Tensor &din, const Tensor &in,
-                               const Tensor &dout) {
-  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
+template <typename T1, typename T2>
+static void cpu_relu_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
+  CPU_GRAD_INIT_3(T1, RealTensor, T2);
   CPU_RELU_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
-  CPU_RELU_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+static inline void cpu_relu_grad_real(Tensor &din, const Tensor &in,
+                                      const Tensor &dout) {
+  cpu_relu_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
-                                const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
-  CPU_RELU_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+static inline void cpu_relu_grad_complex(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
+  cpu_relu_grad<ComplexTensor, ComplexTensor>(din, in, dout);
+}
+static inline void cpu_relu_grad_mixed(Tensor &din, const Tensor &in,
+                                       const Tensor &dout) {
+  cpu_relu_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
 #if ENABLE_GPU
@@ -103,7 +102,6 @@ static void gpu_relu(const Tensor &a, Tensor &out) {
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_RELU, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer});
 }
-
 static void gpu_relu_grad_real(Tensor &din, const Tensor &in,
                                const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
@@ -122,30 +120,30 @@ static void gpu_relu_grad_mixed(Tensor &din, const Tensor &in,
 #endif
 
 static void cpu_sigmoid(const Tensor &a, Tensor &out) {
-  CPU_INIT_2(RealTensor, RealStorage);
+  CPU_INIT_2(RealTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i, ONE_R1 / (ONE_R1 + exp(-(*pa)[i])));
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-
-static void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
-  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
+template <typename T1, typename T2>
+static void cpu_sigmoid_grad(Tensor &din, const Tensor &in,
+                             const Tensor &dout) {
+  CPU_GRAD_INIT_3(T1, RealTensor, T2);
   CPU_SIGMOID_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
-                                     const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
-  CPU_SIGMOID_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+static inline void cpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
+  cpu_sigmoid_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
-                                   const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
-  CPU_SIGMOID_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+static inline void cpu_sigmoid_grad_complex(Tensor &din, const Tensor &in,
+                                            const Tensor &dout) {
+  cpu_sigmoid_grad<ComplexTensor, ComplexTensor>(din, in, dout);
+}
+static inline void cpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
+                                          const Tensor &dout) {
+  cpu_sigmoid_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
 #if ENABLE_GPU
@@ -160,7 +158,6 @@ static void gpu_sigmoid(const Tensor &a, Tensor &out) {
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_SIGMOID, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer});
 }
-
 static void gpu_sigmoid_grad_real(Tensor &din, const Tensor &in,
                                   const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
@@ -179,30 +176,29 @@ static void gpu_sigmoid_grad_mixed(Tensor &din, const Tensor &in,
 #endif
 
 static void cpu_tanh(const Tensor &a, Tensor &out) {
-  CPU_INIT_2(RealTensor, RealStorage);
+  CPU_INIT_2(RealTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
-    po->write(i, std::tanh((*pa)[i]));
+    po->write(i, (real1)std::tanh((*pa)[i]));
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-
-static void cpu_tanh_grad_real(Tensor &din, const Tensor &in,
-                               const Tensor &dout) {
-  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
+template <typename T1, typename T2>
+static void cpu_tanh_grad(Tensor &din, const Tensor &in, const Tensor &dout) {
+  CPU_GRAD_INIT_3(T1, RealTensor, T2);
   CPU_TANH_GRAD();
   SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
 }
-static void cpu_tanh_grad_complex(Tensor &din, const Tensor &in,
-                                  const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
-  CPU_TANH_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+static inline void cpu_tanh_grad_real(Tensor &din, const Tensor &in,
+                                      const Tensor &dout) {
+  cpu_tanh_grad<RealTensor, RealTensor>(din, in, dout);
 }
-static void cpu_tanh_grad_mixed(Tensor &din, const Tensor &in,
-                                const Tensor &dout) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
-  CPU_TANH_GRAD();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+static inline void cpu_tanh_grad_complex(Tensor &din, const Tensor &in,
+                                         const Tensor &dout) {
+  cpu_tanh_grad<ComplexTensor, ComplexTensor>(din, in, dout);
+}
+static inline void cpu_tanh_grad_mixed(Tensor &din, const Tensor &in,
+                                       const Tensor &dout) {
+  cpu_tanh_grad<ComplexTensor, RealTensor>(din, in, dout);
 }
 
 #if ENABLE_GPU
@@ -217,7 +213,6 @@ static void gpu_tanh(const Tensor &a, Tensor &out) {
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_TANH, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer});
 }
-
 static void gpu_tanh_grad_real(Tensor &din, const Tensor &in,
                                const Tensor &dout) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,

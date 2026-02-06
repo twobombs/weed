@@ -44,51 +44,51 @@
   }
 
 namespace Weed {
-void DivKernel::cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(RealTensor, RealTensor, RealStorage);
+template <typename T1, typename T2, typename T3, typename T4>
+static void cpu_div(const Tensor &a, const Tensor &b, Tensor &out) {
+  CPU_INIT_3(T1, T2, T1);
   DIV_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_3_RUN(T3, T4);
 }
-void DivKernel::cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
-  CPU_INIT_3(ComplexTensor, ComplexTensor, ComplexStorage);
-  DIV_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
+static inline void cpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+  cpu_div<RealTensor, RealTensor, SparseCpuRealStorage, SparseCpuRealStorage>(
+      a, b, out);
 }
-void DivKernel::cpu_mixed_c_left(const Tensor &a, const Tensor &b,
-                                 Tensor &out) {
-  CPU_INIT_3(ComplexTensor, RealTensor, ComplexStorage);
-  DIV_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+static inline void cpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+  cpu_div<ComplexTensor, ComplexTensor, SparseCpuComplexStorage,
+          SparseCpuComplexStorage>(a, b, out);
 }
-void DivKernel::cpu_mixed_c_right(const Tensor &a, const Tensor &b,
-                                  Tensor &out) {
-  CPU_INIT_3(RealTensor, ComplexTensor, ComplexStorage);
-  DIV_KERNEL();
-  SPARSE_CPU_3_RUN(SparseCpuRealStorage, SparseCpuComplexStorage);
+static inline void cpu_mixed_c_left(const Tensor &a, const Tensor &b,
+                                    Tensor &out) {
+  cpu_div<ComplexTensor, RealTensor, SparseCpuComplexStorage,
+          SparseCpuRealStorage>(a, b, out);
+}
+static inline void cpu_mixed_c_right(const Tensor &a, const Tensor &b,
+                                     Tensor &out) {
+  cpu_div<ComplexTensor, RealTensor, SparseCpuRealStorage,
+          SparseCpuComplexStorage>(a, b, out);
 }
 
 #if ENABLE_GPU
-void DivKernel::gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_real(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_DIV_REAL);
 }
-void DivKernel::gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
+static void gpu_complex(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_DIV_COMPLEX);
 }
-void DivKernel::gpu_mixed_c_left(const Tensor &a, const Tensor &b,
-                                 Tensor &out) {
+static void gpu_mixed_c_left(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
                       OCL_API_DIV_MIXED_C_LEFT);
 }
-void DivKernel::gpu_mixed_c_right(const Tensor &a, const Tensor &b,
-                                  Tensor &out) {
+static void gpu_mixed_c_right(const Tensor &a, const Tensor &b, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuRealStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_DIV_MIXED_C_RIGHT);
 }
 #endif
 
-void DivKernel::div(const Tensor &a, const Tensor &b, Tensor &out) {
+void div(const Tensor &a, const Tensor &b, Tensor &out) {
   validate_all_same_device({&a, &b, &out}, "DivKernel::div");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   const bool isBComplex = b.storage->dtype == DType::COMPLEX;
@@ -136,11 +136,5 @@ void DivKernel::div(const Tensor &a, const Tensor &b, Tensor &out) {
     cpu_real(a, b, out);
 #endif
   }
-}
-
-DivKernel div_kernel;
-
-void div(const Tensor &a, const Tensor &b, Tensor &out) {
-  div_kernel.div(a, b, out);
 }
 } // namespace Weed

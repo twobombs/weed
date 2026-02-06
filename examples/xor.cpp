@@ -13,8 +13,6 @@
 
 #include "autograd/adam.hpp"
 #include "autograd/bci_loss.hpp"
-// #include "autograd/mse_loss.hpp"
-// #include "autograd/sgd.hpp"
 #include "autograd/zero_grad.hpp"
 #include "modules/linear.hpp"
 #include "modules/sequential.hpp"
@@ -22,6 +20,7 @@
 #include "modules/tanh.hpp"
 #include "tensors/real_scalar.hpp"
 
+#include <fstream>
 #include <iostream> // For cout
 
 #define GET_REAL(ptr) static_cast<RealScalar *>((ptr).get())->get_item()
@@ -42,8 +41,7 @@ int main() {
 
   const std::vector<ModulePtr> mv = {
       std::make_shared<Linear>(2, 4), std::make_shared<Tanh>(),
-      std::make_shared<Linear>(4, 1), std::make_shared<Tanh>(),
-      std::make_shared<Linear>(1, 1), std::make_shared<Sigmoid>()};
+      std::make_shared<Linear>(4, 1), std::make_shared<Sigmoid>()};
 
   Sequential model(mv);
 
@@ -58,11 +56,9 @@ int main() {
   while ((epoch <= 200) && (loss_r > 0.01)) {
     TensorPtr y_pred = model.forward(x);
     TensorPtr loss = bci_loss(y_pred, y);
-    // TensorPtr loss = mse_loss(y_pred, y);
 
     Tensor::backward(loss);
     adam_step(opt, params);
-    // sgd_step(params, 1.0);
 
     loss_r = GET_REAL(loss);
     if ((epoch % 10) == 0U) {
@@ -73,9 +69,20 @@ int main() {
     ++epoch;
   }
 
+  // Can we save to disk?
+  std::ofstream o("xor.qml");
+  model.save(o);
+  o.close();
+
+  std::ifstream i("xor.qml");
+  ModulePtr m = Module::load(i);
+  i.close();
+
+  m->eval();
+
   std::cout << "In: [[0, 0], [1, 0], [0, 1], [1, 1]]" << std::endl;
 
-  TensorPtr y_pred = model.forward(x);
+  TensorPtr y_pred = m->forward(x);
   RealStorage &storage = *static_cast<RealStorage *>(y_pred->storage.get());
 
   std::cout << "Out: [";

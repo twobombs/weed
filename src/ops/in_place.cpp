@@ -45,20 +45,20 @@
                                 {a_storage->buffer, b_storage->buffer})
 
 namespace Weed {
-static void cpu_real_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(RealTensor, RealTensor);
+template <typename T1, typename T2, typename T3>
+static void cpu_add(Tensor &a, const Tensor &b) {
+  CPU_INIT_2_IN_PLACE(T1, T2);
   ADD_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(T3);
 }
-static void cpu_complex_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexTensor, ComplexTensor);
-  ADD_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage);
+static inline void cpu_real_add(Tensor &a, const Tensor &b) {
+  cpu_add<RealTensor, RealTensor, SparseCpuRealStorage>(a, b);
 }
-static void cpu_mixed_add(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexTensor, RealTensor);
-  ADD_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage);
+static inline void cpu_complex_add(Tensor &a, const Tensor &b) {
+  cpu_add<ComplexTensor, ComplexTensor, SparseCpuComplexStorage>(a, b);
+}
+static inline void cpu_mixed_add(Tensor &a, const Tensor &b) {
+  cpu_add<ComplexTensor, RealTensor, SparseCpuRealStorage>(a, b);
 }
 #if ENABLE_GPU
 static void gpu_real_add(Tensor &a, const Tensor &b) {
@@ -75,20 +75,20 @@ static void gpu_mixed_add(Tensor &a, const Tensor &b) {
 }
 #endif
 
-static void cpu_real_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(RealTensor, RealTensor);
+template <typename T1, typename T2, typename T3>
+static void cpu_sub(Tensor &a, const Tensor &b) {
+  CPU_INIT_2_IN_PLACE(T1, T2);
   SUB_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage);
+  SPARSE_CPU_2_SWITCH(T3);
 }
-static void cpu_complex_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexTensor, ComplexTensor);
-  SUB_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuComplexStorage);
+static inline void cpu_real_sub(Tensor &a, const Tensor &b) {
+  cpu_sub<RealTensor, RealTensor, SparseCpuRealStorage>(a, b);
 }
-static void cpu_mixed_sub(Tensor &a, const Tensor &b) {
-  CPU_INIT_2_IN_PLACE(ComplexTensor, RealTensor);
-  SUB_KERNEL();
-  SPARSE_CPU_2_SWITCH(SparseCpuRealStorage);
+static inline void cpu_complex_sub(Tensor &a, const Tensor &b) {
+  cpu_sub<ComplexTensor, ComplexTensor, SparseCpuComplexStorage>(a, b);
+}
+static inline void cpu_mixed_sub(Tensor &a, const Tensor &b) {
+  cpu_sub<ComplexTensor, RealTensor, SparseCpuRealStorage>(a, b);
 }
 
 #if ENABLE_GPU

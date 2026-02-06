@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "modules/linear.hpp"
+#include "common/serializer.hpp"
 #include "storage/all_storage.hpp"
 
 #include <random>
@@ -17,7 +18,7 @@
 namespace Weed {
 Linear::Linear(tcapint in_f, tcapint out_f, bool use_bias, DType dtype,
                DeviceTag device, int64_t device_id, bool init_rand)
-    : in_features(in_f), out_features(out_f) {
+    : Module(LINEAR_T), in_features(in_f), out_features(out_f) {
 
   const std::vector<tcapint> shape{in_f, out_f};
   const std::vector<tcapint> stride{1U, in_f};
@@ -89,5 +90,15 @@ std::vector<ParameterPtr> Linear::parameters() {
   }
 
   return {weight};
+}
+void Linear::save(std::ostream &os) const {
+  Module::save(os);
+  Serializer::write_tcapint(os, in_features);
+  Serializer::write_tcapint(os, out_features);
+  weight->save(os);
+  Serializer::write_bool(os, !!bias);
+  if (bias) {
+    bias->save(os);
+  }
 }
 } // namespace Weed

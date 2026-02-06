@@ -25,7 +25,12 @@ add_library (weed STATIC
     src/common/parallel_for.cpp
     src/modules/dropout.cpp
     src/modules/embedding.cpp
+    src/modules/gru.cpp
+    src/modules/layernorm.cpp
     src/modules/linear.cpp
+    src/modules/lstm.cpp
+    src/modules/module.cpp
+    src/modules/sequential.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
@@ -46,6 +51,8 @@ add_library (weed STATIC
     src/storage/cpu_real_storage.cpp
     src/storage/sparse_cpu_complex_storage.cpp
     src/storage/sparse_cpu_real_storage.cpp
+    src/storage/storage.cpp
+    src/tensors/parameter.cpp
     src/tensors/tensor.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -89,7 +96,6 @@ if (ENABLE_EXAMPLES)
     include ("cmake/Examples.cmake")
 endif (ENABLE_EXAMPLES)
 include ("cmake/OpenCL.cmake" )
-include ("cmake/CUDA.cmake")
 
 message ("C++ standard year is (at least): ${CPP_STD}")
 message ("Tensor capacity power is: ${TCAPPOW}")
@@ -99,10 +105,6 @@ message ("CPU work item stride power is: ${PSTRIDEPOW}")
 message ("Async CPU is: ${ENABLE_ASYNC}")
 message ("OpenCL (v2.0) out-of-order queue is: ${ENABLE_OOO_OCL}")
 message ("Environment variable usage is: ${ENABLE_ENV_VARS}")
-
-if (ENABLE_OPENCL AND ENABLE_CUDA)
-  message(FATAL_ERROR "You cannot enable both OpenCL and CUDA! Please choose one (or turn both off)." )
-endif (ENABLE_OPENCL AND ENABLE_CUDA)
 
 if (FPPOW GREATER 6)
     target_link_libraries(weed PUBLIC quadmath)
@@ -145,16 +147,6 @@ else (MSVC)
         set(WEED_CPP_STD_OPT -std=c++11)
     endif ()
 endif (MSVC)
-
-if (TCAPPOW GREATER 6)
-    set(WEED_CUDA_COMPILE_OPTS -O3 -use_fast_math -Xcompiler -fpermissive ${WEED_CPP_STD_OPT} --ptxas-options -O3,)
-else (TCAPPOW GREATER 6)
-    set(WEED_CUDA_COMPILE_OPTS -O3 -use_fast_math -Werror all-warnings ${WEED_CPP_STD_OPT} --ptxas-options -O3,)
-endif (TCAPPOW GREATER 6)
-
-if (ENABLE_GVIRTUS)
-    set(WEED_CUDA_COMPILE_OPTS --cudart=shared ${WEED_CUDA_COMPILE_OPTS})
-endif (ENABLE_GVIRTUS)
 
 if (MSVC)
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -252,23 +244,21 @@ if (APPLE)
     set(TEST_COMPILE_OPTS -Wno-inconsistent-missing-override)
 endif (APPLE)
 
-if (ENABLE_CUDA)
-    target_compile_options (weed PUBLIC
-        "$<$<COMPILE_LANGUAGE:C>:${WEED_COMPILE_OPTS}>"
-        "$<$<COMPILE_LANGUAGE:CXX>:${WEED_COMPILE_OPTS}>"
-        "$<$<COMPILE_LANGUAGE:CUDA>:${WEED_CUDA_COMPILE_OPTS}>"
-        -DCATCH_CONFIG_FAST_COMPILE
-        )
-else (ENABLE_CUDA)
-    if (MSVC)
-        target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS})
-    else (MSVC)
-        target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
-    endif (MSVC)
-endif (ENABLE_CUDA)
+if (MSVC)
+target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS})
+else (MSVC)
+target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
+endif (MSVC)
+
 if (NOT PACK_DEBIAN)
     target_compile_options (unittest PUBLIC ${TEST_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
 endif (NOT PACK_DEBIAN)
+
+add_library (weed_shared SHARED src/shared_api.cpp)
+set_property(TARGET weed_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries (weed_shared ${WEED_LIBS})
+target_compile_options (weed_shared PUBLIC ${WEED_COMPILE_OPTS})
+set_target_properties (weed_shared PROPERTIES VERSION ${PROJECT_VERSION})
 
 # Declare the OCL precompilation executable
 add_executable (weed_cl_precompile
@@ -285,19 +275,19 @@ set_target_properties (weed PROPERTIES
 # Install common headers
 install (FILES
     ${CMAKE_BINARY_DIR}/include/common/config.h
-    include/common/weed_functions.hpp
-    include/common/weed_types.hpp
-    include/common/complex16x2simd.hpp
-    include/common/complex8x2simd.hpp
+    include/common/half.hpp
     include/common/oclapi.hpp
     include/common/oclengine.hpp
     include/common/parallel_for.hpp
-    include/common/half.hpp
+    include/common/serializer.hpp
+    include/common/weed_functions.hpp
+    include/common/weed_types.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed/common
     )
 
 # Install weed library headers
 install (FILES
+    include/shared_api.hpp
     include/autograd/adam.hpp
     include/autograd/bci_loss.hpp
     include/autograd/mse_loss.hpp
@@ -309,9 +299,13 @@ install (FILES
     include/devices/queue_item.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
+    include/enums/module_type.hpp
+    include/enums/storage_type.hpp
     include/modules/dropout.hpp
     include/modules/embedding.hpp
+    include/modules/gru.hpp
     include/modules/linear.hpp
+    include/modules/lstm.hpp
     include/modules/module.hpp
     include/modules/relu.hpp
     include/modules/sequential.hpp
@@ -361,6 +355,11 @@ install (TARGETS weed
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/weed
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
+install (TARGETS weed_shared
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/weed
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE
+        )
 
 # Install the pkg-config file
 configure_file (libweed.pc.in libweed.pc @ONLY)

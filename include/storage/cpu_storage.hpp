@@ -21,10 +21,11 @@ namespace Weed {
  */
 template <typename T> struct CpuStorage : TypedStorage<T> {
   std::unique_ptr<T[], void (*)(T *)> data;
-  CpuStorage(const tcapint &n)
-      : TypedStorage<T>(DeviceTag::CPU, n), data(TypedStorage<T>::Alloc(n)) {}
-  CpuStorage(const std::vector<T> &i)
-      : TypedStorage<T>(DeviceTag::CPU, i.size()),
+  CpuStorage(const StorageType &stp, const tcapint &n)
+      : TypedStorage<T>(stp, DeviceTag::CPU, n),
+        data(TypedStorage<T>::Alloc(n)) {}
+  CpuStorage(const StorageType &stp, const std::vector<T> &i)
+      : TypedStorage<T>(stp, DeviceTag::CPU, i.size()),
         data(TypedStorage<T>::Alloc(i.size())) {
     std::copy(i.begin(), i.end(), data.get());
   }
@@ -58,8 +59,6 @@ template <typename T> struct CpuStorage : TypedStorage<T> {
   void FillValue(const T &v) override {
     std::fill(data.get(), data.get() + TypedStorage<T>::size, v);
   }
-
-  virtual StoragePtr Upcast(const DType &dt) = 0;
 
   StoragePtr cpu() override { return TypedStorage<T>::get_ptr(); }
 };

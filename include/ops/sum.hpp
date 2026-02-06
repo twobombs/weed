@@ -24,9 +24,6 @@ struct SumKernel {
   void sum(const Tensor &, Tensor &);
 };
 
-extern SumKernel sum_kernel;
-extern SumKernel mean_kernel;
-
 /**
  * Sum of all elements
  */

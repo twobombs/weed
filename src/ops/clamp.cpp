@@ -67,38 +67,42 @@
   }
 
 namespace Weed {
-void ClampKernel::cpu(const Tensor &a, const real1 &l, const real1 &h,
-                      Tensor &out) {
-  CPU_INIT_2(RealTensor, RealStorage);
+static inline void cpu(const Tensor &a, const real1 &l, const real1 &h,
+                       Tensor &out) {
+  CPU_INIT_2(RealTensor, RealTensor);
   const auto fn = [&](const tcapint &i, const unsigned &cpu) {
     po->write(i, std::min(std::max((*pa)[i], l), h));
   };
   SPARSE_CPU_2_RUN(SparseCpuRealStorage);
 }
-void ClampKernel::cpu_grad_real(Tensor &din, const Tensor &in,
-                                const Tensor &dout, const real1 &l,
-                                const real1 &h) {
-  CPU_GRAD_INIT_3(RealTensor, RealTensor, RealTensor);
+
+template <typename T1, typename T2, typename T3, typename T4>
+static void cpu_grad(Tensor &din, const Tensor &in, const Tensor &dout,
+                     const real1 &l, const real1 &h) {
+  CPU_GRAD_INIT_3(T1, RealTensor, T2);
   CPU_GRAD_KERNEL();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuRealStorage, SparseCpuRealStorage);
+  SPARSE_CPU_GRAD_3_RUN(T3, T4);
 }
-void ClampKernel::cpu_grad_complex(Tensor &din, const Tensor &in,
-                                   const Tensor &dout, const real1 &l,
-                                   const real1 &h) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, ComplexTensor);
-  CPU_GRAD_KERNEL();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuComplexStorage);
-}
-void ClampKernel::cpu_grad_mixed(Tensor &din, const Tensor &in,
+static inline void cpu_grad_real(Tensor &din, const Tensor &in,
                                  const Tensor &dout, const real1 &l,
                                  const real1 &h) {
-  CPU_GRAD_INIT_3(ComplexTensor, RealTensor, RealTensor);
-  CPU_GRAD_KERNEL();
-  SPARSE_CPU_GRAD_3_RUN(SparseCpuComplexStorage, SparseCpuRealStorage);
+  cpu_grad<RealTensor, RealTensor, SparseCpuRealStorage, SparseCpuRealStorage>(
+      din, in, dout, l, h);
+}
+static inline void cpu_grad_complex(Tensor &din, const Tensor &in,
+                                    const Tensor &dout, const real1 &l,
+                                    const real1 &h) {
+  cpu_grad<ComplexTensor, ComplexTensor, SparseCpuComplexStorage,
+           SparseCpuComplexStorage>(din, in, dout, l, h);
+}
+static inline void cpu_grad_mixed(Tensor &din, const Tensor &in,
+                                  const Tensor &dout, const real1 &l,
+                                  const real1 &h) {
+  cpu_grad<ComplexTensor, RealTensor, SparseCpuComplexStorage,
+           SparseCpuRealStorage>(din, in, dout, l, h);
 }
 #if ENABLE_GPU
-void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
-                      Tensor &out) {
+static void gpu(const Tensor &a, const real1 &l, const real1 &h, Tensor &out) {
   GPU_ARGS();
   GpuRealStoragePtr a_storage =
       std::dynamic_pointer_cast<GpuRealStorage>(a.storage);
@@ -108,27 +112,23 @@ void ClampKernel::gpu(const Tensor &a, const real1 &l, const real1 &h,
   a_storage->dev->RequestKernel(OCLAPI::OCL_API_CLAMP, args, a.get_size(),
                                 {a_storage->buffer, o_storage->buffer}, 0U, &v);
 }
-void ClampKernel::gpu_grad_real(Tensor &din, const Tensor &in,
-                                const Tensor &dout, const real1 &l,
-                                const real1 &h) {
+static void gpu_grad_real(Tensor &din, const Tensor &in, const Tensor &dout,
+                          const real1 &l, const real1 &h) {
   GPU_GRAD(GpuRealStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_CLAMP_GRAD_REAL);
 }
-void ClampKernel::gpu_grad_complex(Tensor &din, const Tensor &in,
-                                   const Tensor &dout, const real1 &l,
-                                   const real1 &h) {
+static void gpu_grad_complex(Tensor &din, const Tensor &in, const Tensor &dout,
+                             const real1 &l, const real1 &h) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuComplexStorage,
            OCL_API_CLAMP_GRAD_COMPLEX);
 }
-void ClampKernel::gpu_grad_mixed(Tensor &din, const Tensor &in,
-                                 const Tensor &dout, const real1 &l,
-                                 const real1 &h) {
+static void gpu_grad_mixed(Tensor &din, const Tensor &in, const Tensor &dout,
+                           const real1 &l, const real1 &h) {
   GPU_GRAD(GpuComplexStorage, GpuRealStorage, GpuRealStorage,
            OCL_API_CLAMP_GRAD_MIXED);
 }
 #endif
-void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
-                        Tensor &out) {
+void clamp(const Tensor &a, const real1 &l, const real1 &h, Tensor &out) {
   validate_all_same_device({&a, &out}, "ClampKernel::clamp");
   if ((a.storage->dtype != DType::REAL) ||
       (out.storage->dtype != DType::REAL)) {
@@ -147,8 +147,8 @@ void ClampKernel::clamp(const Tensor &a, const real1 &l, const real1 &h,
   cpu(a, l, h, out);
 #endif
 }
-void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
-                             const real1 &l, const real1 &h) {
+void clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
+                const real1 &l, const real1 &h) {
   validate_all_same_device({&din, &in, &dout}, "ClampKernel::clamp_grad");
   if ((din.storage->dtype == DType::REAL) &&
       (dout.storage->dtype != DType::REAL)) {
@@ -183,7 +183,7 @@ void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
 #if ENABLE_GPU
       GRAD_DEVICE_SWITCH(cpu_grad_mixed, gpu_grad_mixed, din, in, dout, l, h);
 #else
-      cpu_grad_complex(din, in, dout, l, h);
+      cpu_grad_mixed(din, in, dout, l, h);
 #endif
     }
     break;
@@ -195,15 +195,5 @@ void ClampKernel::clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
     cpu_grad_real(din, in, dout, l, h);
 #endif
   }
-}
-
-ClampKernel clamp_kernel;
-
-void clamp(const Tensor &a, const real1 &l, const real1 &h, Tensor &out) {
-  clamp_kernel.clamp(a, l, h, out);
-}
-void clamp_grad(Tensor &din, const Tensor &in, const Tensor &dout,
-                const real1 &l, const real1 &h) {
-  clamp_kernel.clamp_grad(din, in, dout, l, h);
 }
 } // namespace Weed

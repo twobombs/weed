@@ -14,6 +14,7 @@
 #include "common/weed_types.hpp"
 #include "enums/device_tag.hpp"
 #include "enums/dtype.hpp"
+#include "enums/storage_type.hpp"
 
 namespace Weed {
 struct Storage;
@@ -24,6 +25,10 @@ typedef std::shared_ptr<Storage> StoragePtr;
  * Base class for Tensor Storage for all data types
  */
 struct Storage : public std::enable_shared_from_this<Storage> {
+  /**
+   * Type of storage
+   */
+  StorageType stype;
   /**
    * GPU device ID, if applicable
    */
@@ -37,8 +42,9 @@ struct Storage : public std::enable_shared_from_this<Storage> {
    */
   tcapint size;
 
-  Storage(const DeviceTag &dtg, const DType &dtp, const tcapint &n)
-      : device(dtg), dtype(dtp), size(n) {
+  Storage(const StorageType &stp, const DeviceTag &dtg, const DType &dtp,
+          const tcapint &n)
+      : stype(stp), device(dtg), dtype(dtp), size(n) {
     if (!size) {
       throw std::invalid_argument("Storage must have size of at least 1!");
     }
@@ -90,5 +96,31 @@ struct Storage : public std::enable_shared_from_this<Storage> {
    * Migrate storage to GPU
    */
   virtual StoragePtr gpu(const int64_t &did = -1) = 0;
+
+  /**
+   * Serialize storage to ostream
+   */
+  virtual void save(std::ostream &) const;
+
+  /**
+   * Load serialized storage from istream
+   */
+  static StoragePtr load(std::istream &);
+
+  static void write_storage_type(std::ostream &out, const StorageType &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(StorageType));
+  }
+
+  static void read_storage_type(std::istream &in, StorageType &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(StorageType));
+  }
+
+  static void write_device_tag(std::ostream &out, const DeviceTag &x) {
+    out.write(reinterpret_cast<const char *>(&x), sizeof(DeviceTag));
+  }
+
+  static void read_device_tag(std::istream &in, DeviceTag &x) {
+    in.read(reinterpret_cast<char *>(&x), sizeof(DeviceTag));
+  }
 };
 } // namespace Weed

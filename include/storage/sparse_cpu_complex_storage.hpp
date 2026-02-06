@@ -19,12 +19,14 @@ namespace Weed {
  */
 struct SparseCpuComplexStorage : SparseCpuStorage<complex> {
   SparseCpuComplexStorage(const ComplexSparseVector &v, const tcapint &n)
-      : SparseCpuStorage<complex>(v, n) {}
-  SparseCpuComplexStorage(const tcapint &n) : SparseCpuStorage<complex>(n) {}
+      : SparseCpuStorage<complex>(COMPLEX_CPU_SPARSE, v, n) {}
+  SparseCpuComplexStorage(const tcapint &n)
+      : SparseCpuStorage<complex>(COMPLEX_CPU_SPARSE, n) {}
   StoragePtr Upcast(const DType &dt) override {
     return SparseCpuStorage<complex>::get_ptr();
   }
   StoragePtr gpu(const int64_t &did = -1) override;
+  void save(std::ostream &) const override;
 };
 typedef std::shared_ptr<SparseCpuComplexStorage> SparseCpuComplexStoragePtr;
 } // namespace Weed

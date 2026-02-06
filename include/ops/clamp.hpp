@@ -14,30 +14,6 @@
 #include "tensors/tensor.hpp"
 
 namespace Weed {
-struct ClampKernel {
-  void cpu(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void cpu_grad_real(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                     const real1 &);
-  void cpu_grad_complex(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                        const real1 &);
-  void cpu_grad_mixed(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                      const real1 &);
-#if ENABLE_GPU
-  void gpu(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void gpu_grad_real(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                     const real1 &);
-  void gpu_grad_complex(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                        const real1 &);
-  void gpu_grad_mixed(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                      const real1 &);
-#endif
-  void clamp(const Tensor &, const real1 &, const real1 &, Tensor &);
-  void clamp_grad(Tensor &, const Tensor &, const Tensor &, const real1 &,
-                  const real1 &);
-};
-
-extern ClampKernel clamp_kernel;
-
 /**
  * Element-wise clamp
  */

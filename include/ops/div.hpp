@@ -14,22 +14,6 @@
 #include "tensors/tensor.hpp"
 
 namespace Weed {
-struct DivKernel {
-  void cpu_real(const Tensor &, const Tensor &, Tensor &);
-  void cpu_complex(const Tensor &, const Tensor &, Tensor &);
-  void cpu_mixed_c_left(const Tensor &, const Tensor &, Tensor &);
-  void cpu_mixed_c_right(const Tensor &, const Tensor &, Tensor &);
-#if ENABLE_GPU
-  void gpu_real(const Tensor &, const Tensor &, Tensor &);
-  void gpu_complex(const Tensor &, const Tensor &, Tensor &);
-  void gpu_mixed_c_left(const Tensor &, const Tensor &, Tensor &);
-  void gpu_mixed_c_right(const Tensor &, const Tensor &, Tensor &);
-#endif
-  void div(const Tensor &, const Tensor &, Tensor &);
-};
-
-extern DivKernel div_kernel;
-
 /**
  * Element-wise division
  */

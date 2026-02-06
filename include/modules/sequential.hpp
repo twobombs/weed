@@ -21,19 +21,20 @@ struct Sequential : public Module {
   std::vector<ModulePtr> layers;
   std::vector<ParameterPtr> param_vector;
 
-  Sequential(const std::vector<ModulePtr> &l) : layers(l), param_vector() {
+  Sequential(const std::vector<ModulePtr> &l)
+      : Module(SEQUENTIAL_T), layers(l), param_vector() {
     for (size_t i = 0U; i < layers.size(); ++i) {
       const std::vector<ParameterPtr> p = layers[i]->parameters();
       param_vector.insert(param_vector.end(), p.begin(), p.end());
     }
   }
 
-  void train() {
+  void train() override {
     for (const ModulePtr &m : layers) {
       m->train();
     }
   }
-  void eval() {
+  void eval() override {
     for (const ModulePtr &m : layers) {
       m->eval();
     }
@@ -49,5 +50,7 @@ struct Sequential : public Module {
   }
 
   std::vector<ParameterPtr> parameters() override { return param_vector; }
+
+  void save(std::ostream &) const override;
 };
 } // namespace Weed

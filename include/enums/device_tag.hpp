@@ -17,5 +17,5 @@ namespace Weed {
 /**
  * Back-end device types available in Weed
  */
-enum DeviceTag { DEFAULT_DEVICE = 0, CPU = 1, GPU = 2, Qrack = 3 };
+enum DeviceTag { NONE_DEVICE = 0, DEFAULT_DEVICE = 1, CPU = 2, GPU = 3 };
 } // namespace Weed

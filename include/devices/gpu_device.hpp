@@ -14,13 +14,19 @@
 #include "pool_item.hpp"
 #include "queue_item.hpp"
 
-#if !ENABLE_OPENCL && !ENABLE_CUDA
+#if !ENABLE_GPU
 #error GPU files were included without either OpenCL and CUDA enabled.
 #endif
+
+#define WEED_GPU_SINGLETON (OCLEngine::Instance())
 
 #include <list>
 
 namespace Weed {
+#if ENABLE_CUDA
+typedef cudaError_t cl_int;
+#endif
+
 /**
  * Manages a GPU (or accelerator) device context, per discrete (or integrated)
  * device, or per device queue of dependent events
@@ -47,7 +53,7 @@ struct GpuDevice {
    */
   GpuDevice(const int64_t &did = -1)
       : deviceID(did), callbackError(CL_SUCCESS), totalOclAllocSize(0U) {
-    const size_t deviceCount = OCLEngine::Instance().GetDeviceCount();
+    const size_t deviceCount = WEED_GPU_SINGLETON.GetDeviceCount();
 
     if (!deviceCount) {
       throw std::runtime_error("GpuDevice::GpuDevice(): No available devices.");
@@ -60,7 +66,7 @@ struct GpuDevice {
 
     clFinish();
 
-    device_context = OCLEngine::Instance().GetDeviceContextPtr(did);
+    device_context = WEED_GPU_SINGLETON.GetDeviceContextPtr(did);
     context = device_context->context;
     queue = device_context->queue;
   }
@@ -113,10 +119,10 @@ struct GpuDevice {
    */
   void AddAlloc(const size_t &size) {
     size_t currentAlloc =
-        OCLEngine::Instance().AddToActiveAllocSize(deviceID, size);
+        WEED_GPU_SINGLETON.AddToActiveAllocSize(deviceID, size);
     if (device_context &&
         (currentAlloc > device_context->GetGlobalAllocLimit())) {
-      OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+      WEED_GPU_SINGLETON.SubtractFromActiveAllocSize(deviceID, size);
       throw bad_alloc("VRAM limits exceeded in QEngineOCL::AddAlloc()");
     }
     totalOclAllocSize += size;
@@ -126,7 +132,7 @@ struct GpuDevice {
    * Subtract byte count to manual GPU memory tracking
    */
   void SubtractAlloc(const size_t &size) {
-    OCLEngine::Instance().SubtractFromActiveAllocSize(deviceID, size);
+    WEED_GPU_SINGLETON.SubtractFromActiveAllocSize(deviceID, size);
     totalOclAllocSize -= size;
   }
 

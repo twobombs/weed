@@ -13,7 +13,9 @@
 #include "common/parallel_for.hpp"
 #include "ops/util.hpp"
 #include "storage/all_storage.hpp"
+#if ENABLE_GPU
 #include "storage/gpu_int_storage.hpp"
+#endif
 
 #define DEVICE_SWITCH(cpu, gpu, a, b, o)                                       \
   switch (a.storage->device) {                                                 \
@@ -48,8 +50,8 @@
 
 namespace Weed {
 template <typename T>
-void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
-                 Tensor &out) {
+static void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
+                        Tensor &out) {
   const tcapint D = weight.shape[1];
   const size_t N = indices.get_broadcast_size();
 
@@ -75,7 +77,8 @@ void cpu_forward(const SymbolTensor &indices, const Tensor &weight,
 }
 
 template <typename T1, typename T2>
-void cpu_backward(Tensor &dW, const SymbolTensor &indices, const Tensor &dout) {
+static void cpu_backward(Tensor &dW, const SymbolTensor &indices,
+                         const Tensor &dout) {
   const tcapint D = dW.shape[1];
   const size_t N = indices.get_broadcast_size();
 
@@ -101,28 +104,28 @@ void cpu_backward(Tensor &dW, const SymbolTensor &indices, const Tensor &dout) {
 }
 
 #if ENABLE_GPU
-void gpu_forward_real(const SymbolTensor &indices, const Tensor &weight,
-                      Tensor &out) {
+static void gpu_forward_real(const SymbolTensor &indices, const Tensor &weight,
+                             Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_REAL);
 }
-void gpu_forward_complex(const SymbolTensor &indices, const Tensor &weight,
-                         Tensor &out) {
+static void gpu_forward_complex(const SymbolTensor &indices,
+                                const Tensor &weight, Tensor &out) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuComplexStorage, GpuComplexStorage,
                       OCL_API_EMBEDDING_COMPLEX);
 }
-void gpu_backward_real(Tensor &out, const SymbolTensor &indices,
-                       const Tensor &weight) {
+static void gpu_backward_real(Tensor &out, const SymbolTensor &indices,
+                              const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
 }
-void gpu_backward_complex(Tensor &out, const SymbolTensor &indices,
-                          const Tensor &weight) {
+static void gpu_backward_complex(Tensor &out, const SymbolTensor &indices,
+                                 const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
 }
-void gpu_backward_mixed(Tensor &out, const SymbolTensor &indices,
-                        const Tensor &weight) {
+static void gpu_backward_mixed(Tensor &out, const SymbolTensor &indices,
+                               const Tensor &weight) {
   DISPATCH_GPU_KERNEL(GpuIntStorage, GpuRealStorage, GpuRealStorage,
                       OCL_API_EMBEDDING_GRAD_REAL);
 }
@@ -132,9 +135,17 @@ void embedding_gather(const SymbolTensor &a, const Tensor &b, Tensor &o) {
   validate_all_same_device({&a, &b, &o}, "embedding_gather");
   const bool isAComplex = a.storage->dtype == DType::COMPLEX;
   if (isAComplex) {
+#if ENABLE_GPU
     DEVICE_SWITCH(cpu_forward<ComplexStorage>, gpu_forward_complex, a, b, o);
+#else
+    cpu_forward<ComplexStorage>(a, b, o);
+#endif
   } else {
+#if ENABLE_GPU
     DEVICE_SWITCH(cpu_forward<RealStorage>, gpu_forward_real, a, b, o);
+#else
+    cpu_forward<RealStorage>(a, b, o);
+#endif
   }
 }
 
@@ -148,24 +159,36 @@ void embedding_scatter_add(Tensor &o, const SymbolTensor &a, const Tensor &b) {
   }
   if (isOComplex) {
     if (isAComplex) {
+#if ENABLE_GPU
       if (o.storage->device == DeviceTag::GPU) {
         cpu_backward<ComplexStorage, ComplexStorage>(o, a, b);
       } else {
         gpu_backward_complex(o, a, b);
       }
+#else
+      cpu_backward<ComplexStorage, ComplexStorage>(o, a, b);
+#endif
     } else {
+#if ENABLE_GPU
       if (o.storage->device == DeviceTag::GPU) {
         cpu_backward<ComplexStorage, RealStorage>(o, a, b);
       } else {
         gpu_backward_mixed(o, a, b);
       }
+#else
+      cpu_backward<ComplexStorage, RealStorage>(o, a, b);
+#endif
     }
   } else {
+#if ENABLE_GPU
     if (o.storage->device == DeviceTag::GPU) {
       cpu_backward<RealStorage, RealStorage>(o, a, b);
     } else {
       gpu_backward_real(o, a, b);
     }
+#else
+    cpu_backward<RealStorage, RealStorage>(o, a, b);
+#endif
   }
 }
 } // namespace Weed
