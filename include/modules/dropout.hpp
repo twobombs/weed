@@ -35,5 +35,8 @@ struct Dropout : public Module {
   void eval() override { training = false; }
 
   TensorPtr forward(const TensorPtr x) override;
+
+  void save(std::ostream &) const;
 };
+typedef std::shared_ptr<Dropout> DropoutPtr;
 } // namespace Weed

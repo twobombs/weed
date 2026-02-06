@@ -12,6 +12,7 @@
 #include "modules/module.hpp"
 #include "common/serializer.hpp"
 
+#include "modules/dropout.hpp"
 #include "modules/linear.hpp"
 #include "modules/relu.hpp"
 #include "modules/sequential.hpp"
@@ -66,6 +67,16 @@ ModulePtr Module::load(std::istream &is) {
   }
   case ModuleType::TANH_T: {
     return std::make_shared<Tanh>();
+  }
+  case ModuleType::DROPOUT_T: {
+    real1 p;
+    Serializer::read_real(is, p);
+    bool training;
+    Serializer::read_bool(is, training);
+    DropoutPtr d = std::make_shared<Dropout>(p);
+    d->training = training;
+
+    return d;
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:
