@@ -10,10 +10,11 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "modules/gru.hpp"
+#include "common/serializer.hpp"
 
 namespace Weed {
 TensorPtr GRU::forward(const TensorPtr x) {
-  const TensorPtr &prev = state.back();
+  const TensorPtr &prev = history.back();
   if (prev->shape.size() == 1U) {
     prev->shape.insert(prev->shape.begin(), x->shape[0U]);
     prev->stride.insert(prev->stride.begin(), 0U);
@@ -21,7 +22,7 @@ TensorPtr GRU::forward(const TensorPtr x) {
   }
 
   // z = W_x(x) + W_h(h)
-  TensorPtr z = W_x.forward(x) + W_h.forward(prev);
+  TensorPtr z = W_x->forward(x) + W_h->forward(prev);
 
   // Split into 3 chunks
   const std::vector<TensorPtr> zc = z->chunk(3, /*axis=*/-1);
@@ -30,13 +31,20 @@ TensorPtr GRU::forward(const TensorPtr x) {
   TensorPtr r_t = Tensor::sigmoid(zc[1U]);
 
   // Candidate
-  TensorPtr h_tilde = Tensor::tanh(zc[2U] + W_h.forward(r_t * prev));
+  TensorPtr h_tilde = Tensor::tanh(zc[2U] + W_h->forward(r_t * prev));
 
   // Final hidden state
   TensorPtr h = (Tensor::ones_like(z_t->shape) - z_t) * prev + z_t * h_tilde;
 
-  state.push_back(h);
+  history.push_back(h);
 
   return h;
+}
+void GRU::save(std::ostream &os) const {
+  Module::save(os);
+  Serializer::write_tcapint(os, input_dim);
+  Serializer::write_tcapint(os, hidden_dim);
+  W_x->save(os);
+  W_h->save(os);
 }
 } // namespace Weed

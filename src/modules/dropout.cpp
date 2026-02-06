@@ -10,6 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "modules/dropout.hpp"
+#include "common/serializer.hpp"
 
 #include <random>
 
@@ -39,5 +40,9 @@ TensorPtr Dropout::forward(const TensorPtr x) {
 
   // y = x * mask / (1 - p)
   return (x * mask) / (ONE_R1 - p);
+}
+void Dropout::save(std::ostream &os) const {
+  Serializer::write_real(os, p);
+  Serializer::write_bool(os, training);
 }
 } // namespace Weed

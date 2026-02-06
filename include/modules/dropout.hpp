@@ -22,7 +22,9 @@ struct Dropout : public Module {
   bool training;
   TensorPtr mask;
 
-  Dropout(real1 prob) : p(prob), training(true), mask(nullptr) {
+  Dropout() : Module(DROPOUT_T) {}
+  Dropout(real1 prob)
+      : Module(DROPOUT_T), p(prob), training(true), mask(nullptr) {
     if ((p < ZERO_R1) || (p >= ONE_R1)) {
       throw std::invalid_argument(
           "Dropout probability must be at least 0.0 and cannot be greater than "
@@ -30,9 +32,18 @@ struct Dropout : public Module {
     }
   }
 
-  void train() override { training = true; }
-  void eval() override { training = false; }
+  void train() override {
+    Module::train();
+    training = true;
+  }
+  void eval() override {
+    Module::eval();
+    training = false;
+  }
 
   TensorPtr forward(const TensorPtr x) override;
+
+  void save(std::ostream &) const;
 };
+typedef std::shared_ptr<Dropout> DropoutPtr;
 } // namespace Weed

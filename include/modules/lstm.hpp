@@ -31,25 +31,31 @@ struct LSTM : public Module {
   tcapint input_dim;
   tcapint hidden_dim;
 
-  Linear W_x; // input -> 4H
-  Linear W_h; // hidden -> 4H
+  LinearPtr W_x; // input -> 4H
+  LinearPtr W_h; // hidden -> 4H
 
-  std::vector<LSTMState> state;
+  LSTMState state;
+  std::vector<TensorPtr> history;
 
+  LSTM() : Module(LSTM_T) {}
   LSTM(tcapint in, tcapint hid, DeviceTag dtag = DEFAULT_DEVICE)
-      : input_dim(in), hidden_dim(hid),
-        W_x(in, 4 * hid, true, DType::REAL, dtag),
-        W_h(hid, 4 * hid, true, DType::REAL, dtag),
-        state{LSTMState{Tensor::zeros(std::vector<tcapint>{hidden_dim}),
-                        Tensor::zeros(std::vector<tcapint>{hidden_dim})}} {}
+      : Module(LSTM_T), input_dim(in), hidden_dim(hid),
+        W_x(std::make_shared<Linear>(in, 4 * hid, true, DType::REAL, dtag)),
+        W_h(std::make_shared<Linear>(hid, 4 * hid, true, DType::REAL, dtag)),
+        state{Tensor::zeros(std::vector<tcapint>{hidden_dim}),
+              Tensor::zeros(std::vector<tcapint>{hidden_dim})},
+        history{state.h} {}
 
   std::vector<ParameterPtr> parameters() override {
-    auto px = W_x.parameters();
-    auto ph = W_h.parameters();
+    auto px = W_x->parameters();
+    auto ph = W_h->parameters();
     px.insert(px.end(), ph.begin(), ph.end());
     return px;
   }
 
   TensorPtr forward(const TensorPtr) override;
+
+  void save(std::ostream &) const;
 };
+typedef std::shared_ptr<LSTM> LSTMPtr;
 } // namespace Weed

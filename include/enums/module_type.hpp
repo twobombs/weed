@@ -15,7 +15,19 @@
 
 namespace Weed {
 /**
- * Back-end device types available in Weed
+ * Module types for serialization
  */
-enum DeviceTag { NONE_DEVICE = 0, DEFAULT_DEVICE = 1, CPU = 2, GPU = 3 };
+enum ModuleType {
+  NONE_MODULE_TYPE = 0,
+  SEQUENTIAL_T = 1,
+  LINEAR_T = 2,
+  RELU_T = 3,
+  SIGMOID_T = 4,
+  TANH_T = 5,
+  DROPOUT_T = 6,
+  LAYERNORM_T = 7,
+  EMBEDDING_T = 8,
+  GRU_T = 9,
+  LSTM_T = 10
+};
 } // namespace Weed

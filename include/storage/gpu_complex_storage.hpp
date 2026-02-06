@@ -24,9 +24,9 @@ namespace Weed {
 struct GpuComplexStorage : public GpuStorage<complex> {
   GpuComplexStorage(const tcapint &n, const int64_t &did,
                     const bool &alloc = true)
-      : GpuStorage<complex>(n, did, alloc) {}
-  GpuComplexStorage(const std::vector<complex> &val, const int64_t &did)
-      : GpuStorage<complex>(val, did) {}
+      : GpuStorage<complex>(COMPLEX_GPU_DENSE, n, did, alloc) {}
+  GpuComplexStorage(const std::vector<complex> &val, const int64_t &did = -1)
+      : GpuStorage<complex>(COMPLEX_GPU_DENSE, val, did) {}
 
   void FillZeros() override { dev->ClearRealBuffer(buffer, size << 1U); }
   void FillOnes() override { dev->FillOnesComplex(buffer, size); }
@@ -46,6 +46,8 @@ struct GpuComplexStorage : public GpuStorage<complex> {
   StoragePtr Upcast(const DType &dt) override { return get_ptr(); };
 
   StoragePtr cpu() override;
+
+  void save(std::ostream &) const override;
 };
 typedef std::shared_ptr<GpuComplexStorage> GpuComplexStoragePtr;
 } // namespace Weed

@@ -26,8 +26,11 @@ add_library (weed STATIC
     src/modules/dropout.cpp
     src/modules/embedding.cpp
     src/modules/gru.cpp
+    src/modules/layernorm.cpp
     src/modules/linear.cpp
     src/modules/lstm.cpp
+    src/modules/module.cpp
+    src/modules/sequential.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
@@ -48,6 +51,8 @@ add_library (weed STATIC
     src/storage/cpu_real_storage.cpp
     src/storage/sparse_cpu_complex_storage.cpp
     src/storage/sparse_cpu_real_storage.cpp
+    src/storage/storage.cpp
+    src/tensors/parameter.cpp
     src/tensors/tensor.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -264,14 +269,13 @@ set_target_properties (weed PROPERTIES
 # Install common headers
 install (FILES
     ${CMAKE_BINARY_DIR}/include/common/config.h
-    include/common/weed_functions.hpp
-    include/common/weed_types.hpp
-    include/common/complex16x2simd.hpp
-    include/common/complex8x2simd.hpp
+    include/common/half.hpp
     include/common/oclapi.hpp
     include/common/oclengine.hpp
     include/common/parallel_for.hpp
-    include/common/half.hpp
+    include/common/serializer.hpp
+    include/common/weed_functions.hpp
+    include/common/weed_types.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/weed/common
     )
 
@@ -288,6 +292,8 @@ install (FILES
     include/devices/queue_item.hpp
     include/enums/device_tag.hpp
     include/enums/dtype.hpp
+    include/enums/module_type.hpp
+    include/enums/storage_type.hpp
     include/modules/dropout.hpp
     include/modules/embedding.hpp
     include/modules/gru.hpp

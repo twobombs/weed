@@ -9,13 +9,15 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#pragma once
-
-#include "config.h"
+#include "modules/layernorm.hpp"
+#include "common/serializer.hpp"
 
 namespace Weed {
-/**
- * Back-end device types available in Weed
- */
-enum DeviceTag { NONE_DEVICE = 0, DEFAULT_DEVICE = 1, CPU = 2, GPU = 3 };
+void LayerNorm::save(std::ostream &os) const {
+  Module::save(os);
+  Serializer::write_tcapint(os, features);
+  Serializer::write_real(os, eps);
+  gamma->save(os);
+  beta->save(os);
+}
 } // namespace Weed
