@@ -19,6 +19,7 @@
 #include "ops/matmul.hpp"
 #include "ops/pow.hpp"
 #include "ops/real_extremum.hpp"
+#include <algorithm>
 #include "ops/real_unary.hpp"
 #include "ops/reduce.hpp"
 #include "ops/sub.hpp"

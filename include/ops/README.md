@@ -7,12 +7,15 @@ This directory contains the definitions and dispatch logic for tensor operations
 *   **abs.hpp**: Absolute value operation (`abs`).
 *   **clamp.hpp**: Clamping operation (`clamp`), limiting values to a specified range.
 *   **commuting.hpp**: Commutative binary operations (`add`, `mul`). Defines the `CommutingKernel` struct used to dispatch these operations.
+*   **copy_broadcast.hpp**: Helper for materializing broadcast indices.
 *   **div.hpp**: Division operation (`div`).
+*   **embedding.hpp**: Embedding lookup operation.
 *   **in_place.hpp**: In-place binary operations (`add_in_place`, `sub_in_place`). Defines the `InPlaceKernel` struct.
 *   **matmul.hpp**: Matrix multiplication (`matmul`, `>>`, `<<`).
 *   **pow.hpp**: Power (`pow`, `^`) and exponential (`exp`) operations. Also includes logarithm (`log`).
+*   **real_extremum.hpp**: Kernels for finding maximum and minimum values (`max`, `min`) and their gradients.
 *   **real_unary.hpp**: Unary operations that might have specific real-valued behaviors or constraints.
 *   **reduce.hpp**: Reduction operations base definitions.
 *   **sub.hpp**: Subtraction operation (`sub`).
 *   **sum.hpp**: Summation operation (`sum`, `mean`).
-*   **unary.hpp**: Common unary operations like activation functions (`relu`, `sigmoid`, `tanh`) and their gradients. Defines the `UnaryKernel` struct.
+*   **util.hpp**: Utility functions for validating tensor properties (e.g., ensuring same device).

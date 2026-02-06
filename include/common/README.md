@@ -15,5 +15,6 @@ This directory contains common definitions, types, and utility classes used thro
     *   `OCLEngine`: A singleton that manages OpenCL devices, contexts, and program compilation.
     *   `OCLDeviceContext`: Encapsulates an OpenCL context, command queue, and device properties.
 *   **weed_functions.hpp**: Declarations for common mathematical and utility functions.
-*   **complex*x2simd.hpp**: SIMD vectorization helpers for complex numbers.
+*   **half.hpp**: IEEE 754-based half-precision floating-point library.
+*   **serializer.hpp**: Static methods for serialization and de-serialization of primitive types (`bool`, `tcapint`, `symint`, `real1`, `complex`).
 *   **config.h.in**: Template for the generated `config.h`.
