@@ -22,6 +22,7 @@ struct Dropout : public Module {
   bool training;
   TensorPtr mask;
 
+  Dropout() : Module(DROPOUT_T) {}
   Dropout(real1 prob)
       : Module(DROPOUT_T), p(prob), training(true), mask(nullptr) {
     if ((p < ZERO_R1) || (p >= ONE_R1)) {

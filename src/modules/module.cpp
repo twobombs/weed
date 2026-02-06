@@ -13,6 +13,7 @@
 #include "common/serializer.hpp"
 
 #include "modules/dropout.hpp"
+#include "modules/embedding.hpp"
 #include "modules/linear.hpp"
 #include "modules/relu.hpp"
 #include "modules/sequential.hpp"
@@ -41,21 +42,15 @@ ModulePtr Module::load(std::istream &is) {
     return std::make_shared<Sequential>(mv);
   }
   case ModuleType::LINEAR_T: {
-    tcapint in_features, out_features;
-    Serializer::read_tcapint(is, in_features);
-    Serializer::read_tcapint(is, out_features);
-    ParameterPtr weight = Parameter::load(is);
+    LinearPtr l = std::make_shared<Linear>();
+    Serializer::read_tcapint(is, l->in_features);
+    Serializer::read_tcapint(is, l->out_features);
+    l->weight = Parameter::load(is);
     bool is_bias;
     Serializer::read_bool(is, is_bias);
-    ParameterPtr bias = nullptr;
     if (is_bias) {
-      bias = Parameter::load(is);
+      l->bias = Parameter::load(is);
     }
-    LinearPtr l = std::make_shared<Linear>();
-    l->in_features = in_features;
-    l->out_features = out_features;
-    l->weight = weight;
-    l->bias = bias;
 
     return l;
   }
@@ -69,14 +64,19 @@ ModulePtr Module::load(std::istream &is) {
     return std::make_shared<Tanh>();
   }
   case ModuleType::DROPOUT_T: {
-    real1 p;
-    Serializer::read_real(is, p);
-    bool training;
-    Serializer::read_bool(is, training);
-    DropoutPtr d = std::make_shared<Dropout>(p);
-    d->training = training;
+    DropoutPtr d = std::make_shared<Dropout>();
+    Serializer::read_real(is, d->p);
+    Serializer::read_bool(is, d->training);
 
     return d;
+  }
+  case ModuleType::EMBEDDING_T: {
+    EmbeddingPtr e = std::make_shared<Embedding>();
+    Serializer::read_tcapint(is, e->num_embeddings);
+    Serializer::read_tcapint(is, e->embedding_dim);
+    e->weight = Parameter::load(is);
+
+    return e;
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:
