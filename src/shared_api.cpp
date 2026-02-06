@@ -12,6 +12,7 @@
 // "Qrack::QInterface."
 #include "modules/module.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -19,72 +20,31 @@
 #define META_LOCK_GUARD()                                                      \
   const std::lock_guard<std::mutex> meta_lock(meta_operation_mutex)
 
-// MODULE_LOCK_GUARD variants will lock module_mutexes[nullptr], if the
-// requested module doesn't exist. This is CORRECT behavior. This will
-// effectively emplace a mutex for nullptr key.
-#if CPP_STD > 13
-#define MODULE_LOCK_GUARD(module)                                              \
+#define MODULE_LOCK_GUARD(mid)                                                 \
   std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;              \
   if (true) {                                                                  \
-    std::lock(meta_operation_mutex, module_mutexes[module]);                   \
-    const std::lock_guard<std::mutex> meta_lock(meta_operation_mutex,          \
-                                                std::adopt_lock);              \
+    std::lock(meta_operation_mutex, module_results[mid]->mtx);                 \
+    const std::lock_guard<std::mutex> metaLock(meta_operation_mutex,           \
+                                               std::adopt_lock);               \
     module_lock = std::make_unique<const std::lock_guard<std::mutex>>(         \
-        module_mutexes[module], std::adopt_lock);                              \
+        module_results[mid]->mtx, std::adopt_lock);                            \
   }
-#else
-#define MODULE_LOCK_GUARD(module)                                                                                  \
-  std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;                                                  \
-  if (true) {                                                                                                      \
-    std::lock(meta_operation_mutex, module_mutexes[module]);                                                       \
-    const std::lock_guard<std::mutex> meta_lock(meta_operation_mutex,                                              \
-                                                std::adopt_lock);CMPLX_DEFAULT_ARG, false, true, hp, -1, true, sp)                               \
-        module_lock = std::unique_ptr<const std::lock_guard<std::mutex>>(                                            \
-            new const std::lock_guard<std::mutex>(module_mutexes[module], std::adopt_lock));                       \
-  }
-#endif
-
-#define MODULE_LOCK_GUARD_VOID(mid)                                            \
-  if (mid >= modules.size()) {                                                 \
-    std::cout << "Invalid argument: module ID not found!" << std::endl;        \
-    meta_error = 2;                                                            \
-    return;                                                                    \
-  }                                                                            \
-  QInterfacePtr module = modules[mid];                                         \
-  MODULE_LOCK_GUARD(module.get())                                              \
-  if (!module) {                                                               \
-    return;                                                                    \
-  }
-
-#define MODULE_LOCK_GUARD_TYPED(mid, def)                                      \
-  if (mid >= modules.size()) {                                                 \
-    std::cout << "Invalid argument: module ID not found!" << std::endl;        \
-    meta_error = 2;                                                            \
-    return def;                                                                \
-  }                                                                            \
-                                                                               \
-  QInterfacePtr module = modules[mid];                                         \
-  MODULE_LOCK_GUARD(module.get())                                              \
-  if (!module) {                                                               \
-    return def;                                                                \
-  }
-
-#define MODULE_LOCK_GUARD_BOOL(mid) MODULE_LOCK_GUARD_TYPED(mid, false)
-
-#define MODULE_LOCK_GUARD_DOUBLE(mid) MODULE_LOCK_GUARD_TYPED(mid, 0.0)
-
-#define MODULE_LOCK_GUARD_INT(mid) MODULE_LOCK_GUARD_TYPED(mid, 0U)
 
 using namespace Weed;
+
+struct ModuleResult {
+  std::mutex mtx;
+  ModulePtr m;
+  TensorPtr t;
+  int error;
+  ModuleResult(ModulePtr a) : m(a), t(nullptr), error(0) {}
+};
+typedef std::unique_ptr<ModuleResult> ModuleResultPtr;
 
 std::mutex meta_operation_mutex;
 int meta_error = 0;
 
-std::vector<int> module_errors;
-std::vector<ModulePtr> modules;
-
-std::vector<int> tensor_errors;
-std::vector<BaseTensorPtr> tensors;
+std::vector<ModuleResultPtr> module_results;
 
 void _darray_to_creal1_array(double *params, tcapint componentCount,
                              complex *amps) {
@@ -94,18 +54,15 @@ void _darray_to_creal1_array(double *params, tcapint componentCount,
 }
 
 extern "C" {
-
-/**
- * (External API) Poll after each operation to check whether error occurred.
- */
 MICROSOFT_QUANTUM_DECL int get_error(_In_ const uintw mid) {
   if (meta_error) {
     meta_error = 0;
     return 2;
   }
 
-  return module_errors[mid];
+  return module_results[mid]->error;
 }
+
 MICROSOFT_QUANTUM_DECL uintw load_module(_In_ const char *f) {
   META_LOCK_GUARD();
 
@@ -124,27 +81,78 @@ MICROSOFT_QUANTUM_DECL uintw load_module(_In_ const char *f) {
 
   uintw id = 0U;
   if (is_success) {
-    while ((id < modules.size()) && modules[id]) {
+    while ((id < module_results.size()) && module_results[id]) {
       ++id;
     }
-    if (id == modules.size()) {
-      modules.push_back(m);
+    if (id == module_results.size()) {
+      module_results.push_back(
+          std::unique_ptr<ModuleResult>(new ModuleResult(m)));
     } else {
-      modules[id] = m;
+      module_results[id] = std::unique_ptr<ModuleResult>(new ModuleResult(m));
     }
   }
 
   return id;
 }
+
 MICROSOFT_QUANTUM_DECL void free_module(_In_ uintw mid) {
   META_LOCK_GUARD();
 
-  if (mid >= modules.size()) {
+  if (mid >= module_results.size()) {
     std::cout << "Invalid argument: module ID not found!" << std::endl;
     meta_error = 2;
     return;
   }
 
-  modules[mid] = nullptr;
+  module_results[mid] = nullptr;
+}
+
+MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
+                                    _In_ uintw n, _In_reads_(n) uintw *shape,
+                                    _In_reads_(n) uintw *stride,
+                                    _In_ real1_s *d) {
+  MODULE_LOCK_GUARD(mid);
+
+  TensorPtr x;
+  try {
+    std::vector<tcapint> sh(n);
+    std::vector<tcapint> st(n);
+    std::transform(shape, shape + n, sh.begin(),
+                   [](uintw x) { return (tcapint)x; });
+    std::transform(stride, stride + n, st.begin(),
+                   [](uintw x) { return (tcapint)x; });
+
+    tcapint max_index = 0U;
+    for (size_t i = 0U; i < sh.size(); ++i) {
+      max_index += (sh[i] - 1U) * st[i];
+    }
+    if (!sh.empty()) {
+      ++max_index;
+    }
+
+    if (dtype == 1U) {
+      std::vector<real1> v(max_index);
+      std::transform(d, d + max_index, v.begin(),
+                     [](real1_s x) { return (real1)x; });
+      x = std::make_shared<Tensor>(v, sh, st);
+    } else {
+      std::vector<complex> v(max_index);
+      for (size_t i = 0U; i < max_index; ++i) {
+        size_t j = i << 1U;
+        v[i] = complex(d[j], d[j + 1U]);
+      }
+      x = std::make_shared<Tensor>(v, sh, st);
+    }
+  } catch (const std::exception &ex) {
+    std::cout << ex.what() << std::endl;
+    meta_error = 1;
+  }
+
+  try {
+    module_results[mid]->t = module_results[mid]->m->forward(x);
+  } catch (const std::exception &ex) {
+    std::cout << ex.what() << std::endl;
+    module_results[mid]->error = 1;
+  }
 }
 }

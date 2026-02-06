@@ -231,6 +231,7 @@ Tensor::Tensor(const std::vector<real1> &val, const std::vector<tcapint> &shp,
   storage = std::make_shared<CpuRealStorage>(val);
 #endif
 }
+
 Tensor::Tensor(const std::vector<complex> &val, const std::vector<tcapint> &shp,
                const std::vector<tcapint> &strd, const bool &rg,
                const DeviceTag &_dtag, const int64_t &did)

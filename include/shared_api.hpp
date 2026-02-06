@@ -42,4 +42,8 @@ extern "C" {
 MICROSOFT_QUANTUM_DECL int get_error(_In_ const uintw mid);
 MICROSOFT_QUANTUM_DECL uintw load_module(_In_ const char *f);
 MICROSOFT_QUANTUM_DECL void free_module(_In_ uintw mid);
+MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
+                                    _In_ uintw n, _In_reads_(n) uintw *shape,
+                                    _In_reads_(n) uintw *stride,
+                                    _In_ real1_s *d);
 }
