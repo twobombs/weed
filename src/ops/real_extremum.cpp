@@ -12,6 +12,7 @@
 #include "ops/real_extremum.hpp"
 #include "common/parallel_for.hpp"
 #include "ops/util.hpp"
+#include <algorithm>
 #include "tensors/flat_tensors.hpp"
 #include "tensors/real_scalar.hpp"
 

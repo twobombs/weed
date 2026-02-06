@@ -12,6 +12,7 @@ This directory contains the unit tests for the Weed library, built using the [Ca
     *   Matrix multiplication.
     *   Autograd functionality (verifying gradients).
 *   **tests.hpp**: Header file defining common macros, globals (like the current `DeviceTag` being tested), and includes.
+*   **benchmarks.cpp**: Contains performance benchmark tests (e.g., matrix multiplication).
 *   **catch.hpp**: The single-header Catch2 library.
 
 ## Running Tests

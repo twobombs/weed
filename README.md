@@ -40,6 +40,7 @@ Much like `Qrack`, `Weed` is designed to make the correct thing the default—an
 
 *   **cmake/**: CMake modules for build configuration.
 *   **debian/**: Debian packaging files.
+*   **docs/**: Documentation files (PDFs).
 *   **examples/**: Example code demonstrating usage.
 *   **include/**: Public API header files, organized by module.
     *   `autograd/`: Optimizers and loss functions.
@@ -50,7 +51,7 @@ Much like `Qrack`, `Weed` is designed to make the correct thing the default—an
     *   `ops/`: Tensor operations.
     *   `storage/`: Tensor storage implementations.
     *   `tensors/`: Tensor interface.
-*   **src/**: Source code implementations, mirroring the `include/` structure.
+*   **src/**: Source code implementations, mirroring the `include/` structure (excluding header-only modules).
 *   **test/**: Unit tests.
 
 

@@ -11,6 +11,7 @@
 
 #include "storage/cpu_real_storage.hpp"
 #include "storage/cpu_complex_storage.hpp"
+#include <algorithm>
 #if ENABLE_GPU
 #include "storage/gpu_real_storage.hpp"
 #endif

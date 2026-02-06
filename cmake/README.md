@@ -5,7 +5,6 @@ This directory contains CMake modules and scripts used to configure the build pr
 ## Files
 
 *   **Boost.cmake**: Configures the Boost C++ libraries dependency. It defines `BOOST_AVAILABLE` if found.
-*   **CUDA.cmake**: Handles the detection and configuration of CUDA for GPU acceleration. It sets `ENABLE_CUDA` and configures target architectures.
 *   **Complex_x2.cmake**: Likely configures double-precision complex number support or SIMD extensions.
 *   **Coverage.cmake**: Sets up code coverage analysis (likely used with `ENABLE_CODECOVERAGE`).
 *   **CppStd.cmake**: Ensures the compiler supports the required C++ standard (C++11 or later).

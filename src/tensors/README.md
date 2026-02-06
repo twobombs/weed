@@ -11,3 +11,5 @@ This directory contains the implementation of the tensor logic.
         2.  Dispatch to the appropriate `ops` kernel.
         3.  If gradients are required, create a `Node` in the autograd graph with the appropriate backward closure.
     *   **Autograd**: `backward()` triggers the reverse-mode automatic differentiation from the given tensor (usually loss).
+*   **symbol_tensor.cpp**: Implements `SymbolTensor` constructors and methods.
+*   **parameter.cpp**: Implements `Parameter` constructors.
