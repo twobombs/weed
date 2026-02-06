@@ -49,9 +49,7 @@ struct Sequential : public Module {
     return tmp;
   }
 
-  std::vector<ParameterPtr> parameters() override {
-    return param_vector;
-  }
+  std::vector<ParameterPtr> parameters() override { return param_vector; }
 
   void save(std::ostream &) const override;
 };

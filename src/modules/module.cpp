@@ -96,7 +96,7 @@ ModulePtr Module::load(std::istream &is) {
     Serializer::read_tcapint(is, g->hidden_dim);
     g->W_x = std::dynamic_pointer_cast<Linear>(Linear::load(is));
     g->W_h = std::dynamic_pointer_cast<Linear>(Linear::load(is));
-    g->history.push_back(Tensor::zeros({g->hidden_dim}));
+    g->state = Tensor::zeros({g->hidden_dim});
 
     return g;
   }
@@ -108,7 +108,6 @@ ModulePtr Module::load(std::istream &is) {
     l->W_h = std::dynamic_pointer_cast<Linear>(Linear::load(is));
     l->state = LSTMState{Tensor::zeros(std::vector<tcapint>{l->hidden_dim}),
                          Tensor::zeros(std::vector<tcapint>{l->hidden_dim})};
-    l->history.push_back(l->state.h);
 
     return l;
   }

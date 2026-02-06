@@ -21,6 +21,7 @@ endif (PACK_DEBIAN)
 
 # Declare the library
 add_library (weed STATIC
+    src/shared_api.cpp
     src/common/functions.cpp
     src/common/parallel_for.cpp
     src/modules/dropout.cpp
@@ -281,6 +282,7 @@ install (FILES
 
 # Install weed library headers
 install (FILES
+    include/shared_api.hpp
     include/autograd/adam.hpp
     include/autograd/bci_loss.hpp
     include/autograd/mse_loss.hpp

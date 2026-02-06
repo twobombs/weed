@@ -42,8 +42,6 @@ TensorPtr LSTM::forward(const TensorPtr x) {
   state.h = h;
   state.c = c;
 
-  history.push_back(h);
-
   return h;
 }
 void LSTM::save(std::ostream &os) const {

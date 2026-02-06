@@ -24,14 +24,14 @@ struct GRU : public Module {
   LinearPtr W_x; // x → 3H
   LinearPtr W_h; // h → 3H
 
-  std::vector<TensorPtr> history;
+  TensorPtr state;
 
   GRU() : Module(GRU_T) {}
   GRU(tcapint in, tcapint hid, DeviceTag dtag = DeviceTag::DEFAULT_DEVICE)
       : Module(GRU_T), input_dim(in), hidden_dim(hid),
         W_x(std::make_shared<Linear>(in, 3 * hid, true, DType::REAL, dtag)),
         W_h(std::make_shared<Linear>(hid, 3 * hid, true, DType::REAL, dtag)),
-        history{Tensor::zeros({hidden_dim})} {}
+        state(Tensor::zeros({hidden_dim})) {}
 
   std::vector<ParameterPtr> parameters() override {
     auto px = W_x->parameters();
