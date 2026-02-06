@@ -35,7 +35,6 @@ struct LSTM : public Module {
   LinearPtr W_h; // hidden -> 4H
 
   LSTMState state;
-  std::vector<TensorPtr> history;
 
   LSTM() : Module(LSTM_T) {}
   LSTM(tcapint in, tcapint hid, DeviceTag dtag = DEFAULT_DEVICE)
@@ -43,8 +42,7 @@ struct LSTM : public Module {
         W_x(std::make_shared<Linear>(in, 4 * hid, true, DType::REAL, dtag)),
         W_h(std::make_shared<Linear>(hid, 4 * hid, true, DType::REAL, dtag)),
         state{Tensor::zeros(std::vector<tcapint>{hidden_dim}),
-              Tensor::zeros(std::vector<tcapint>{hidden_dim})},
-        history{state.h} {}
+              Tensor::zeros(std::vector<tcapint>{hidden_dim})} {}
 
   std::vector<ParameterPtr> parameters() override {
     auto px = W_x->parameters();

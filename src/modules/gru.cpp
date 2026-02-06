@@ -14,15 +14,14 @@
 
 namespace Weed {
 TensorPtr GRU::forward(const TensorPtr x) {
-  const TensorPtr &prev = history.back();
-  if (prev->shape.size() == 1U) {
-    prev->shape.insert(prev->shape.begin(), x->shape[0U]);
-    prev->stride.insert(prev->stride.begin(), 0U);
-    prev->materialize_broadcast();
+  if (state->shape.size() == 1U) {
+    state->shape.insert(state->shape.begin(), x->shape[0U]);
+    state->stride.insert(state->stride.begin(), 0U);
+    state->materialize_broadcast();
   }
 
   // z = W_x(x) + W_h(h)
-  TensorPtr z = W_x->forward(x) + W_h->forward(prev);
+  TensorPtr z = W_x->forward(x) + W_h->forward(state);
 
   // Split into 3 chunks
   const std::vector<TensorPtr> zc = z->chunk(3, /*axis=*/-1);
@@ -31,12 +30,10 @@ TensorPtr GRU::forward(const TensorPtr x) {
   TensorPtr r_t = Tensor::sigmoid(zc[1U]);
 
   // Candidate
-  TensorPtr h_tilde = Tensor::tanh(zc[2U] + W_h->forward(r_t * prev));
+  TensorPtr h_tilde = Tensor::tanh(zc[2U] + W_h->forward(r_t * state));
 
   // Final hidden state
-  TensorPtr h = (Tensor::ones_like(z_t->shape) - z_t) * prev + z_t * h_tilde;
-
-  history.push_back(h);
+  TensorPtr h = (Tensor::ones_like(z_t->shape) - z_t) * state + z_t * h_tilde;
 
   return h;
 }
