@@ -243,13 +243,13 @@ MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, double *d) {
     for (size_t i = 0U; i < max_lcv; ++i) {
       size_t j = i << 1U;
       const complex v = s[i];
-      d[j] = v.real();
-      d[j + 1] = v.imag();
+      d[j] = (double)v.real();
+      d[j + 1] = (double)v.imag();
     }
   } else {
     RealStorage &s = *static_cast<RealStorage *>(sp.get());
     for (size_t i = 0U; i < max_lcv; ++i) {
-      d[i] = s[i];
+      d[i] = (double)s[i];
     }
   }
 }
