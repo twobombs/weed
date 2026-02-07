@@ -9,11 +9,14 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#include "storage/int_storage.hpp"
+#include "tensors/symbol_tensor.hpp"
 
-#define IS_SPARSE(a)                                                           \
-  (a && a->storage->is_sparse() &&                                             \
-   ((a->storage->get_sparse_size() << 1U) < a->storage->size))
+#include "storage/cpu_int_storage.hpp"
+#if ENABLE_GPU
+#include "storage/gpu_int_storage.hpp"
+#endif
+
+#include <thread>
 
 #if ENABLE_GPU
 #define INIT_DEVICE_STORAGE(val, GpuType, CpuType)                             \
@@ -57,8 +60,7 @@ SymbolTensor::SymbolTensor(const std::vector<tcapint> &shp,
                            const std::vector<tcapint> &strd, const bool &rg,
                            const DeviceTag &_dtag, const int64_t &did,
                            const bool &s)
-    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
-      freeze(shp.size(), false) {
+    : BaseTensor(shp, strd) {
 
   const tcapint size = get_size();
   DeviceTag dtag = _dtag;
@@ -70,23 +72,18 @@ SymbolTensor::SymbolTensor(const std::vector<tcapint> &shp,
     }
   }
 
-  if (s && (dtag == DeviceTag::CPU)) {
-    storage = std::make_shared<SparseCpuIntStorage>(size);
-  } else {
 #if ENABLE_GPU
-    INIT_DEVICE_STORAGE(size, GpuIntStorage, CpuIntStorage);
+  INIT_DEVICE_STORAGE(size, GpuIntStorage, CpuIntStorage);
 #else
-    storage = std::make_shared<CpuIntStorage>(size);
+  storage = std::make_shared<CpuIntStorage>(size);
 #endif
-  }
 }
 
-SymbolTensor::SymbolTensor(const std::vector<tcapint> &val,
+SymbolTensor::SymbolTensor(const std::vector<symint> &val,
                            const std::vector<tcapint> &shp,
                            const std::vector<tcapint> &strd, const bool &rg,
                            const DeviceTag &_dtag, const int64_t &did)
-    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
-      freeze(shp.size(), false) {
+    : BaseTensor(shp, strd) {
 
   const tcapint size = get_size();
 
@@ -109,13 +106,5 @@ SymbolTensor::SymbolTensor(const std::vector<tcapint> &val,
 #else
   storage = std::make_shared<CpuIntStorage>(val);
 #endif
-}
-
-Tensor::Tensor(const IntSparseVector &val, const std::vector<tcapint> &shp,
-               const std::vector<tcapint> &strd, const bool &rg)
-    : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
-      freeze(shp.size(), false) {
-
-  storage = std::make_shared<SparseCpuIntStorage>(val, get_size());
 }
 } // namespace Weed

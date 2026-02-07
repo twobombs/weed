@@ -56,6 +56,7 @@ add_library (weed STATIC
     src/storage/storage.cpp
     src/tensors/parameter.cpp
     src/tensors/tensor.cpp
+    src/tensors/symbol_tensor.cpp
     )
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
 
