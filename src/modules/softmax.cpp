@@ -21,7 +21,7 @@ TensorPtr Softmax::forward(const TensorPtr x) {
   }
 
   // m = max(x, axis)
-  TensorPtr m = Tensor::max(x); //, ax);
+  TensorPtr m = Tensor::max(x, ax);
 
   // x_shifted = x - m
   TensorPtr x_shifted = x - m;
