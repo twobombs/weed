@@ -211,6 +211,20 @@ MICROSOFT_QUANTUM_DECL uintw get_result_size(_In_ uintw mid) {
   return (uintw)(t->storage->size);
 }
 
+MICROSOFT_QUANTUM_DECL uintw get_result_offset(_In_ uintw mid) {
+  MODULE_LOCK_GUARD_INT(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return 0U;
+  }
+
+  return (uintw)(t->offset);
+}
+
 MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid) {
   MODULE_LOCK_GUARD_INT(mid);
 
