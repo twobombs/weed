@@ -13,7 +13,6 @@
 #include "modules/module.hpp"
 #include "storage/cpu_storage.hpp"
 
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -62,13 +61,6 @@ std::mutex meta_operation_mutex;
 int meta_error = 0;
 
 std::vector<ModuleResultPtr> module_results;
-
-void _darray_to_creal1_array(double *params, tcapint componentCount,
-                             complex *amps) {
-  for (tcapint j = 0U; j < componentCount; ++j) {
-    amps[j] = complex(real1(params[2U * j]), real1(params[2U * j + 1U]));
-  }
-}
 
 extern "C" {
 MICROSOFT_QUANTUM_DECL int get_error(_In_ const uintw mid) {
@@ -132,10 +124,10 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
   try {
     std::vector<tcapint> sh(n);
     std::vector<tcapint> st(n);
-    std::transform(shape, shape + n, sh.begin(),
-                   [](uintw x) { return (tcapint)x; });
-    std::transform(stride, stride + n, st.begin(),
-                   [](uintw x) { return (tcapint)x; });
+    for (size_t i = 0U; i < n; ++i) {
+      sh[i] = (tcapint)shape[i];
+      st[i] = (tcapint)stride[i];
+    }
 
     tcapint max_index = 0U;
     for (size_t i = 0U; i < sh.size(); ++i) {
@@ -147,8 +139,9 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
 
     if (dtype == 1U) {
       std::vector<real1> v(max_index);
-      std::transform(d, d + max_index, v.begin(),
-                     [](double x) { return (real1)x; });
+      for (size_t i = 0U; i < max_index; ++i) {
+        v[i] = (real1)d[i];
+      }
       x = std::make_shared<Tensor>(v, sh, st);
     } else {
       std::vector<complex> v(max_index);
