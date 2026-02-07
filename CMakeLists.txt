@@ -29,6 +29,8 @@ add_library (weed STATIC
     src/modules/layernorm.cpp
     src/modules/linear.cpp
     src/modules/lstm.cpp
+    src/modules/migrate_cpu.cpp
+    src/modules/migrate_gpu.cpp
     src/modules/module.cpp
     src/modules/sequential.cpp
     src/ops/abs.cpp
