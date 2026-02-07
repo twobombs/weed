@@ -96,12 +96,7 @@ DeviceTag Tensor::get_dtag_by_presidence(const std::vector<TensorPtr> &v) {
 }
 
 void Tensor::make_gradient(const bool &force_sparse) {
-  if (!requires_grad) {
-    throw std::domain_error("Called Tensor::make_gradient() on a node "
-                            "instance that does not require autograd!");
-  }
-
-  if (grad) {
+  if (!requires_grad || grad) {
     return;
   }
 

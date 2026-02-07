@@ -28,6 +28,8 @@ enum ModuleType {
   LAYERNORM_T = 7,
   EMBEDDING_T = 8,
   GRU_T = 9,
-  LSTM_T = 10
+  LSTM_T = 10,
+  MIGRATE_CPU = 11,
+  MIGRATE_GPU = 12
 };
 } // namespace Weed

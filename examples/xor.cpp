@@ -15,6 +15,8 @@
 #include "autograd/bci_loss.hpp"
 #include "autograd/zero_grad.hpp"
 #include "modules/linear.hpp"
+#include "modules/migrate_cpu.hpp"
+#include "modules/migrate_gpu.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
 #include "modules/tanh.hpp"
@@ -41,7 +43,8 @@ int main() {
 
   const std::vector<ModulePtr> mv = {
       std::make_shared<Linear>(2, 4), std::make_shared<Tanh>(),
-      std::make_shared<Linear>(4, 1), std::make_shared<Sigmoid>()};
+      std::make_shared<Linear>(4, 1), std::make_shared<Sigmoid>(),
+      std::make_shared<MigrateGpu>(), std::make_shared<MigrateCpu>()};
 
   Sequential model(mv);
 

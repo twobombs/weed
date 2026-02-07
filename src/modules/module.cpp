@@ -18,6 +18,8 @@
 #include "modules/layernorm.hpp"
 #include "modules/linear.hpp"
 #include "modules/lstm.hpp"
+#include "modules/migrate_cpu.hpp"
+#include "modules/migrate_gpu.hpp"
 #include "modules/relu.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
@@ -110,6 +112,12 @@ ModulePtr Module::load(std::istream &is) {
                          Tensor::zeros(std::vector<tcapint>{l->hidden_dim})};
 
     return l;
+  }
+  case ModuleType::MIGRATE_CPU: {
+    return std::make_shared<MigrateCpu>();
+  }
+  case ModuleType::MIGRATE_GPU: {
+    return std::make_shared<MigrateGpu>();
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:
