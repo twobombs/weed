@@ -125,7 +125,7 @@ MICROSOFT_QUANTUM_DECL void free_module(_In_ uintw mid) {
 MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
                                     _In_ uintw n, _In_reads_(n) uintw *shape,
                                     _In_reads_(n) uintw *stride,
-                                    _In_ real1_s *d) {
+                                    _In_ double *d) {
   MODULE_LOCK_GUARD_VOID(mid);
 
   TensorPtr x;
@@ -148,13 +148,13 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
     if (dtype == 1U) {
       std::vector<real1> v(max_index);
       std::transform(d, d + max_index, v.begin(),
-                     [](real1_s x) { return (real1)x; });
+                     [](double x) { return (real1)x; });
       x = std::make_shared<Tensor>(v, sh, st);
     } else {
       std::vector<complex> v(max_index);
       for (size_t i = 0U; i < max_index; ++i) {
         size_t j = i << 1U;
-        v[i] = complex(d[j], d[j + 1U]);
+        v[i] = complex((real1)d[j], (real1)d[j + 1U]);
       }
       x = std::make_shared<Tensor>(v, sh, st);
     }
@@ -232,7 +232,7 @@ MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid) {
   return (uintw)(t->storage->dtype);
 }
 
-MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, real1_s *d) {
+MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, double *d) {
   MODULE_LOCK_GUARD_VOID(mid);
 
   const TensorPtr t = module_results[mid]->t;
