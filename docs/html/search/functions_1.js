@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['abs_1338',['abs',['../structWeed_1_1Tensor.html#ad80b0112ee3f0fc78357b4338279ae42',1,'Weed::Tensor::abs()'],['../namespacehalf__float.html#a1b64482e7b39ce993497bc3cddc4ae56',1,'half_float::abs()'],['../namespaceWeed.html#a259efb5f4dd2a7eabe5faa1559246c62',1,'Weed::abs(const Tensor &amp;a, Tensor &amp;out)']]],
+  ['abs_5fgrad_1339',['abs_grad',['../namespaceWeed.html#a16466f364360dd43fbe92e29f55154f5',1,'Weed']]],
+  ['acos_1340',['acos',['../namespacehalf__float.html#ae78413959fa655665b70c48ec62ac060',1,'half_float']]],
+  ['acosh_1341',['acosh',['../namespacehalf__float.html#a90efeed8751189d7652ed185e4852b38',1,'half_float']]],
+  ['adam_1342',['Adam',['../structWeed_1_1Adam.html#af91200b988c46a30e73d18679810029c',1,'Weed::Adam']]],
+  ['adam_5fstep_1343',['adam_step',['../namespaceWeed.html#a134e1940df2d6c2e7990fc4b278f2ef0',1,'Weed']]],
+  ['add_1344',['add',['../structWeed_1_1RealTensor.html#aa6e17d5d676a5ed40e3dff113e9ab1f6',1,'Weed::RealTensor::add()'],['../structWeed_1_1Tensor.html#ad6cf3b766a44818c7bbb388bde74b572',1,'Weed::Tensor::add()'],['../namespaceWeed.html#a9d56f33b78e4293510b021cff97acc02',1,'Weed::add()'],['../structWeed_1_1ComplexTensor.html#ac34ddd61333bd251c8fc3c7a0f31c1eb',1,'Weed::ComplexTensor::add()'],['../structWeed_1_1TypedStorage.html#a97ce5b21a231d5d054bc4a5959876485',1,'Weed::TypedStorage::add()'],['../structWeed_1_1SparseCpuStorage.html#ae0ad3ef6a3a41cbf9a16f5678a6f6d03',1,'Weed::SparseCpuStorage::add()'],['../structWeed_1_1GpuStorage.html#a90e70a0a7b68c6a416475bd07156c248',1,'Weed::GpuStorage::add()'],['../structWeed_1_1CpuStorage.html#aff9a0fa93ab4afb394421022ff51a9f1',1,'Weed::CpuStorage::add()']]],
+  ['add_5fin_5fplace_1345',['add_in_place',['../namespaceWeed.html#a20beada83859b14e2a3a3ea6cb3849cb',1,'Weed']]],
+  ['addalloc_1346',['AddAlloc',['../structWeed_1_1GpuStorage.html#ad89ac4f7896e978634712ffd718b776a',1,'Weed::GpuStorage::AddAlloc()'],['../structWeed_1_1GpuDevice.html#a8ab53526ec6a563d432c919f2f8656c6',1,'Weed::GpuDevice::AddAlloc(const size_t &amp;size)']]],
+  ['addqueueitem_1347',['AddQueueItem',['../structWeed_1_1GpuDevice.html#a28910c51840544c9c6641111b08570bc',1,'Weed::GpuDevice']]],
+  ['addtoactiveallocsize_1348',['AddToActiveAllocSize',['../classWeed_1_1OCLEngine.html#a0e8df9eb4d5460b92832dcfa5a837ccc',1,'Weed::OCLEngine']]],
+  ['alloc_1349',['Alloc',['../structWeed_1_1TypedStorage.html#aa597e951e5d3cc01008476d94d247afb',1,'Weed::TypedStorage']]],
+  ['allocate_5flike_1350',['allocate_like',['../structWeed_1_1Tensor.html#ae6a4225cbdf16353af11bd297b06f93d',1,'Weed::Tensor::allocate_like(const std::vector&lt; tcapint &gt; &amp;shape, const std::vector&lt; tcapint &gt; &amp;stride, const Tensor &amp;orig, const DType &amp;dt, const bool &amp;rg, const bool &amp;s)'],['../structWeed_1_1Tensor.html#a59f3071a4407e936d97f86a5ed3d2815',1,'Weed::Tensor::allocate_like(const std::vector&lt; tcapint &gt; &amp;shape, const Tensor &amp;orig, const DType &amp;dt, const bool &amp;rg, const bool &amp;s)'],['../structWeed_1_1Tensor.html#ab9673dd545e5e742ef1745e1c102a861',1,'Weed::Tensor::allocate_like(const Tensor &amp;orig, const DType &amp;dt, const bool &amp;rg, const bool &amp;s)']]],
+  ['allocate_5fscalar_5flike_1351',['allocate_scalar_like',['../structWeed_1_1Tensor.html#a0386f345b54dfa546026e9fda697b5df',1,'Weed::Tensor']]],
+  ['allocraw_1352',['AllocRaw',['../structWeed_1_1PoolItem.html#a2182e2dc95067f6a4ddcfbd626ed6b2c',1,'Weed::PoolItem']]],
+  ['angle_5farg_1353',['angle_arg',['../namespacehalf__float_1_1detail.html#ab67b48d2957b3d29076f5e674444ec40',1,'half_float::detail']]],
+  ['area_1354',['area',['../namespacehalf__float_1_1detail.html#abed05f956ea222b0ab8e6107a12f7b4f',1,'half_float::detail']]],
+  ['arithmetic_5fshift_1355',['arithmetic_shift',['../namespacehalf__float_1_1detail.html#a93c05ac48d51c12540e58dc4652c6c90',1,'half_float::detail']]],
+  ['asin_1356',['asin',['../namespacehalf__float.html#a747253edd1dadd80265dd16582a730f6',1,'half_float']]],
+  ['asinh_1357',['asinh',['../namespacehalf__float.html#a000c0c87f1053f48e34cfb22b8bcbd9d',1,'half_float']]],
+  ['atan_1358',['atan',['../namespacehalf__float.html#a0a81d274e4b63408e921078e24ae18c8',1,'half_float']]],
+  ['atan2_1359',['atan2',['../namespacehalf__float_1_1detail.html#a627a7138efee1ebbb2237c5b368143ba',1,'half_float::detail::atan2()'],['../namespacehalf__float.html#aa36b863d379dc709d758bd9fae79d3b1',1,'half_float::atan2()']]],
+  ['atan2_5fargs_1360',['atan2_args',['../namespacehalf__float_1_1detail.html#a28197f9bb525659639b7e742017f0ce9',1,'half_float::detail']]],
+  ['atanh_1361',['atanh',['../namespacehalf__float.html#a6221675384c8a858b8abd393368d339b',1,'half_float']]]
+];

@@ -1,0 +1,24 @@
+<map id="/notebooks/qrack/weed/include" name="/notebooks/qrack/weed/include">
+<area shape="rect" id="node2" href="dir_f46e9a7e27d47f681d1f606f018b5d43.html" title="autograd" alt="" coords="64,63,144,111"/>
+<area shape="rect" id="node7" href="dir_d448d2d7e43b6b912c5189ac3a9f7f8d.html" title="ops" alt="" coords="141,159,213,207"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000004_000009.html" title="3" alt="" coords="150,132,160,146"/>
+<area shape="rect" id="node9" href="dir_549b113d1acc80c1ae605276ddf8d1d9.html" title="tensors" alt="" coords="141,255,213,303"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000004_000011.html" title="7" alt="" coords="212,238,221,253"/>
+<area shape="rect" id="node3" href="dir_fbc948907f9042c9c77ad435e7c17093.html" title="common" alt="" coords="115,543,194,591"/>
+<area shape="rect" id="node5" href="dir_5afb1a849c8cf2d09ad55f0d50725244.html" title="enums" alt="" coords="85,639,157,687"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000005_000007.html" title="3" alt="" coords="139,617,148,632"/>
+<area shape="rect" id="node4" href="dir_ab626b8dc0670679502c86ffdf39b91a.html" title="devices" alt="" coords="141,447,213,495"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000006_000005.html" title="3" alt="" coords="168,520,177,534"/>
+<area shape="rect" id="node6" href="dir_82dd3fc35c0eea2f96094b8b1d58cef7.html" title="modules" alt="" coords="38,159,117,207"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000008_000007.html" title="1" alt="" coords="104,611,114,625"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000008_000011.html" title="4" alt="" coords="141,229,150,243"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000009_000011.html" title="16" alt="" coords="177,229,194,244"/>
+<area shape="rect" id="node8" href="dir_7d2a7a6b1d6b9c8260e83cbec2a05c90.html" title="storage" alt="" coords="141,351,213,399"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000010_000005.html" title="3" alt="" coords="139,515,148,530"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000010_000006.html" title="1" alt="" coords="181,421,190,436"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000010_000007.html" title="3" alt="" coords="173,628,182,643"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000011_000007.html" title="2" alt="" coords="113,611,122,626"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000011_000010.html" title="6" alt="" coords="181,325,190,340"/>
+<area shape="rect" id="clust2" href="dir_ed4756846d2bde20051fbd13851c1ad0.html" alt="" coords="27,52,251,697"/>
+<area shape="rect" id="clust1" href="dir_147718f0c5f3b2bff883e273867b89e9.html" title="weed" alt="" coords="16,16,261,708"/>
+</map>

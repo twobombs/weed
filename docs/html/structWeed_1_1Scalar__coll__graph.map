@@ -1,0 +1,5 @@
+<map id="Weed::Scalar" name="Weed::Scalar">
+<area shape="rect" id="node1" title="Tensor with only 1 element (with broadcast on tensor operations)" alt="" coords="22,155,129,181"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Tensor.html" title="Tensor with arbitrary dimensions and autograd." alt="" coords="21,80,129,107"/>
+<area shape="rect" id="node3" href="$structWeed_1_1BaseTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="5,5,145,32"/>
+</map>

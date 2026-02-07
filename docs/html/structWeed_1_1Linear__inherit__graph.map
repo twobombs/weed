@@ -1,0 +1,4 @@
+<map id="Weed::Linear" name="Weed::Linear">
+<area shape="rect" id="node1" title="Linear module to train $y = xW^T + b$." alt="" coords="9,80,116,107"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Module.html" title="Composable module with forward function and parameters for autograd optimization." alt="" coords="5,5,120,32"/>
+</map>

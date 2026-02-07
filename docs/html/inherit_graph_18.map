@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structWeed_1_1BaseTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="5,56,145,83"/>
+<area shape="rect" id="node2" href="$structWeed_1_1SymbolTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="193,31,351,57"/>
+<area shape="rect" id="node3" href="$structWeed_1_1Tensor.html" title="Tensor with arbitrary dimensions and autograd." alt="" coords="218,81,326,108"/>
+<area shape="rect" id="node4" href="$structWeed_1_1ComplexTensor.html" title="Interface to read Tensor as flat and complex&#45;valued." alt="" coords="399,5,565,32"/>
+<area shape="rect" id="node5" href="$structWeed_1_1Parameter.html" title="A Parameter is simply a tensor that always requires gradient calculation and &quot;lives&quot; on a module&quot;." alt="" coords="415,56,549,83"/>
+<area shape="rect" id="node6" href="$structWeed_1_1RealTensor.html" title="Interface to read Tensor as flat and real&#45;valued." alt="" coords="413,107,551,133"/>
+<area shape="rect" id="node7" href="$structWeed_1_1Scalar.html" title="Tensor with only 1 element (with broadcast on tensor operations)" alt="" coords="429,157,535,184"/>
+<area shape="rect" id="node8" href="$structWeed_1_1ComplexScalar.html" title="Tensor with only 1 element of complex&#45;number value (with broadcast on tensor operations)" alt="" coords="613,132,777,159"/>
+<area shape="rect" id="node9" href="$structWeed_1_1RealScalar.html" title="Tensor with only 1 element of real&#45;number value (with broadcast on tensor operations)" alt="" coords="628,183,763,209"/>
+</map>

@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['half_5fconstexpr_2317',['HALF_CONSTEXPR',['../half_8hpp.html#ace3116a3e2cd66dd15780b92060987c7',1,'half.hpp']]],
+  ['half_5fconstexpr_5fconst_2318',['HALF_CONSTEXPR_CONST',['../half_8hpp.html#a5df92c245e5d4e45d35fad7b6de73354',1,'half.hpp']]],
+  ['half_5fconstexpr_5fnoerr_2319',['HALF_CONSTEXPR_NOERR',['../half_8hpp.html#a29863245d113a7ec350d0120c03cd722',1,'half.hpp']]],
+  ['half_5fenable_5ff16c_5fintrinsics_2320',['HALF_ENABLE_F16C_INTRINSICS',['../half_8hpp.html#a9f8c77eb299462e092d2df4d2d2b7abf',1,'half.hpp']]],
+  ['half_5ferrhandling_2321',['HALF_ERRHANDLING',['../half_8hpp.html#a4c88018bae0dba3cbcce0a0644bc9d2a',1,'half.hpp']]],
+  ['half_5ferrhandling_5foverflow_5fto_5finexact_2322',['HALF_ERRHANDLING_OVERFLOW_TO_INEXACT',['../half_8hpp.html#a187c6c8a8cf2c1e0772cb00a4a593312',1,'half.hpp']]],
+  ['half_5ferrhandling_5funderflow_5fto_5finexact_2323',['HALF_ERRHANDLING_UNDERFLOW_TO_INEXACT',['../half_8hpp.html#afefcd93b3b080f0f77cce54937a6b1d9',1,'half.hpp']]],
+  ['half_5fgcc_5fversion_2324',['HALF_GCC_VERSION',['../half_8hpp.html#a1e9b6605cef3ea152e021414f034984d',1,'half.hpp']]],
+  ['half_5ficc_5fversion_2325',['HALF_ICC_VERSION',['../half_8hpp.html#a33cc859e74a935434387b3b29d2a2fdb',1,'half.hpp']]],
+  ['half_5fnoexcept_2326',['HALF_NOEXCEPT',['../half_8hpp.html#a04e7940852b33adbb81a8249fef1c508',1,'half.hpp']]],
+  ['half_5fnothrow_2327',['HALF_NOTHROW',['../half_8hpp.html#a76353b496550acb4b523ad263d09908a',1,'half.hpp']]],
+  ['half_5fr1_5ff_2328',['HALF_R1_F',['../weed__types_8hpp.html#a26df9cc44429231a88382bdc878f0607',1,'weed_types.hpp']]],
+  ['half_5fround_5fstyle_2329',['HALF_ROUND_STYLE',['../half_8hpp.html#af470ed60568b3e7f4fde6092d22abbde',1,'half.hpp']]],
+  ['half_5fthread_5flocal_2330',['HALF_THREAD_LOCAL',['../half_8hpp.html#a761d3c2b1ff7dbb68f0f7387f3af9a2a',1,'half.hpp']]],
+  ['half_5funused_5fnoerr_2331',['HALF_UNUSED_NOERR',['../half_8hpp.html#aac7ff9dbc81530a23df7043ca3c50cf3',1,'half.hpp']]],
+  ['hlf_5frounds_2332',['HLF_ROUNDS',['../half_8hpp.html#a3cc94d39d56b78d54faae060d86c78c0',1,'half.hpp']]],
+  ['huge_5fvalh_2333',['HUGE_VALH',['../half_8hpp.html#abdcd774b81d03564edec8523484d02bf',1,'half.hpp']]]
+];

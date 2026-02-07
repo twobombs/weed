@@ -1,0 +1,4 @@
+<map id="Weed::Embedding" name="Weed::Embedding">
+<area shape="rect" id="node1" title="Embedding module to gather symbols over weights." alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Module.html" title="Composable module with forward function and parameters for autograd optimization." alt="" coords="17,5,132,32"/>
+</map>

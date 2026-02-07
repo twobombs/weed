@@ -1,0 +1,39 @@
+<map id="/notebooks/qrack/weed/include/common/serializer.hpp" name="/notebooks/qrack/weed/include/common/serializer.hpp">
+<area shape="rect" id="node1" title=" " alt="" coords="2667,5,2893,47"/>
+<area shape="rect" id="node2" href="$cpu__real__storage_8hpp.html" title=" " alt="" coords="1424,95,1597,151"/>
+<area shape="rect" id="node18" href="$linear_8cpp.html" title=" " alt="" coords="1029,310,1203,351"/>
+<area shape="rect" id="node22" href="$gpu__real__storage_8cpp.html" title=" " alt="" coords="1548,199,1721,255"/>
+<area shape="rect" id="node23" href="$storage_8cpp.html" title=" " alt="" coords="1745,206,1924,247"/>
+<area shape="rect" id="node24" href="$dropout_8cpp.html" title=" " alt="" coords="1723,102,1909,143"/>
+<area shape="rect" id="node25" href="$modules_2embedding_8cpp.html" title=" " alt="" coords="1934,102,2143,143"/>
+<area shape="rect" id="node26" href="$gru_8cpp.html" title=" " alt="" coords="2168,102,2341,143"/>
+<area shape="rect" id="node27" href="$layernorm_8cpp.html" title=" " alt="" coords="2365,102,2568,143"/>
+<area shape="rect" id="node28" href="$lstm_8cpp.html" title=" " alt="" coords="2592,102,2765,143"/>
+<area shape="rect" id="node29" href="$module_8cpp.html" title=" " alt="" coords="2790,102,2975,143"/>
+<area shape="rect" id="node30" href="$sequential_8cpp.html" title=" " alt="" coords="2999,102,3203,143"/>
+<area shape="rect" id="node31" href="$cpu__complex__storage_8cpp.html" title=" " alt="" coords="3227,95,3415,151"/>
+<area shape="rect" id="node32" href="$cpu__int__storage_8cpp.html" title=" " alt="" coords="3440,95,3613,151"/>
+<area shape="rect" id="node33" href="$gpu__complex__storage_8cpp.html" title=" " alt="" coords="3637,95,3827,151"/>
+<area shape="rect" id="node34" href="$gpu__int__storage_8cpp.html" title=" " alt="" coords="3851,95,4024,151"/>
+<area shape="rect" id="node35" href="$sparse__cpu__complex__storage_8cpp.html" title=" " alt="" coords="4049,95,4223,151"/>
+<area shape="rect" id="node36" href="$sparse__cpu__real__storage_8cpp.html" title=" " alt="" coords="4247,95,4422,151"/>
+<area shape="rect" id="node37" href="$parameter_8cpp.html" title=" " alt="" coords="4447,102,4641,143"/>
+<area shape="rect" id="node3" href="$all__storage_8hpp.html" title=" " alt="" coords="1351,199,1524,255"/>
+<area shape="rect" id="node21" href="$cpu__real__storage_8cpp.html" title=" " alt="" coords="1153,199,1327,255"/>
+<area shape="rect" id="node4" href="$flat__tensors_8hpp.html" title=" " alt="" coords="1227,303,1400,359"/>
+<area shape="rect" id="node19" href="$ops_2embedding_8cpp.html" title=" " alt="" coords="1424,310,1600,351"/>
+<area shape="rect" id="node20" href="$tensor_8cpp.html" title=" " alt="" coords="1624,310,1797,351"/>
+<area shape="rect" id="node5" href="$abs_8cpp.html" title=" " alt="" coords="5,407,179,448"/>
+<area shape="rect" id="node6" href="$clamp_8cpp.html" title=" " alt="" coords="203,407,376,448"/>
+<area shape="rect" id="node7" href="$commuting_8cpp.html" title=" " alt="" coords="401,407,578,448"/>
+<area shape="rect" id="node8" href="$copy__broadcast_8cpp.html" title=" " alt="" coords="603,407,808,448"/>
+<area shape="rect" id="node9" href="$div_8cpp.html" title=" " alt="" coords="832,407,1005,448"/>
+<area shape="rect" id="node10" href="$in__place_8cpp.html" title=" " alt="" coords="1029,407,1203,448"/>
+<area shape="rect" id="node11" href="$matmul_8cpp.html" title=" " alt="" coords="1227,407,1400,448"/>
+<area shape="rect" id="node12" href="$pow_8cpp.html" title=" " alt="" coords="1424,407,1597,448"/>
+<area shape="rect" id="node13" href="$real__extremum_8cpp.html" title=" " alt="" coords="1621,407,1824,448"/>
+<area shape="rect" id="node14" href="$real__unary_8cpp.html" title=" " alt="" coords="1848,407,2021,448"/>
+<area shape="rect" id="node15" href="$reduce_8cpp.html" title=" " alt="" coords="2045,407,2219,448"/>
+<area shape="rect" id="node16" href="$sub_8cpp.html" title=" " alt="" coords="2243,407,2416,448"/>
+<area shape="rect" id="node17" href="$sum_8cpp.html" title=" " alt="" coords="2440,407,2613,448"/>
+</map>

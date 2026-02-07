@@ -1,0 +1,4 @@
+<map id="Weed::MigrateGpu" name="Weed::MigrateGpu">
+<area shape="rect" id="node1" title="Convenience wrapper on migration to GPU." alt="" coords="5,80,148,107"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Module.html" title="Composable module with forward function and parameters for autograd optimization." alt="" coords="19,5,134,32"/>
+</map>

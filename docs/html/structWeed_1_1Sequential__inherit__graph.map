@@ -1,0 +1,4 @@
+<map id="Weed::Sequential" name="Weed::Sequential">
+<area shape="rect" id="node1" title="Standard interface for sequential models of multiple layers." alt="" coords="5,80,140,107"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Module.html" title="Composable module with forward function and parameters for autograd optimization." alt="" coords="15,5,130,32"/>
+</map>

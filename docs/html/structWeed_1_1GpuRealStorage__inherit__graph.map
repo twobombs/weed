@@ -1,0 +1,7 @@
+<map id="Weed::GpuRealStorage" name="Weed::GpuRealStorage">
+<area shape="rect" id="node1" title="GPU&#45;accessible storage for real&#45;value data type elements." alt="" coords="23,319,193,345"/>
+<area shape="rect" id="node2" href="$structWeed_1_1GpuStorage.html" title=" " alt="" coords="5,244,211,271"/>
+<area shape="rect" id="node3" href="$structWeed_1_1TypedStorage.html" title="Type&#45;specific Storage template." alt="" coords="12,169,204,196"/>
+<area shape="rect" id="node4" href="$structWeed_1_1Storage.html" title="Base class for Tensor Storage for all data types." alt="" coords="50,95,166,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="23,5,193,47"/>
+</map>

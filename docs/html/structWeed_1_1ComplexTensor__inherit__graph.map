@@ -1,0 +1,5 @@
+<map id="Weed::ComplexTensor" name="Weed::ComplexTensor">
+<area shape="rect" id="node1" title="Interface to read Tensor as flat and complex&#45;valued." alt="" coords="5,155,172,181"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Tensor.html" title="Tensor with arbitrary dimensions and autograd." alt="" coords="35,80,143,107"/>
+<area shape="rect" id="node3" href="$structWeed_1_1BaseTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="19,5,159,32"/>
+</map>

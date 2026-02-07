@@ -1,0 +1,5 @@
+<map id="Weed::Parameter" name="Weed::Parameter">
+<area shape="rect" id="node1" title="A Parameter is simply a tensor that always requires gradient calculation and &quot;lives&quot; on a module&quot;." alt="" coords="9,155,142,181"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Tensor.html" title="Tensor with arbitrary dimensions and autograd." alt="" coords="21,80,129,107"/>
+<area shape="rect" id="node3" href="$structWeed_1_1BaseTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="5,5,145,32"/>
+</map>

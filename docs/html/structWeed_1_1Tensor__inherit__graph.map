@@ -1,0 +1,10 @@
+<map id="Weed::Tensor" name="Weed::Tensor">
+<area shape="rect" id="node1" title="Tensor with arbitrary dimensions and autograd." alt="" coords="289,80,397,107"/>
+<area shape="rect" id="node3" href="$structWeed_1_1ComplexTensor.html" title="Interface to read Tensor as flat and complex&#45;valued." alt="" coords="5,155,172,181"/>
+<area shape="rect" id="node4" href="$structWeed_1_1Parameter.html" title="A Parameter is simply a tensor that always requires gradient calculation and &quot;lives&quot; on a module&quot;." alt="" coords="197,155,330,181"/>
+<area shape="rect" id="node5" href="$structWeed_1_1RealTensor.html" title="Interface to read Tensor as flat and real&#45;valued." alt="" coords="355,155,492,181"/>
+<area shape="rect" id="node6" href="$structWeed_1_1Scalar.html" title="Tensor with only 1 element (with broadcast on tensor operations)" alt="" coords="517,155,623,181"/>
+<area shape="rect" id="node2" href="$structWeed_1_1BaseTensor.html" title="Non&#45;mathematical tensor, solely for indexing (by integer enumeration)" alt="" coords="273,5,413,32"/>
+<area shape="rect" id="node7" href="$structWeed_1_1ComplexScalar.html" title="Tensor with only 1 element of complex&#45;number value (with broadcast on tensor operations)" alt="" coords="401,229,565,256"/>
+<area shape="rect" id="node8" href="$structWeed_1_1RealScalar.html" title="Tensor with only 1 element of real&#45;number value (with broadcast on tensor operations)" alt="" coords="589,229,724,256"/>
+</map>

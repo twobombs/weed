@@ -1,0 +1,4 @@
+<map id="Weed::Tanh" name="Weed::Tanh">
+<area shape="rect" id="node1" title="Convenience wrapper on sigmoid as a module." alt="" coords="15,80,111,107"/>
+<area shape="rect" id="node2" href="$structWeed_1_1Module.html" title="Composable module with forward function and parameters for autograd optimization." alt="" coords="5,5,120,32"/>
+</map>
