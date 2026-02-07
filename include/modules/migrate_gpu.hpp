@@ -26,7 +26,7 @@ struct MigrateGpu : public Module {
     out->storage = out->storage->gpu();
     out->make_gradient();
     out->grad_node = std::make_shared<Node>(std::vector<TensorPtr> {x}, [x, out] {
-      x->grad->storage = (x->storage->device == DeviceTag::CPU) ? out->grad->storage->cpu() : out->grad->storage->gpu();
+      x->grad = out->grad;
     });
 
     return out;

@@ -26,8 +26,7 @@ struct MigrateCpu : public Module {
     out->storage = out->storage->cpu();
     out->make_gradient();
     out->grad_node = std::make_shared<Node>(std::vector<TensorPtr> {x}, [x, out] {
-      const DeviceTag dtag = Tensor::get_dtag_by_presidence({x->grad, out->grad});
-      x->grad = out->grad->cast(dtag);
+      x->grad = out->grad;
     });
 
     return out;
