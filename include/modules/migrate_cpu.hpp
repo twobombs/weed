@@ -11,25 +11,16 @@
 
 #pragma once
 
-#include "config.h"
+#include "modules/module.hpp"
+#include "tensors/tensor.hpp"
 
 namespace Weed {
 /**
- * Module types for serialization
+ * Convenience wrapper on migration to CPU
  */
-enum ModuleType {
-  NONE_MODULE_TYPE = 0,
-  SEQUENTIAL_T = 1,
-  LINEAR_T = 2,
-  RELU_T = 3,
-  SIGMOID_T = 4,
-  TANH_T = 5,
-  DROPOUT_T = 6,
-  LAYERNORM_T = 7,
-  EMBEDDING_T = 8,
-  GRU_T = 9,
-  LSTM_T = 10,
-  MIGRATE_CPU = 11,
-  MIGRATE_GPU = 12
+struct MigrateCpu : public Module {
+  MigrateCpu() : Module(MIGRATE_CPU) {}
+  TensorPtr forward(const TensorPtr x) override;
 };
+typedef std::shared_ptr<MigrateCpu> MigrateCpuPtr;
 } // namespace Weed

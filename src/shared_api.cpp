@@ -13,7 +13,6 @@
 #include "modules/module.hpp"
 #include "storage/cpu_storage.hpp"
 
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -62,13 +61,6 @@ std::mutex meta_operation_mutex;
 int meta_error = 0;
 
 std::vector<ModuleResultPtr> module_results;
-
-void _darray_to_creal1_array(double *params, tcapint componentCount,
-                             complex *amps) {
-  for (tcapint j = 0U; j < componentCount; ++j) {
-    amps[j] = complex(real1(params[2U * j]), real1(params[2U * j + 1U]));
-  }
-}
 
 extern "C" {
 MICROSOFT_QUANTUM_DECL int get_error(_In_ const uintw mid) {
@@ -125,17 +117,17 @@ MICROSOFT_QUANTUM_DECL void free_module(_In_ uintw mid) {
 MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
                                     _In_ uintw n, _In_reads_(n) uintw *shape,
                                     _In_reads_(n) uintw *stride,
-                                    _In_ real1_s *d) {
+                                    _In_ double *d) {
   MODULE_LOCK_GUARD_VOID(mid);
 
   TensorPtr x;
   try {
     std::vector<tcapint> sh(n);
     std::vector<tcapint> st(n);
-    std::transform(shape, shape + n, sh.begin(),
-                   [](uintw x) { return (tcapint)x; });
-    std::transform(stride, stride + n, st.begin(),
-                   [](uintw x) { return (tcapint)x; });
+    for (size_t i = 0U; i < n; ++i) {
+      sh[i] = (tcapint)shape[i];
+      st[i] = (tcapint)stride[i];
+    }
 
     tcapint max_index = 0U;
     for (size_t i = 0U; i < sh.size(); ++i) {
@@ -147,14 +139,15 @@ MICROSOFT_QUANTUM_DECL void forward(_In_ uintw mid, _In_ uintw dtype,
 
     if (dtype == 1U) {
       std::vector<real1> v(max_index);
-      std::transform(d, d + max_index, v.begin(),
-                     [](real1_s x) { return (real1)x; });
+      for (size_t i = 0U; i < max_index; ++i) {
+        v[i] = (real1)d[i];
+      }
       x = std::make_shared<Tensor>(v, sh, st);
     } else {
       std::vector<complex> v(max_index);
       for (size_t i = 0U; i < max_index; ++i) {
         size_t j = i << 1U;
-        v[i] = complex(d[j], d[j + 1U]);
+        v[i] = complex((real1)d[j], (real1)d[j + 1U]);
       }
       x = std::make_shared<Tensor>(v, sh, st);
     }
@@ -218,6 +211,20 @@ MICROSOFT_QUANTUM_DECL uintw get_result_size(_In_ uintw mid) {
   return (uintw)(t->storage->size);
 }
 
+MICROSOFT_QUANTUM_DECL uintw get_result_offset(_In_ uintw mid) {
+  MODULE_LOCK_GUARD_INT(mid);
+
+  const TensorPtr t = module_results[mid]->t;
+  if (!t) {
+    std::cout << "Invalid argument: module result tensor not found!"
+              << std::endl;
+    meta_error = 2;
+    return 0U;
+  }
+
+  return (uintw)(t->offset);
+}
+
 MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid) {
   MODULE_LOCK_GUARD_INT(mid);
 
@@ -232,7 +239,7 @@ MICROSOFT_QUANTUM_DECL uintw get_result_type(_In_ uintw mid) {
   return (uintw)(t->storage->dtype);
 }
 
-MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, real1_s *d) {
+MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, double *d) {
   MODULE_LOCK_GUARD_VOID(mid);
 
   const TensorPtr t = module_results[mid]->t;
@@ -246,18 +253,17 @@ MICROSOFT_QUANTUM_DECL void get_result(_In_ uintw mid, real1_s *d) {
   const StoragePtr sp = t->storage->cpu();
   const size_t max_lcv = sp->size;
   if (sp->dtype == DType::COMPLEX) {
-    const CpuStorage<complex> &s =
-        *static_cast<CpuStorage<complex> *>(sp.get());
+    ComplexStorage &s = *static_cast<ComplexStorage *>(sp.get());
     for (size_t i = 0U; i < max_lcv; ++i) {
       size_t j = i << 1U;
       const complex v = s[i];
-      d[j] = v.real();
-      d[j + 1] = v.imag();
+      d[j] = (double)v.real();
+      d[j + 1] = (double)v.imag();
     }
   } else {
-    const CpuStorage<real1> &s = *static_cast<CpuStorage<real1> *>(sp.get());
+    RealStorage &s = *static_cast<RealStorage *>(sp.get());
     for (size_t i = 0U; i < max_lcv; ++i) {
-      d[i] = s[i];
+      d[i] = (double)s[i];
     }
   }
 }

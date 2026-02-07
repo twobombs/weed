@@ -3,6 +3,9 @@
 # Weed
 Minimalist AI/ML inference and backprogation in the style of [Qrack](https://github.com/unitaryfoundation/qrack)
 
+## Weed Loader
+This repository is for the base **C++ Weed library**. Once you have trained models in C++, you can load them for use in Python with the **Python loader** in [this repository](https://github.com/vm6502q/weed_loader).
+
 ## Development Status
 **Weed** is a rapidly-developing **work-in-progress**. Its ABI may change drastically and without notice.
 

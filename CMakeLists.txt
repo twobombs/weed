@@ -29,6 +29,8 @@ add_library (weed STATIC
     src/modules/layernorm.cpp
     src/modules/linear.cpp
     src/modules/lstm.cpp
+    src/modules/migrate_cpu.cpp
+    src/modules/migrate_gpu.cpp
     src/modules/module.cpp
     src/modules/sequential.cpp
     src/ops/abs.cpp
@@ -306,6 +308,8 @@ install (FILES
     include/modules/gru.hpp
     include/modules/linear.hpp
     include/modules/lstm.hpp
+    include/modules/migrate_cpu.hpp
+    include/modules/migrate_gpu.hpp
     include/modules/module.hpp
     include/modules/relu.hpp
     include/modules/sequential.hpp
