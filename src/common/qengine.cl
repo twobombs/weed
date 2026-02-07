@@ -293,7 +293,7 @@ void kernel axis_min(global real1* a, global real1* b, constant tcapint* shape, 
   }
   b[i_X * I_B + O_B] = m;
 }
-void kernel match_grad_real(global real1* din, global real1* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
+void kernel axis_match_grad_real(global real1* din, global real1* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
 {
   tcapint tmp = i_X;
   tcapint o = 0U;
@@ -316,7 +316,7 @@ void kernel match_grad_real(global real1* din, global real1* dout, global real1*
     din[i] += dout[o];
   }
 }
-void kernel reduce_grad_complex(global cmplx* din, global cmplx* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
+void kernel axis_match_grad_complex(global cmplx* din, global cmplx* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
 {
   tcapint tmp = i_X;
   tcapint o = 0U;
@@ -339,7 +339,7 @@ void kernel reduce_grad_complex(global cmplx* din, global cmplx* dout, global re
     din[i] += dout[o];
   }
 }
-void kernel reduce_grad_mixed(global real1* din, global real1* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
+void kernel axis_match_grad_mixed(global real1* din, global real1* dout, global real1* in, global real1* out, constant tcapint* shape, constant tcapint* stride, constant tcapint* vecCapIntArgs)
 {
   tcapint tmp = i_X;
   tcapint o = 0U;

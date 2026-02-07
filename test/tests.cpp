@@ -158,6 +158,34 @@ TEST_CASE("test_sum_axis_complex") {
   REQUIRE((*xg)[1] == R(1));
 }
 
+TEST_CASE("test_max_axis") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<real1>{R(0), R(1)}, std::vector<tcapint>{2},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::max(x, 0U);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(1));
+
+  RealStorage *xg = static_cast<RealStorage *>(x->grad->storage.get());
+  REQUIRE((*xg)[0] == R(0));
+  REQUIRE((*xg)[1] == R(1));
+}
+
+TEST_CASE("test_min_axis") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<real1>{R(0), R(1)}, std::vector<tcapint>{2},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::min(x, 0U);
+  Tensor::backward(y);
+
+  REQUIRE(GET_REAL(y) == R(0));
+
+  RealStorage *xg = static_cast<RealStorage *>(x->grad->storage.get());
+  REQUIRE((*xg)[0] == R(1));
+  REQUIRE((*xg)[1] == R(0));
+}
+
 TEST_CASE("test_scalar_relu") {
   TensorPtr x = std::make_shared<RealScalar>(R(2), true, TEST_DTAG);
   TensorPtr y = Tensor::relu(x);
