@@ -26,8 +26,6 @@ struct SymbolTensor : BaseTensor {
                const std::vector<tcapint> &strd, const bool &rg = false,
                const DeviceTag &dtag = DeviceTag::DEFAULT_DEVICE,
                const int64_t &did = -1);
-  SymbolTensor(const IntSparseVector &val, const std::vector<tcapint> &shp,
-               const std::vector<tcapint> &strd, const bool &rg = false);
 };
 typedef std::shared_ptr<SymbolTensor> SymbolTensorPtr;
 } // namespace Weed
