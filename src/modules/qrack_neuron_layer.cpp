@@ -117,7 +117,7 @@ TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
 
   in->storage = in->storage->cpu();
 
-  CpuRealStorage *pi = static_cast<CpuRealStorage *>(in->storage.get());
+  const CpuRealStorage *pi = static_cast<const CpuRealStorage *>(in->storage.get());
   CpuRealStorage *po = static_cast<CpuRealStorage *>(out->storage.get());
 
   for (size_t b = 0U; b < B; ++b) {

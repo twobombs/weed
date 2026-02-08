@@ -59,7 +59,7 @@ TensorPtr QrackNeuron::forward() {
           dout->storage = dout->storage->cpu();
 
           RealTensor dxo = *static_cast<RealTensor *>(dx.get());
-          RealTensor doo = *static_cast<RealTensor *>(dout.get());
+          const RealTensor doo = *static_cast<const RealTensor *>(dout.get());
 
           neuron.Unpredict(data, true, activation_fn);
 
@@ -73,13 +73,13 @@ TensorPtr QrackNeuron::forward() {
             data[i] = theta + SineShift;
             const real1 p_plus =
                 neuron.Predict(data, true, false, activation_fn);
-            neuron.Unpredict(data, true);
+            neuron.Unpredict(data, true, activation_fn);
 
             // -π/2
             data[i] = theta - SineShift;
             const real1 p_minus =
                 neuron.Predict(data, true, false, activation_fn);
-            neuron.Unpredict(data, true);
+            neuron.Unpredict(data, true, activation_fn);
 
             const real1 grad = (p_plus - p_minus) / 2;
             dxo.add(i, grad * upstream);
