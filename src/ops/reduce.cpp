@@ -456,7 +456,7 @@ void match_grad(const tcapint &index, Tensor &din, const Tensor &in,
 #if ENABLE_GPU
       DEVICE_SWITCH_MATCH_GRAD(cpu_match_grad_complex, gpu_match_grad_complex);
 #else
-      cpu_match_grad_complex(index, din, in, dout);
+      cpu_match_grad_complex(index, din, in, dout, out);
 #endif
       break;
     case DType::REAL:
@@ -464,7 +464,7 @@ void match_grad(const tcapint &index, Tensor &din, const Tensor &in,
 #if ENABLE_GPU
       DEVICE_SWITCH_MATCH_GRAD(cpu_match_grad_mixed, gpu_match_grad_mixed);
 #else
-      cpu_match_grad_mixed(index, din, in, dout);
+      cpu_match_grad_mixed(index, din, in, dout, out);
 #endif
     }
     break;
@@ -473,7 +473,7 @@ void match_grad(const tcapint &index, Tensor &din, const Tensor &in,
 #if ENABLE_GPU
     DEVICE_SWITCH_MATCH_GRAD(cpu_match_grad_real, gpu_match_grad_real);
 #else
-    cpu_match_grad_real(index, din, in, dout);
+    cpu_match_grad_real(index, din, in, dout, out);
 #endif
   }
 }
