@@ -284,6 +284,7 @@ install (FILES
     include/common/oclapi.hpp
     include/common/oclengine.hpp
     include/common/parallel_for.hpp
+    include/common/rapidcsv.h
     include/common/serializer.hpp
     include/common/weed_functions.hpp
     include/common/weed_types.hpp
