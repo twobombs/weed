@@ -15,8 +15,9 @@
 #include "tensors/real_tensor.hpp"
 
 namespace Weed {
-QrackNeuron::QrackNeuron(Qrack::QNeuron &qn)
-    : Module(QRACK_NEURON), neuron(qn) {
+QrackNeuron::QrackNeuron(Qrack::QNeuron &qn,
+                         const Qrack::QNeuronActivationFn &activation)
+    : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
       std::vector<tcapint>{(tcapint)(qn.GetInputPower())},
       std::vector<tcapint>{1U}, DType::REAL, DeviceTag::CPU, false);
@@ -25,8 +26,9 @@ QrackNeuron::QrackNeuron(Qrack::QNeuron &qn)
 }
 
 QrackNeuron::QrackNeuron(Qrack::QNeuron &qn,
-                         const std::vector<real1> &init_angles)
-    : Module(QRACK_NEURON), neuron(qn) {
+                         const std::vector<real1> &init_angles,
+                         const Qrack::QNeuronActivationFn &activation)
+    : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
       init_angles, std::vector<tcapint>{(tcapint)(qn.GetInputPower())},
       std::vector<tcapint>{1U}, DeviceTag::CPU);
@@ -38,7 +40,7 @@ TensorPtr QrackNeuron::forward() {
 
   // Save simulator state
   const real1 pre_prob = neuron.GetSimulator()->Prob(neuron.GetOutputIndex());
-  const real1 post_prob = neuron.Predict(data, true, false);
+  const real1 post_prob = neuron.Predict(data, true, false, activation_fn);
   const real1 delta = std::asin(post_prob) - std::asin(pre_prob);
   denom = std::max(std::sqrt(std::max(ONE_R1 - post_prob * post_prob, ZERO_R1)),
                    FP_NORM_EPSILON);
@@ -61,7 +63,7 @@ TensorPtr QrackNeuron::forward() {
           RealTensor dxo = *static_cast<RealTensor *>(dx.get());
           RealTensor doo = *static_cast<RealTensor *>(dout.get());
 
-          neuron.Unpredict(data, true);
+          neuron.Unpredict(data, true, activation_fn);
 
           const real1 upstream = doo[0U] / denom;
 
@@ -71,12 +73,14 @@ TensorPtr QrackNeuron::forward() {
 
             // +π/2
             data[i] = theta + SineShift;
-            const real1 p_plus = neuron.Predict(data, true, false);
+            const real1 p_plus =
+                neuron.Predict(data, true, false, activation_fn);
             neuron.Unpredict(data, true);
 
             // -π/2
             data[i] = theta - SineShift;
-            const real1 p_minus = neuron.Predict(data, true, false);
+            const real1 p_minus =
+                neuron.Predict(data, true, false, activation_fn);
             neuron.Unpredict(data, true);
 
             const real1 grad = (p_plus - p_minus) / 2;
@@ -91,5 +95,4 @@ TensorPtr QrackNeuron::forward() {
 
   return out;
 }
-
 } // namespace Weed

@@ -13,5 +13,6 @@ if (QRACK_LIB)
     target_compile_definitions (weed PUBLIC QRACK_AVAILABLE=1)
     target_sources (weed PRIVATE
         src/modules/qrack_neuron.cpp
+        src/modules/qrack_neuron_layer.cpp
         )
 endif (QRACK_LIB)

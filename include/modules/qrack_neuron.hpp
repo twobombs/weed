@@ -22,13 +22,21 @@
 namespace Weed {
 struct QrackNeuron : public Module {
   Qrack::QNeuron neuron;
+  Qrack::QNeuronActivationFn activation_fn;
   ParameterPtr angles;
   real1 *data;
   real1 denom;
 
-  QrackNeuron(Qrack::QNeuron &qn);
-  QrackNeuron(Qrack::QNeuron &qn, const std::vector<real1> &init_angles);
+  QrackNeuron(Qrack::QNeuron &qn, const Qrack::QNeuronActivationFn &activation =
+                                      Qrack::QNeuronActivationFn::Sigmoid);
+  QrackNeuron(Qrack::QNeuron &qn, const std::vector<real1> &init_angles,
+              const Qrack::QNeuronActivationFn &activation =
+                  Qrack::QNeuronActivationFn::Sigmoid);
 
+  TensorPtr forward(TensorPtr x) override {
+    throw std::domain_error("QrackNeuron acts forward() on Qrack::QInterface "
+                            "simulators, not Weed::Tensor!");
+  }
   TensorPtr forward(Qrack::QInterfacePtr q, const std::vector<bitLenInt> &c,
                     const bitLenInt &t) override {
     if (c.size() != neuron.GetInputCount()) {

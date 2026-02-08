@@ -317,6 +317,7 @@ install (FILES
     include/modules/module.hpp
     include/modules/relu.hpp
     include/modules/qrack_neuron.hpp
+    include/modules/qrack_neuron_layer.hpp
     include/modules/sequential.hpp
     include/modules/sigmoid.hpp
     include/modules/softmax.hpp

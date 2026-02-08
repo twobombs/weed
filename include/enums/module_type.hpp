@@ -33,6 +33,7 @@ enum ModuleType {
   MIGRATE_GPU = 12,
   SOFTMAX = 13,
   LOGSOFTMAX = 14,
-  QRACK_NEURON = 15
+  QRACK_NEURON = 15,
+  QRACK_NEURON_LAYER = 16
 };
 } // namespace Weed
