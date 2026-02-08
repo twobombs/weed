@@ -36,7 +36,7 @@
 
 namespace Weed {
 #if ENABLE_GPU
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_ENV_VARS
 const tlenint PSTRIDEPOW_DEFAULT =
     (tlenint)(getenv("WEED_PSTRIDEPOW")
                   ? std::stoi(std::string(getenv("WEED_PSTRIDEPOW")))

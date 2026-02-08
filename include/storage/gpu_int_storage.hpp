@@ -13,7 +13,7 @@
 
 #include "storage/gpu_storage.hpp"
 
-#if !ENABLE_OPENCL && !ENABLE_CUDA
+#if !ENABLE_GPU
 #error GPU files were included without either OpenCL and CUDA enabled.
 #endif
 
@@ -33,7 +33,6 @@ struct GpuIntStorage : public GpuStorage<symint> {
     dev->FillValueInt(buffer, size, v);
   }
 
-  // TODO:
   symint operator[](const tcapint &idx) const override {
     if (idx >= GpuStorage<symint>::size) {
       throw std::invalid_argument(

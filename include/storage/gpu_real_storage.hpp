@@ -13,7 +13,7 @@
 
 #include "storage/gpu_storage.hpp"
 
-#if !ENABLE_OPENCL && !ENABLE_CUDA
+#if !ENABLE_GPU
 #error GPU files were included without either OpenCL and CUDA enabled.
 #endif
 

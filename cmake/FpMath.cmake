@@ -7,7 +7,3 @@ endif (WEED_FPPOW LESS 4)
 if (WEED_FPPOW GREATER 7)
     message(FATAL_ERROR "FPPOW must be no greater than 7, equivalent to 128-bit precision!")
 endif (WEED_FPPOW GREATER 7)
-
-if (WEED_FPPOW LESS 5)
-    set(ENABLE_COMPLEX_X2 OFF)
-endif (WEED_FPPOW LESS 5)

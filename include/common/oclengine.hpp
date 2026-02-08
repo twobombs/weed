@@ -13,7 +13,7 @@
 
 #include "oclapi.hpp"
 
-#if !ENABLE_OPENCL
+#if !WEED_ENABLE_OPENCL
 #error GPU files were included without OpenCL enabled.
 #endif
 
@@ -28,10 +28,10 @@
 #include <string>
 #include <sys/stat.h>
 
-#if ENABLE_SNUCL
+#if WEED_ENABLE_SNUCL
 #include <CL/cl.hpp>
 #include <stdexcept>
-#elif defined(OPENCL_V3)
+#elif defined(WEED_OPENCL_V3)
 #include <CL/opencl.hpp>
 #elif defined(__APPLE__)
 #define CL_SILENCE_DEPRECATION
@@ -119,19 +119,12 @@ public:
                    bool isGpu, bool isCpu, bool useHostMem)
       : platform(p), device(d), context(c), context_id(cntxt_id),
         device_id(dev_id), is_gpu(isGpu), is_cpu(isCpu),
-        use_host_mem(useHostMem), wait_events(new EventVec())
-#if ENABLE_OCL_MEM_GUARDS
-        ,
-        globalLimit((maxAlloc >= 0) ? maxAlloc : globalSize)
-#else
-        ,
-        globalLimit((maxAlloc >= 0) ? maxAlloc : -1)
-#endif
-        ,
+        use_host_mem(useHostMem), wait_events(new EventVec()),
+        globalLimit((maxAlloc >= 0) ? maxAlloc : globalSize),
         preferredSizeMultiple(0U), preferredConcurrency(0U) {
     cl_int error;
-#if ENABLE_OOO_OCL
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_OOO_OCL
+#if WEED_ENABLE_ENV_VARS
     if (getenv("DISABLE_OOO_OCL")) {
       queue = cl::CommandQueue(c, d, 0, &error);
       if (error != CL_SUCCESS) {
@@ -206,7 +199,7 @@ public:
     }
 
     int hybridOffset = 3U;
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_ENV_VARS
     if (getenv("WEED_GPU_OFFSET_POW")) {
       hybridOffset = std::stoi(std::string(getenv("WEED_GPU_OFFSET_POW")));
     }
@@ -264,7 +257,7 @@ public:
   }
   /// Get default location for precompiled binaries:
   static std::string GetDefaultBinaryPath() {
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_ENV_VARS
     if (getenv("WEED_OCL_PATH")) {
       std::string toRet = std::string(getenv("WEED_OCL_PATH"));
       if ((toRet.back() != '/') && (toRet.back() != '\\')) {
