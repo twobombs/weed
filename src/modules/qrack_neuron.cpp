@@ -20,7 +20,7 @@ QrackNeuron::QrackNeuron(Qrack::QNeuron &qn,
     : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
       std::vector<tcapint>{(tcapint)(qn.GetInputPower())},
-      std::vector<tcapint>{1U}, DType::REAL, DeviceTag::CPU, false);
+      std::vector<tcapint>{1U}, DType::REAL, DeviceTag::CPU, -1, false);
   angles->storage->FillZeros();
   data = static_cast<CpuRealStorage *>(angles->storage.get())->data.get();
 }
