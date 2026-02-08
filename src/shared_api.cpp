@@ -30,15 +30,16 @@
         module_results[mid]->mtx, std::adopt_lock);                            \
   }
 #else
-std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;
-if (true) {
-  std::lock(meta_operation_mutex, module_results[mid]->mtx);
-  const std::lock_guard<std::mutex> metaLock(meta_operation_mutex,
-                                             std::adopt_lock);
-  module_lock = std::unique_ptr<const std::lock_guard<std::mutex>>(
-      new const std::lock_guard<std::mutex>(module_results[mid]->mtx,
-                                            std::adopt_lock));
-}
+#define MODULE_LOCK_GUARD(mid)                                                 \
+  std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;              \
+  if (true) {                                                                  \
+    std::lock(meta_operation_mutex, module_results[mid]->mtx);                 \
+    const std::lock_guard<std::mutex> metaLock(meta_operation_mutex,           \
+                                               std::adopt_lock);               \
+    module_lock = std::unique_ptr<const std::lock_guard<std::mutex>>(          \
+        new const std::lock_guard<std::mutex>(module_results[mid]->mtx,        \
+                                              std::adopt_lock));               \
+  }
 #endif
 
 #define MODULE_LOCK_GUARD_VOID(mid)                                            \
