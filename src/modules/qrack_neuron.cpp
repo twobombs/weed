@@ -42,22 +42,18 @@ TensorPtr QrackNeuron::forward() {
   const real1 pre_prob = neuron.GetSimulator()->Prob(neuron.GetOutputIndex());
   const real1 post_prob = neuron.Predict(data, true, false, activation_fn);
   const real1 delta = std::asin(post_prob) - std::asin(pre_prob);
-  denom = std::max(std::sqrt(std::max(ONE_R1 - post_prob * post_prob, ZERO_R1)),
-                   FP_NORM_EPSILON);
+  const real1 denom =
+      std::max(std::sqrt(std::max(ONE_R1 - post_prob * post_prob, ZERO_R1)),
+               FP_NORM_EPSILON);
 
   TensorPtr out = std::make_shared<Tensor>(delta, angles->requires_grad);
 
   if (angles->requires_grad) {
     out->make_gradient();
-    out->grad_node =
-        std::make_shared<Node>(std::vector<TensorPtr>{angles}, [this, out]() {
-          const DeviceTag dtag =
-              Tensor::get_dtag_by_presidence({angles->grad, out->grad});
-          TensorPtr dxc = angles->grad->cast(dtag);
-          TensorPtr doc = out->grad->cast(dtag);
-
-          TensorPtr dx = std::make_shared<Tensor>(*(dxc.get()));
-          TensorPtr dout = std::make_shared<Tensor>(*(doc.get()));
+    out->grad_node = std::make_shared<Node>(
+        std::vector<TensorPtr>{angles}, [this, denom, out]() {
+          TensorPtr dx = angles->grad;
+          TensorPtr dout = out->grad;
 
           dx->storage = dx->storage->cpu();
           dout->storage = dout->storage->cpu();

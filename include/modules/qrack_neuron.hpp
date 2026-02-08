@@ -25,7 +25,6 @@ struct QrackNeuron : public Module {
   Qrack::QNeuronActivationFn activation_fn;
   ParameterPtr angles;
   real1 *data;
-  real1 denom;
 
   QrackNeuron(Qrack::QNeuron &qn, const Qrack::QNeuronActivationFn &activation =
                                       Qrack::QNeuronActivationFn::Sigmoid);
