@@ -28,6 +28,7 @@ struct QrackNeuronLayer : public Module {
   std::function<void(Qrack::QInterfacePtr)> post_init_fn;
   std::vector<QrackNeuronPtr> neurons;
   std::vector<ParameterPtr> param_vector;
+  bool requires_grad;
 
   QrackNeuronLayer(
       const size_t &input_q, const size_t &output_q, const size_t &hidden_q,
@@ -47,11 +48,13 @@ struct QrackNeuronLayer : public Module {
     for (const QrackNeuronPtr &n : neurons) {
       n->train();
     }
+    requires_grad = true;
   }
   void eval() override {
     for (const QrackNeuronPtr &n : neurons) {
       n->eval();
     }
+    requires_grad = false;
   }
 
   TensorPtr forward(const TensorPtr x) override;

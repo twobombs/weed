@@ -62,7 +62,7 @@ QrackNeuronLayer::QrackNeuronLayer(
     const bool &oc, const bool &hp, const bool &sp)
     : Module(QRACK_NEURON_LAYER), input_indices(input_q),
       hidden_indices(hidden_q), output_indices(output_q),
-      activation_fn(activation), post_init_fn(post_init) {
+      activation_fn(activation), post_init_fn(post_init), requires_grad(true) {
   const bitLenInt num_qubits = input_q + output_q + hidden_q;
   prototype = Qrack::CreateArrangedLayersFull(
       nw, md, sd, sh, bdt, pg, tn, hy, oc, num_qubits, Qrack::ZERO_BCI, nullptr,
@@ -108,7 +108,7 @@ TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
   const size_t B = x->shape[0];
   TensorPtr out = Tensor::zeros(
       std::vector<tcapint>{(tcapint)B, (tcapint)(output_indices.size())},
-      x->requires_grad, x->storage->dtype, DeviceTag::CPU);
+      requires_grad || x->requires_grad, x->storage->dtype, DeviceTag::CPU);
   TensorPtr in = std::make_shared<Tensor>(*(x.get()));
 
   in->storage = in->storage->cpu();
