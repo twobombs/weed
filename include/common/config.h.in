@@ -9,8 +9,8 @@
 #cmakedefine WEED_FPPOW @WEED_FPPOW@
 #cmakedefine WEED_PSTRIDEPOW @WEED_PSTRIDEPOW@
 #cmakedefine WEED_TCAPPOW @WEED_TCAPPOW@
-#cmakedefine WEED_OPENCL_V3 @OPENCL_V3@
-#cmakedefine WEED_CPP_STD @CPP_STD@
+#cmakedefine WEED_OPENCL_V3 @WEED_OPENCL_V3@
+#cmakedefine WEED_CPP_STD @WEED_CPP_STD@
 
 #if WEED_ENABLE_OPENCL
 #define ENABLE_GPU 1

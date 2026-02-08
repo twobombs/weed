@@ -8,8 +8,6 @@
 
 #include "shared_api.hpp"
 
-// "qfactory.hpp" pulls in all headers needed to create any type of
-// "Qrack::QInterface."
 #include "modules/module.hpp"
 #include "storage/cpu_storage.hpp"
 #include "tensors/symbol_tensor.hpp"
@@ -21,6 +19,7 @@
 #define META_LOCK_GUARD()                                                      \
   const std::lock_guard<std::mutex> meta_lock(meta_operation_mutex)
 
+#if WEED_CPP_STD > 13
 #define MODULE_LOCK_GUARD(mid)                                                 \
   std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;              \
   if (true) {                                                                  \
@@ -30,6 +29,17 @@
     module_lock = std::make_unique<const std::lock_guard<std::mutex>>(         \
         module_results[mid]->mtx, std::adopt_lock);                            \
   }
+#else
+std::unique_ptr<const std::lock_guard<std::mutex>> module_lock;
+if (true) {
+  std::lock(meta_operation_mutex, module_results[mid]->mtx);
+  const std::lock_guard<std::mutex> metaLock(meta_operation_mutex,
+                                             std::adopt_lock);
+  module_lock = std::unique_ptr<const std::lock_guard<std::mutex>>(
+      new const std::lock_guard<std::mutex>(module_results[mid]->mtx,
+                                            std::adopt_lock));
+}
+#endif
 
 #define MODULE_LOCK_GUARD_VOID(mid)                                            \
   MODULE_LOCK_GUARD(mid);                                                      \
