@@ -9,29 +9,20 @@
 // See LICENSE.md in the project root or
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
-#pragma once
-
-#include "config.h"
+#include "modules/logsoftmax.hpp"
+#include "common/serializer.hpp"
 
 namespace Weed {
-/**
- * Module types for serialization
- */
-enum ModuleType {
-  NONE_MODULE_TYPE = 0,
-  SEQUENTIAL_T = 1,
-  LINEAR_T = 2,
-  RELU_T = 3,
-  SIGMOID_T = 4,
-  TANH_T = 5,
-  DROPOUT_T = 6,
-  LAYERNORM_T = 7,
-  EMBEDDING_T = 8,
-  GRU_T = 9,
-  LSTM_T = 10,
-  MIGRATE_CPU = 11,
-  MIGRATE_GPU = 12,
-  SOFTMAX = 13,
-  LOGSOFTMAX = 14
-};
+TensorPtr LogSoftmax::forward(const TensorPtr x) {
+  const tcapint ax = axis < 0 ? axis + x->shape.size() : axis;
+
+  TensorPtr m = Tensor::max(x, ax);
+  TensorPtr x_shifted = x - m;
+  TensorPtr logsum = Tensor::log(Tensor::sum(Tensor::exp(x_shifted), ax));
+
+  return x_shifted - logsum;
+}
+void LogSoftmax::save(std::ostream &os) const {
+  Serializer::write_tcapint(os, axis);
+}
 } // namespace Weed

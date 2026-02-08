@@ -64,6 +64,8 @@ YT [explainer](https://youtu.be/lJvkaGy8QZg)
 
 Copyright (c) Daniel Strano and the Qrack contributors 2017-2026. All rights reserved.
 
+In its `include/common` folder, Weed bundles a copy of [`rapidcsv` by Kristofer Berggren](https://github.com/d99kris/rapidcsv), reused under a BSD 3-Clause License. (This is a convenience and suggestion to Weed's users, for loading CSVs.)
+
 The Weed logo was produced with assistance from "Elara," an OpenAI custom GPT, and it is in the **public domain**.
 
 Licensed under the GNU Lesser General Public License V3.

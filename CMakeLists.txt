@@ -28,11 +28,13 @@ add_library (weed STATIC
     src/modules/gru.cpp
     src/modules/layernorm.cpp
     src/modules/linear.cpp
+    src/modules/logsoftmax.cpp
     src/modules/lstm.cpp
     src/modules/migrate_cpu.cpp
     src/modules/migrate_gpu.cpp
     src/modules/module.cpp
     src/modules/sequential.cpp
+    src/modules/softmax.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
@@ -282,6 +284,7 @@ install (FILES
     include/common/oclapi.hpp
     include/common/oclengine.hpp
     include/common/parallel_for.hpp
+    include/common/rapidcsv.h
     include/common/serializer.hpp
     include/common/weed_functions.hpp
     include/common/weed_types.hpp
@@ -308,6 +311,7 @@ install (FILES
     include/modules/embedding.hpp
     include/modules/gru.hpp
     include/modules/linear.hpp
+    include/modules/logsoftmax.hpp
     include/modules/lstm.hpp
     include/modules/migrate_cpu.hpp
     include/modules/migrate_gpu.hpp
@@ -315,6 +319,7 @@ install (FILES
     include/modules/relu.hpp
     include/modules/sequential.hpp
     include/modules/sigmoid.hpp
+    include/modules/softmax.hpp
     include/modules/tanh.hpp
     include/ops/abs.hpp
     include/ops/clamp.hpp
