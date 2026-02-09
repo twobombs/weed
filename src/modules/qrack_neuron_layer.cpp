@@ -81,7 +81,8 @@ QrackNeuronLayer::QrackNeuronLayer(
     for (size_t k = lowest_combo; k < (highest_combo + 1U); ++k) {
       for_each_combination(
           input_q, k, [&](const std::vector<bitLenInt> &combo) {
-            Qrack::QNeuronPtr qn = std::make_shared<Qrack::QNeuron>(prototype, combo, output_id);
+            Qrack::QNeuronPtr qn =
+                std::make_shared<Qrack::QNeuron>(prototype, combo, output_id);
             neurons.push_back(std::make_shared<QrackNeuron>(qn));
           });
     }
@@ -104,7 +105,8 @@ QrackNeuronLayer::QrackNeuronLayer(
 
 TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
   if (x->storage->dtype != DType::REAL) {
-    throw std::invalid_argument("QrackNeuronLayer::forward(x) argument must be real-number!");
+    throw std::invalid_argument(
+        "QrackNeuronLayer::forward(x) argument must be real-number!");
   }
 
   WEED_CONST real1 init_phi = asin(ONE_R1 / 2);
@@ -117,7 +119,8 @@ TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
 
   in->storage = in->storage->cpu();
 
-  const CpuRealStorage *pi = static_cast<const CpuRealStorage *>(in->storage.get());
+  const CpuRealStorage *pi =
+      static_cast<const CpuRealStorage *>(in->storage.get());
   CpuRealStorage *po = static_cast<CpuRealStorage *>(out->storage.get());
 
   for (size_t b = 0U; b < B; ++b) {
@@ -125,7 +128,8 @@ TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
 
     // Load classical inputs
     for (size_t i = 0; i < input_indices.size(); ++i) {
-      const real1 v = (*pi)[in->offset + b * in->stride[0U] + i * in->stride[1U]];
+      const real1 v =
+          (*pi)[in->offset + b * in->stride[0U] + i * in->stride[1U]];
       sim->RY(PI_R1 * v, input_indices[i]);
     }
 

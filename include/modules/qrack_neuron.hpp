@@ -26,8 +26,10 @@ struct QrackNeuron : public Module {
   ParameterPtr angles;
   real1 *data;
 
-  QrackNeuron(Qrack::QNeuronPtr qn, const Qrack::QNeuronActivationFn &activation =
-                                      Qrack::QNeuronActivationFn::Sigmoid);
+  QrackNeuron(Qrack::QNeuronPtr qn,
+              const Qrack::QNeuronActivationFn &activation =
+                  Qrack::QNeuronActivationFn::Sigmoid,
+              const bool &init_rand = true);
   QrackNeuron(Qrack::QNeuronPtr qn, const std::vector<real1> &init_angles,
               const Qrack::QNeuronActivationFn &activation =
                   Qrack::QNeuronActivationFn::Sigmoid);

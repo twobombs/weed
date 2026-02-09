@@ -16,12 +16,30 @@
 
 namespace Weed {
 QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
-                         const Qrack::QNeuronActivationFn &activation)
+                         const Qrack::QNeuronActivationFn &activation,
+                         const bool &init_rand)
     : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
-  angles = std::make_shared<Parameter>(
-      std::vector<tcapint>{(tcapint)(qn->GetInputPower())},
-      std::vector<tcapint>{1U}, DType::REAL, DeviceTag::CPU, -1, false);
-  angles->storage->FillZeros();
+  const size_t sz = qn->GetInputPower();
+  if (init_rand) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    real1_s lim = (real1_s)(0.5 / std::sqrt(sz));
+    std::uniform_real_distribution<real1_s> dis(-lim, lim);
+    std::vector<real1> init;
+    init.reserve(sz);
+    for (size_t n = 0; n < sz; ++n) {
+      init.push_back((real1)dis(gen));
+    }
+
+    angles =
+        std::make_shared<Parameter>(init, std::vector<tcapint>{(tcapint)sz},
+                                    std::vector<tcapint>{1U}, DeviceTag::CPU);
+  } else {
+    angles = std::make_shared<Parameter>(std::vector<tcapint>{(tcapint)sz},
+                                         std::vector<tcapint>{1U}, DType::REAL,
+                                         DeviceTag::CPU, -1, false);
+    angles->storage->FillZeros();
+  }
   data = static_cast<CpuRealStorage *>(angles->storage.get())->data.get();
 }
 
