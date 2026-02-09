@@ -30,6 +30,7 @@ struct QrackNeuronLayer : public Module {
   std::vector<ParameterPtr> param_vector;
   bool requires_grad;
 
+  QrackNeuronLayer() : Module(QRACK_NEURON_LAYER_T) {}
   QrackNeuronLayer(
       const size_t &input_q, const size_t &output_q, const size_t &hidden_q,
       const size_t &lowest_combo, const size_t &highest_combo,
