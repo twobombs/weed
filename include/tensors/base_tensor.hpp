@@ -19,7 +19,8 @@ namespace Weed {
 struct BaseTensor;
 typedef std::shared_ptr<BaseTensor> BaseTensorPtr;
 /**
- * Base tensor class for both symbolic (SymbolTensor) and mathematical (Tensor) objects
+ * Base tensor class for both symbolic (SymbolTensor) and mathematical (Tensor)
+ * objects
  */
 struct BaseTensor {
   StoragePtr storage;
