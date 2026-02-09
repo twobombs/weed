@@ -81,7 +81,7 @@ QrackNeuronLayer::QrackNeuronLayer(
     for (size_t k = lowest_combo; k < (highest_combo + 1U); ++k) {
       for_each_combination(
           input_q, k, [&](const std::vector<bitLenInt> &combo) {
-            Qrack::QNeuron qn(prototype, combo, output_id);
+            Qrack::QNeuronPtr qn = std::make_shared<Qrack::QNeuron>(prototype, combo, output_id);
             neurons.push_back(std::make_shared<QrackNeuron>(qn));
           });
     }
@@ -134,7 +134,7 @@ TensorPtr QrackNeuronLayer::forward(const TensorPtr x) {
     for (size_t o = 0U; o < output_indices.size(); ++o) {
       real1 phi = init_phi;
       for (auto &neuron : neurons) {
-        if (neuron->neuron.GetOutputIndex() == output_indices[o]) {
+        if (neuron->neuron->GetOutputIndex() == output_indices[o]) {
           TensorPtr d = neuron->forward(sim);
           RealTensor r = *static_cast<RealTensor *>(d.get());
           phi += r[0U];

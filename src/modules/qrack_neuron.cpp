@@ -15,22 +15,22 @@
 #include "tensors/real_tensor.hpp"
 
 namespace Weed {
-QrackNeuron::QrackNeuron(Qrack::QNeuron &qn,
+QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
                          const Qrack::QNeuronActivationFn &activation)
     : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
-      std::vector<tcapint>{(tcapint)(qn.GetInputPower())},
+      std::vector<tcapint>{(tcapint)(qn->GetInputPower())},
       std::vector<tcapint>{1U}, DType::REAL, DeviceTag::CPU, -1, false);
   angles->storage->FillZeros();
   data = static_cast<CpuRealStorage *>(angles->storage.get())->data.get();
 }
 
-QrackNeuron::QrackNeuron(Qrack::QNeuron &qn,
+QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
                          const std::vector<real1> &init_angles,
                          const Qrack::QNeuronActivationFn &activation)
     : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
-      init_angles, std::vector<tcapint>{(tcapint)(qn.GetInputPower())},
+      init_angles, std::vector<tcapint>{(tcapint)(qn->GetInputPower())},
       std::vector<tcapint>{1U}, DeviceTag::CPU);
   data = static_cast<CpuRealStorage *>(angles->storage.get())->data.get();
 }
@@ -39,8 +39,8 @@ TensorPtr QrackNeuron::forward() {
   // x is angles tensor
 
   // Save simulator state
-  const real1 pre_prob = neuron.GetSimulator()->Prob(neuron.GetOutputIndex());
-  const real1 post_prob = neuron.Predict(data, true, false, activation_fn);
+  const real1 pre_prob = neuron->GetSimulator()->Prob(neuron->GetOutputIndex());
+  const real1 post_prob = neuron->Predict(data, true, false, activation_fn);
   const real1 delta = std::asin(post_prob) - std::asin(pre_prob);
   const real1 denom =
       std::max(std::sqrt(std::max(ONE_R1 - post_prob * post_prob, ZERO_R1)),
@@ -61,7 +61,7 @@ TensorPtr QrackNeuron::forward() {
           RealTensor dxo = *static_cast<RealTensor *>(dx.get());
           const RealTensor doo = *static_cast<const RealTensor *>(dout.get());
 
-          neuron.Unpredict(data, true, activation_fn);
+          neuron->Unpredict(data, true, activation_fn);
 
           const real1 upstream = doo[0U] / denom;
 
@@ -72,14 +72,14 @@ TensorPtr QrackNeuron::forward() {
             // +π/2
             data[i] = theta + SineShift;
             const real1 p_plus =
-                neuron.Predict(data, true, false, activation_fn);
-            neuron.Unpredict(data, true, activation_fn);
+                neuron->Predict(data, true, false, activation_fn);
+            neuron->Unpredict(data, true, activation_fn);
 
             // -π/2
             data[i] = theta - SineShift;
             const real1 p_minus =
-                neuron.Predict(data, true, false, activation_fn);
-            neuron.Unpredict(data, true, activation_fn);
+                neuron->Predict(data, true, false, activation_fn);
+            neuron->Unpredict(data, true, activation_fn);
 
             const real1 grad = (p_plus - p_minus) / 2;
             dxo.add(i, grad * upstream);

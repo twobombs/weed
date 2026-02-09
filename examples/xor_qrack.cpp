@@ -40,7 +40,7 @@ int main() {
 
   QrackNeuronLayerPtr q = std::make_shared<QrackNeuronLayer>(2, 1, 0, 2, 2);
   q->prototype->H(0);
-  q->prototype->CNOT(0, 1);
+  q->prototype->AntiCNOT(0, 1);
 
   LinearPtr l = std::make_shared<Linear>(1, 1, false);
 
