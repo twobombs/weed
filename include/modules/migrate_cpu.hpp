@@ -19,7 +19,7 @@ namespace Weed {
  * Convenience wrapper on migration to CPU
  */
 struct MigrateCpu : public Module {
-  MigrateCpu() : Module(MIGRATE_CPU) {}
+  MigrateCpu() : Module(MIGRATE_CPU_T) {}
   TensorPtr forward(const TensorPtr x) override;
 };
 typedef std::shared_ptr<MigrateCpu> MigrateCpuPtr;

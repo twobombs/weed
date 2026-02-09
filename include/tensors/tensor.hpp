@@ -266,9 +266,29 @@ struct Tensor : public BaseTensor {
   static void backward(const TensorPtr loss);
 
   /**
+   * Reshape the tensor
+   */
+  static TensorPtr reshape(const TensorPtr a, const std::vector<tcapint> &s);
+
+  /**
    * If the tensor has exactly two indices, transpose them
    */
   static TensorPtr transpose(const TensorPtr a);
+
+  /**
+   * Transpose the two tensor indices
+   */
+  static TensorPtr transpose(const TensorPtr a, symint i, symint j);
+
+  /**
+   * Softmax activation function
+   */
+  static TensorPtr softmax(const TensorPtr x, symint axis);
+
+  /**
+   * Logarithmic softmax activation function
+   */
+  static TensorPtr logsoftmax(const TensorPtr x, symint axis);
 
   /**
    * Sum of all elements (with autograd)
@@ -334,6 +354,11 @@ struct Tensor : public BaseTensor {
    */
   static TensorPtr min(TensorPtr a);
   static void make_min_node(TensorPtr a, TensorPtr out);
+
+  /**
+   * Gaussian linear activation function (WARNING: tanh approximation!)
+   */
+  static TensorPtr gelu(const TensorPtr x);
 
   /**
    * Rectified linear activation function (with autograd)

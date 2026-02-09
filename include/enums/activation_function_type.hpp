@@ -11,21 +11,17 @@
 
 #pragma once
 
-#include "modules/module.hpp"
+#include "config.h"
 
 namespace Weed {
 /**
- * Logarithmic softmax activation
+ * Activation function types for serialization
  */
-struct LogSoftmax : public Module {
-  symint axis;
-  LogSoftmax(const symint &axis_ = -1) : Module(LOGSOFTMAX_T), axis(axis_) {}
-  TensorPtr forward(const TensorPtr x) override {
-    return Tensor::logsoftmax(x, axis);
-  }
-  void save(std::ostream &os) const override {
-    Serializer::write_symint(os, axis);
-  }
+enum ActivationFunctionType {
+  NONE_FN = 0,
+  SIGMOID_FN = 1,
+  TANH_FN = 2,
+  RELU_FN = 3,
+  GELU_FN = 4
 };
-typedef std::shared_ptr<LogSoftmax> LogSoftmaxPtr;
 } // namespace Weed

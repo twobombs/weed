@@ -56,18 +56,18 @@
 
 namespace Weed {
 #if ENABLE_GPU
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_ENV_VARS
 const tlenint PSTRIDEPOW_DEFAULT =
     (tlenint)(getenv("WEED_PSTRIDEPOW")
                   ? std::stoi(std::string(getenv("WEED_PSTRIDEPOW")))
-                  : PSTRIDEPOW);
+                  : WEED_PSTRIDEPOW);
 const tcapint GSTRIDE =
     (tcapint)(getenv("WEED_GSTRIDE")
                   ? std::stoi(std::string(getenv("WEED_GSTRIDE")))
                   : ((1 << PSTRIDEPOW_DEFAULT) *
                      std::thread::hardware_concurrency()));
 #else
-const tlenint PSTRIDEPOW_DEFAULT = PSTRIDEPOW;
+const tlenint PSTRIDEPOW_DEFAULT = WEED_PSTRIDEPOW;
 const tcapint GSTRIDE =
     (1 << PSTRIDEPOW_DEFAULT) * std::thread::hardware_concurrency();
 #endif
@@ -470,6 +470,25 @@ void Tensor::backward(TensorPtr loss) {
   }
 }
 
+TensorPtr Tensor::reshape(const TensorPtr a, const std::vector<tcapint> &s) {
+  if (!a->is_contiguous()) {
+    throw std::invalid_argument(
+        "Tensor::reshape() requires contiguous tensor!");
+  }
+
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
+  out->shape = s;
+  out->stride = full_contiguous_stride(s);
+
+  if (a->get_size() != out->get_size()) {
+    throw std::invalid_argument(
+        "Tensor::reshape() sizes do not match! (If you have broadcast indices, "
+        "try removing them, reshaping, and adding them back.)");
+  }
+
+  return out;
+}
+
 TensorPtr Tensor::transpose(const TensorPtr a) {
   if (a->shape.size() > 2U) {
     throw std::invalid_argument("Tensor::transpose is only for 2D tensors (and "
@@ -490,6 +509,51 @@ TensorPtr Tensor::transpose(const TensorPtr a) {
   std::swap(out->stride[0U], out->stride[1U]);
 
   return out;
+}
+
+TensorPtr Tensor::transpose(const TensorPtr a, symint i, symint j) {
+  while (i < 0) {
+    i += a->shape.size();
+  }
+  while (j < 0) {
+    j += a->shape.size();
+  }
+
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
+
+  if (i == j) {
+    return out;
+  }
+
+  std::swap(out->shape[i], out->shape[j]);
+  std::swap(out->stride[i], out->stride[j]);
+
+  return out;
+}
+
+TensorPtr Tensor::softmax(const TensorPtr x, symint axis) {
+  while (axis < 0) {
+    axis += x->shape.size();
+  }
+
+  TensorPtr m = max(x, axis);
+  TensorPtr x_shifted = x - m;
+  TensorPtr ex = exp(x_shifted);
+  TensorPtr denom = sum(ex, axis);
+
+  return ex / denom;
+}
+
+TensorPtr Tensor::logsoftmax(const TensorPtr x, symint axis) {
+  while (axis < 0) {
+    axis += x->shape.size();
+  }
+
+  TensorPtr m = Tensor::max(x, axis);
+  TensorPtr x_shifted = x - m;
+  TensorPtr logsum = Tensor::log(Tensor::sum(Tensor::exp(x_shifted), axis));
+
+  return x_shifted - logsum;
 }
 
 TensorPtr Tensor::sum(TensorPtr a) {
@@ -717,6 +781,18 @@ void Tensor::make_abs_node(TensorPtr a, TensorPtr out) {
         Weed::abs_grad(*(a_grad.get()), *(_a.get()), *(out_grad.get()));
         a->grad = a_grad;
       });
+}
+
+TensorPtr Tensor::gelu(const TensorPtr x) {
+  const real1 k0 = real1(0.5);
+  const real1 k1 = real1(0.044715);
+  const real1 k2 = real1(0.7978845608028654); // sqrt(2/pi)
+
+  TensorPtr x3 = x * x * x;
+  TensorPtr inner = k2 * (x + k1 * x3);
+  TensorPtr t = Tensor::tanh(inner);
+
+  return k0 * x * (Tensor::ones_like(x->shape) + t);
 }
 
 TensorPtr Tensor::relu(TensorPtr a) {

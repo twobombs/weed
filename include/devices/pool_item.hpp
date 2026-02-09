@@ -46,7 +46,6 @@ struct PoolItem {
   BufferPtr complexBuffer;
   BufferPtr vciBuffer;
 
-#if ENABLE_OPENCL
   PoolItem(cl::Context &context) {
     complexBuffer = MakeBuffer(context, sizeof(complex) * CMPLX_ARG_LEN);
     vciBuffer = MakeBuffer(context, sizeof(tcapint) * VCI_ARG_LEN);
@@ -74,34 +73,6 @@ struct PoolItem {
 
     return toRet;
   }
-#else
-  PoolItem() {
-    complexBuffer = MakeBuffer(sizeof(complex) * CMPLX_ARG_LEN);
-    vciBuffer = MakeBuffer(sizeof(tcapint) * VCI_ARG_LEN);
-  }
-
-  BufferPtr MakeBuffer(size_t size) {
-    cudaError_t error;
-
-    BufferPtr toRet = std::shared_ptr<void>(AllocRaw(size, &error),
-                                            [](void *c) { cudaFree(c); });
-
-    if (error != cudaSuccess) {
-      throw std::runtime_error(
-          "CUDA error code on buffer allocation attempt: " +
-          std::to_string(error));
-    }
-
-    return toRet;
-  }
-
-  void *AllocRaw(size_t size, cudaError_t *errorPtr) {
-    void *toRet;
-    *errorPtr = cudaMalloc(&toRet, size);
-
-    return toRet;
-  }
-#endif
 };
 
 typedef std::shared_ptr<PoolItem> PoolItemPtr;

@@ -14,7 +14,7 @@ include_directories ("include" "include/common" "${CMAKE_BINARY_DIR}/include/com
 set(CMAKE_WARN_DEPRECATED FALSE)
 
 option (ENABLE_EXAMPLES "Include usage examples" ON)
-option (ENABLE_INTRINSICS "Use x86_64 intrinsics" ON)
+option (ENABLE_TESTS "Include tests and benchmarks" ON)
 if (PACK_DEBIAN)
     set(ENABLE_EXAMPLES OFF)
 endif (PACK_DEBIAN)
@@ -28,13 +28,13 @@ add_library (weed STATIC
     src/modules/gru.cpp
     src/modules/layernorm.cpp
     src/modules/linear.cpp
-    src/modules/logsoftmax.cpp
     src/modules/lstm.cpp
     src/modules/migrate_cpu.cpp
     src/modules/migrate_gpu.cpp
     src/modules/module.cpp
+    src/modules/multihead_attention.cpp
     src/modules/sequential.cpp
-    src/modules/softmax.cpp
+    src/modules/transformer_encoder_layer.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
@@ -63,16 +63,16 @@ add_library (weed STATIC
 set_property(TARGET weed PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 set(WEED_LIBS weed)
-if (ENABLE_PTHREAD)
+if (WEED_ENABLE_PTHREAD)
     if (ANDROID OR CMAKE_SYSTEM_PROCESSOR MATCHES "^riscv" OR (NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^arm"))
         set(WEED_LIBS ${WEED_LIBS} atomic)
     endif (ANDROID OR CMAKE_SYSTEM_PROCESSOR MATCHES "^riscv" OR (NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^arm"))
     if (NOT ANDROID AND NOT MSVC)
 	set(WEED_LIBS ${WEED_LIBS} pthread)
     endif (NOT ANDROID AND NOT MSVC)
-endif (ENABLE_PTHREAD)
+endif (WEED_ENABLE_PTHREAD)
 
-if (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     add_executable (unittest
         test/test_main.cpp
         test/tests.cpp
@@ -83,135 +83,82 @@ if (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
         test/benchmarks.cpp
         )
 
-    target_link_libraries (unittest ${WEED_LIBS})
-    target_link_libraries (benchmarks ${WEED_LIBS})
-endif (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
+    target_link_libraries (unittest weed)
+    target_link_libraries (benchmarks weed)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 # Included after the library and other modules have been declared
-option (ENABLE_OPENCL "Use OpenCL optimizations" ON)
-option (ENABLE_SNUCL "Use SnuCL framework for clusters" OFF)
-include ("cmake/Boost.cmake")
-include ("cmake/Complex_x2.cmake")
+option (WEED_ENABLE_OPENCL "Use OpenCL optimizations" ON)
+option (WEED_ENABLE_SNUCL "Use SnuCL framework for clusters" OFF)
 include ("cmake/CppStd.cmake")
 include ("cmake/EnvVars.cmake")
 include ("cmake/FpMath.cmake")
 include ("cmake/Pstridepow.cmake")
 include ("cmake/TCapPow.cmake")
+include ("cmake/Qrack.cmake")
 if (ENABLE_EXAMPLES)
     include ("cmake/Examples.cmake")
 endif (ENABLE_EXAMPLES)
 include ("cmake/OpenCL.cmake" )
 
-message ("C++ standard year is (at least): ${CPP_STD}")
-message ("Tensor capacity power is: ${TCAPPOW}")
-message ("Floating-point capacity power is: ${FPPOW}")
-message ("CPU parallelism is: ${ENABLE_PTHREAD}")
-message ("CPU work item stride power is: ${PSTRIDEPOW}")
-message ("Async CPU is: ${ENABLE_ASYNC}")
-message ("OpenCL (v2.0) out-of-order queue is: ${ENABLE_OOO_OCL}")
-message ("Environment variable usage is: ${ENABLE_ENV_VARS}")
+message ("C++ standard year is (at least): ${WEED_CPP_STD}")
+message ("Tensor capacity power is: ${WEED_TCAPPOW}")
+message ("Floating-point capacity power is: ${WEED_FPPOW}")
+message ("CPU parallelism is: ${WEED_ENABLE_PTHREAD}")
+message ("CPU work item stride power is: ${WEED_PSTRIDEPOW}")
+message ("OpenCL (v2.0) out-of-order queue is: ${WEED_ENABLE_OOO_OCL}")
+message ("Environment variable usage is: ${WEED_ENABLE_ENV_VARS}")
 
-if (FPPOW GREATER 6)
+if (WEED_FPPOW GREATER 6)
     target_link_libraries(weed PUBLIC quadmath)
-endif (FPPOW GREATER 6)
-
-if (ENABLE_COMPLEX_X2)
-    set(COMPLEX_X2_MACRO "(!(defined(__GNUC__) || defined(__MINGW32__)) || ((FPPOW == 5) && __SSE__) || ((FPPOW == 6) && __SSE2__))")
-else (ENABLE_COMPLEX_X2)
-    set(COMPLEX_X2_MACRO "0")
-endif (ENABLE_COMPLEX_X2)
-
-if (ENABLE_SSE3)
-    set(SSE3_MACRO "(!(defined(__GNUC__) || defined(__MINGW32__)) || __SSE3__)")
-else (ENABLE_SSE3)
-    set(SSE3_MACRO "0")
-endif (ENABLE_SSE3)
+endif (WEED_FPPOW GREATER 6)
 
 if (MSVC)
-    if (CPP_STD GREATER_EQUAL 23)
-        set(WEED_CPP_STD_OPT /std:c++23)
-    elseif (CPP_STD GREATER_EQUAL 20)
-        set(WEED_CPP_STD_OPT /std:c++20)
-    elseif (CPP_STD GREATER_EQUAL 17)
-        set(WEED_CPP_STD_OPT /std:c++17)
-    elseif (CPP_STD GREATER_EQUAL 14)
-        set(WEED_CPP_STD_OPT /std:c++14)
+    if (WEED_CPP_STD GREATER_EQUAL 23)
+        set(CPP_STD_OPT /std:c++23)
+    elseif (WEED_CPP_STD GREATER_EQUAL 20)
+        set(CPP_STD_OPT /std:c++20)
+    elseif (WEED_CPP_STD GREATER_EQUAL 17)
+        set(CPP_STD_OPT /std:c++17)
+    elseif (WEED_CPP_STD GREATER_EQUAL 14)
+        set(CPP_STD_OPT /std:c++14)
     else ()
-        set(WEED_CPP_STD_OPT "")
+        set(CPP_STD_OPT "")
     endif ()
 else (MSVC)
-    if (CPP_STD GREATER_EQUAL 23)
-        set(WEED_CPP_STD_OPT -std=c++23)
-    elseif (CPP_STD GREATER_EQUAL 20)
-        set(WEED_CPP_STD_OPT -std=c++20)
-    elseif (CPP_STD GREATER_EQUAL 17)
-        set(WEED_CPP_STD_OPT -std=c++17)
-    elseif (CPP_STD GREATER_EQUAL 14)
-        set(WEED_CPP_STD_OPT -std=c++14)
+    if (WEED_CPP_STD GREATER_EQUAL 23)
+        set(CPP_STD_OPT -std=c++23)
+    elseif (WEED_CPP_STD GREATER_EQUAL 20)
+        set(CPP_STD_OPT -std=c++20)
+    elseif (WEED_CPP_STD GREATER_EQUAL 17)
+        set(CPP_STD_OPT -std=c++17)
+    elseif (WEED_CPP_STD GREATER_EQUAL 14)
+        set(CPP_STD_OPT -std=c++14)
     else ()
-        set(WEED_CPP_STD_OPT -std=c++11)
+        set(CPP_STD_OPT -std=c++11)
     endif ()
 endif (MSVC)
 
 if (MSVC)
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
  
-        set(WEED_COMPILE_FLAGS_PART /O2 ${WEED_CPP_STD_OPT} /Wall)
+        set(WEED_COMPILE_FLAGS_PART /O2 ${CPP_STD_OPT} /Wall)
     else (CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(WEED_COMPILE_FLAGS_PART ${WEED_CPP_STD_OPT} /Wall)
+        set(WEED_COMPILE_FLAGS_PART ${CPP_STD_OPT} /Wall)
     endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 else (MSVC)
-    set(WEED_COMPILE_FLAGS_PART -O3 ${WEED_CPP_STD_OPT})
-    if (EMSCRIPTEN AND ENABLE_PTHREAD)
+    set(WEED_COMPILE_FLAGS_PART -O3 ${CPP_STD_OPT})
+    if (EMSCRIPTEN AND WEED_ENABLE_PTHREAD)
         set (WEED_COMPILE_FLAGS_PART ${WEED_COMPILE_FLAGS_PART} -pthread)
-    endif (EMSCRIPTEN AND ENABLE_PTHREAD)
+    endif (EMSCRIPTEN AND WEED_ENABLE_PTHREAD)
     set(WEED_COMPILE_FLAGS_PART ${WEED_COMPILE_FLAGS_PART} -Wall)
-    if (EMSCRIPTEN OR NOT APPLE OR NOT ENABLE_OPENCL)
+    if (EMSCRIPTEN OR NOT APPLE OR NOT WEED_ENABLE_OPENCL)
         set(WEED_COMPILE_FLAGS_PART ${WEED_COMPILE_FLAGS_PART} -Werror)
-    endif (EMSCRIPTEN OR NOT APPLE OR NOT ENABLE_OPENCL)
+    endif (EMSCRIPTEN OR NOT APPLE OR NOT WEED_ENABLE_OPENCL)
 endif(MSVC)
 
 set(WEED_COMPILE_OPTS ${WEED_COMPILE_FLAGS_PART})
 set(TEST_COMPILE_OPTS ${WEED_COMPILE_FLAGS_PART})
-
-if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i.86|amd64|x86_64"))
-    set(ENABLE_INTRINSICS OFF)
-    set(ENABLE_COMPLEX_X2 OFF)
-endif (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i.86|amd64|x86_64"))
-
-if (ENABLE_INTRINSICS)
-    include(CheckCXXCompilerFlag)
-    if (ENABLE_SSE3)
-        check_cxx_compiler_flag(-msse3 COMPILER_SUPPORTS_SSE3_FLAG)
-        if (COMPILER_SUPPORTS_SSE3_FLAG)
-            set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -msse3)
-        else (COMPILER_SUPPORTS_SSE3_FLAG)
-            set(ENABLE_SSE3 OFF)
-        endif (COMPILER_SUPPORTS_SSE3_FLAG)
-    endif (ENABLE_SSE3)
-
-    if (ENABLE_AVX AND FPPOW GREATER 5)
-        check_cxx_compiler_flag(-mavx COMPILER_SUPPORTS_AVX_FLAG)
-        if (COMPILER_SUPPORTS_AVX_FLAG)
-            set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -mavx)
-        else (COMPILER_SUPPORTS_AVX_FLAG)
-            set(ENABLE_AVX OFF)
-        endif (COMPILER_SUPPORTS_AVX_FLAG)
-    endif (ENABLE_AVX AND FPPOW GREATER 5)
-
-    if (ENABLE_FMA)
-        check_cxx_compiler_flag(-mfma COMPILER_SUPPORTS_FMA_FLAG)
-        if (COMPILER_SUPPORTS_FMA_FLAG)
-            set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -mfma)
-        else (COMPILER_SUPPORTS_FMA_FLAG)
-            set(ENABLE_FMA OFF)
-        endif (COMPILER_SUPPORTS_FMA_FLAG)
-    endif (ENABLE_FMA)
-endif (ENABLE_INTRINSICS)
-
-message ("Complex (x2) SIMD support is: ${ENABLE_COMPLEX_X2}")
-message ("SSE3.0 support is: ${ENABLE_SSE3}")
-message ("FMA support is: ${ENABLE_FMA}")
 
 if (FPPOW LESS 5)
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -220,30 +167,12 @@ if (FPPOW LESS 5)
     endif ()
 endif (FPPOW LESS 5)
 
-if (EMSCRIPTEN AND ENABLE_COMPLEX_X2)
-    check_cxx_compiler_flag(-msimd128 COMPILER_SUPPORTS_FLAG)
-    if (COMPILER_SUPPORTS_FLAG)
-        set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -msimd128)
-    endif (COMPILER_SUPPORTS_FLAG)
-    check_cxx_compiler_flag(-msse COMPILER_SUPPORTS_FLAG)
-    if (COMPILER_SUPPORTS_FLAG)
-        set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -msse)
-    endif (COMPILER_SUPPORTS_FLAG)
-    check_cxx_compiler_flag(-msse2 COMPILER_SUPPORTS_FLAG)
-    if (COMPILER_SUPPORTS_FLAG)
-        set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -msse2)
-    endif (COMPILER_SUPPORTS_FLAG)
-endif (EMSCRIPTEN AND ENABLE_COMPLEX_X2)
-
-if (ENABLE_EMIT_LLVM)
-    set(WEED_COMPILE_OPTS ${WEED_COMPILE_OPTS} -emit-llvm)
-endif (ENABLE_EMIT_LLVM)
-
 include_directories(include/common)
 
-if (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     target_include_directories (unittest PUBLIC test)
-endif (NOT ENABLE_EMIT_LLVM AND NOT PACK_DEBIAN)
+    target_include_directories (benchmarks PUBLIC test)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 if (APPLE)
     set(TEST_COMPILE_OPTS -Wno-inconsistent-missing-override)
@@ -255,13 +184,13 @@ else (MSVC)
 target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
 endif (MSVC)
 
-if (NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     target_compile_options (unittest PUBLIC ${TEST_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
-endif (NOT PACK_DEBIAN)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 add_library (weed_shared SHARED src/shared_api.cpp)
 set_property(TARGET weed_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries (weed_shared ${WEED_LIBS})
+target_link_libraries (weed_shared weed)
 target_compile_options (weed_shared PUBLIC ${WEED_COMPILE_OPTS})
 set_target_properties (weed_shared PROPERTIES VERSION ${PROJECT_VERSION})
 
@@ -269,7 +198,7 @@ set_target_properties (weed_shared PROPERTIES VERSION ${PROJECT_VERSION})
 add_executable (weed_cl_precompile
     src/weed_cl_precompile.cpp
     )
-target_link_libraries (weed_cl_precompile ${WEED_LIBS})
+target_link_libraries (weed_cl_precompile weed)
 target_compile_options (weed_cl_precompile PUBLIC ${TEST_COMPILE_OPTS})
 install(TARGETS weed_cl_precompile RUNTIME DESTINATION bin BUNDLE DESTINATION bin PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
@@ -316,11 +245,15 @@ install (FILES
     include/modules/migrate_cpu.hpp
     include/modules/migrate_gpu.hpp
     include/modules/module.hpp
+    include/modules/multihead_attention.hpp
     include/modules/relu.hpp
+    include/modules/qrack_neuron.hpp
+    include/modules/qrack_neuron_layer.hpp
     include/modules/sequential.hpp
     include/modules/sigmoid.hpp
     include/modules/softmax.hpp
     include/modules/tanh.hpp
+    include/modules/transformer_encoder_layer.hpp
     include/ops/abs.hpp
     include/ops/clamp.hpp
     include/ops/commuting.hpp
@@ -452,10 +385,10 @@ if (PACK_DEBIAN)
         endif (DEBIAN_DISTRO_SERIES STREQUAL "focal")
     endif (DEBHELPER_COMPAT_VERSION)
     if (DEBHELPER_COMPAT_VERSION STREQUAL "13")
-        set(OPENCL_V3 ON)
+        set(WEED_OPENCL_V3 ON)
         set(CMAKE_INSTALL_LIBDIR "/usr/lib")
     else (DEBHELPER_COMPAT_VERSION STREQUAL "13")
-        set(OPENCL_V3 OFF)
+        set(WEED_OPENCL_V3 OFF)
     endif (DEBHELPER_COMPAT_VERSION STREQUAL "13")
 
     if (FPPOW GREATER 6)
@@ -464,13 +397,13 @@ if (PACK_DEBIAN)
         set(CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "")
     endif (FPPOW GREATER 6)
 
-    if (ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
+    if (WEED_ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
         set(CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "${CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS}opencl-headers, ocl-icd-opencl-dev, xxd")
         set(CPACK_DEBIAN_PACKAGE_DEPENDS "ocl-icd-opencl-dev")
-    else (ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
+    else (WEED_ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
         set(CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "")
         set(CPACK_DEBIAN_PACKAGE_DEPENDS "")
-    endif (ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
+    endif (WEED_ENABLE_OPENCL AND NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc"))
 
     set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
     set(CPACK_DEB_COMPONENT_INSTALL YES)

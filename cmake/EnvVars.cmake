@@ -1,1 +1,1 @@
-option (ENABLE_ENV_VARS "Use environment variables (on by default)" ON)
+option (WEED_ENABLE_ENV_VARS "Use environment variables (on by default)" ON)

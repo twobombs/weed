@@ -15,17 +15,11 @@
 
 namespace Weed {
 /**
- * Logarithmic softmax activation
+ * Convenience wrapper on ReLU as a module
  */
-struct LogSoftmax : public Module {
-  symint axis;
-  LogSoftmax(const symint &axis_ = -1) : Module(LOGSOFTMAX_T), axis(axis_) {}
-  TensorPtr forward(const TensorPtr x) override {
-    return Tensor::logsoftmax(x, axis);
-  }
-  void save(std::ostream &os) const override {
-    Serializer::write_symint(os, axis);
-  }
+struct GeLU : public Module {
+  GeLU() : Module(GELU_T) {}
+  TensorPtr forward(const TensorPtr x) override { return Tensor::gelu(x); }
 };
-typedef std::shared_ptr<LogSoftmax> LogSoftmaxPtr;
+typedef std::shared_ptr<GeLU> GeLUPtr;
 } // namespace Weed
