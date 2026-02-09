@@ -14,6 +14,7 @@
 
 #include "modules/dropout.hpp"
 #include "modules/embedding.hpp"
+#include "modules/gelu.hpp"
 #include "modules/gru.hpp"
 #include "modules/layernorm.hpp"
 #include "modules/linear.hpp"
@@ -27,6 +28,7 @@
 #include "modules/sigmoid.hpp"
 #include "modules/softmax.hpp"
 #include "modules/tanh.hpp"
+#include "modules/transformer_encoder_layer.hpp"
 
 namespace Weed {
 void Module::save(std::ostream &os) const {
@@ -61,6 +63,9 @@ ModulePtr Module::load(std::istream &is) {
     }
 
     return l;
+  }
+  case ModuleType::GELU_T: {
+    return std::make_shared<GeLU>();
   }
   case ModuleType::RELU_T: {
     return std::make_shared<ReLU>();
@@ -143,6 +148,21 @@ ModulePtr Module::load(std::istream &is) {
     m->W_o = std::dynamic_pointer_cast<Linear>(Linear::load(is));
 
     return m;
+  }
+  case ModuleType::TRANSFORMER_ENCODER_LAYER_T: {
+    TransformerEncoderLayerPtr t = std::make_shared<TransformerEncoderLayer>();
+    Serializer::read_tcapint(is, t->d_model);
+    Serializer::read_tcapint(is, t->d_ff);
+    Serializer::read_tcapint(is, t->num_heads);
+    t->self_attn = std::dynamic_pointer_cast<MultiHeadAttention>(
+        MultiHeadAttention::load(is));
+    t->ff1 = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    t->ff2 = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    t->norm1 = std::dynamic_pointer_cast<LayerNorm>(LayerNorm::load(is));
+    t->norm2 = std::dynamic_pointer_cast<LayerNorm>(LayerNorm::load(is));
+    t->activation = load(is);
+
+    return t;
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:

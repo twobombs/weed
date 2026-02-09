@@ -11,32 +11,15 @@
 
 #pragma once
 
-#include "config.h"
+#include "modules/module.hpp"
 
 namespace Weed {
 /**
- * Module types for serialization
+ * Convenience wrapper on ReLU as a module
  */
-enum ModuleType {
-  NONE_MODULE_TYPE = 0,
-  SEQUENTIAL_T = 1,
-  LINEAR_T = 2,
-  RELU_T = 3,
-  SIGMOID_T = 4,
-  TANH_T = 5,
-  DROPOUT_T = 6,
-  LAYERNORM_T = 7,
-  EMBEDDING_T = 8,
-  GRU_T = 9,
-  LSTM_T = 10,
-  MIGRATE_CPU_T = 11,
-  MIGRATE_GPU_T = 12,
-  SOFTMAX_T = 13,
-  LOGSOFTMAX_T = 14,
-  QRACK_NEURON_T = 15,
-  QRACK_NEURON_LAYER_T = 16,
-  MULTIHEAD_ATTENTION_T = 17,
-  TRANSFORMER_ENCODER_LAYER_T = 18,
-  GELU_T = 19
+struct GeLU : public Module {
+  GeLU() : Module(GELU_T) {}
+  TensorPtr forward(const TensorPtr x) override { return Tensor::gelu(x); }
 };
+typedef std::shared_ptr<GeLU> GeLUPtr;
 } // namespace Weed

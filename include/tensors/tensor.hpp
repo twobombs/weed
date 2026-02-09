@@ -356,6 +356,11 @@ struct Tensor : public BaseTensor {
   static void make_min_node(TensorPtr a, TensorPtr out);
 
   /**
+   * Gaussian linear activation function (WARNING: tanh approximation!)
+   */
+  static TensorPtr gelu(const TensorPtr x);
+
+  /**
    * Rectified linear activation function (with autograd)
    */
   static TensorPtr relu(TensorPtr a);

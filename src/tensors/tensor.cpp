@@ -782,6 +782,18 @@ void Tensor::make_abs_node(TensorPtr a, TensorPtr out) {
       });
 }
 
+TensorPtr Tensor::gelu(const TensorPtr x) {
+  const real1 k0 = real1(0.5);
+  const real1 k1 = real1(0.044715);
+  const real1 k2 = real1(0.7978845608028654); // sqrt(2/pi)
+
+  TensorPtr x3 = x * x * x;
+  TensorPtr inner = k2 * (x + k1 * x3);
+  TensorPtr t = Tensor::tanh(inner);
+
+  return k0 * x * (Tensor::ones_like(x->shape) + t);
+}
+
 TensorPtr Tensor::relu(TensorPtr a) {
   const bool rg = a->requires_grad;
   TensorPtr out =
