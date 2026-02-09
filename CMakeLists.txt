@@ -169,9 +169,10 @@ endif (FPPOW LESS 5)
 
 include_directories(include/common)
 
-if (NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     target_include_directories (unittest PUBLIC test)
-endif (NOT PACK_DEBIAN)
+    target_include_directories (benchmarks PUBLIC test)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 if (APPLE)
     set(TEST_COMPILE_OPTS -Wno-inconsistent-missing-override)
@@ -183,9 +184,9 @@ else (MSVC)
 target_compile_options (weed PUBLIC ${WEED_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
 endif (MSVC)
 
-if (NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     target_compile_options (unittest PUBLIC ${TEST_COMPILE_OPTS} -DCATCH_CONFIG_FAST_COMPILE)
-endif (NOT PACK_DEBIAN)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 add_library (weed_shared SHARED src/shared_api.cpp)
 set_property(TARGET weed_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
