@@ -21,6 +21,7 @@
 #include "modules/lstm.hpp"
 #include "modules/migrate_cpu.hpp"
 #include "modules/migrate_gpu.hpp"
+#include "modules/multihead_attention.hpp"
 #include "modules/relu.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
@@ -115,21 +116,33 @@ ModulePtr Module::load(std::istream &is) {
 
     return l;
   }
-  case ModuleType::MIGRATE_CPU: {
+  case ModuleType::MIGRATE_CPU_T: {
     return std::make_shared<MigrateCpu>();
   }
-  case ModuleType::MIGRATE_GPU: {
+  case ModuleType::MIGRATE_GPU_T: {
     return std::make_shared<MigrateGpu>();
   }
-  case ModuleType::SOFTMAX: {
-    tcapint axis;
-    Serializer::read_tcapint(is, axis);
+  case ModuleType::SOFTMAX_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
     return std::make_shared<Softmax>(axis);
   }
-  case ModuleType::LOGSOFTMAX: {
-    tcapint axis;
-    Serializer::read_tcapint(is, axis);
+  case ModuleType::LOGSOFTMAX_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
     return std::make_shared<LogSoftmax>(axis);
+  }
+  case ModuleType::MULTIHEAD_ATTENTION_T: {
+    MultiHeadAttentionPtr m = std::make_shared<MultiHeadAttention>();
+    Serializer::read_tcapint(is, m->d_model);
+    Serializer::read_tcapint(is, m->num_heads);
+    Serializer::read_tcapint(is, m->head_dim);
+    m->W_q = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    m->W_k = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    m->W_v = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+    m->W_o = std::dynamic_pointer_cast<Linear>(Linear::load(is));
+
+    return m;
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:

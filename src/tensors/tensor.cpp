@@ -469,17 +469,17 @@ void Tensor::backward(TensorPtr loss) {
   }
 }
 
-TensorPtr Tensor::reshape(const Tensor &a, const std::vector<tcapint> &s) {
-  if (!a.is_contiguous()) {
+TensorPtr Tensor::reshape(const TensorPtr a, const std::vector<tcapint> &s) {
+  if (!a->is_contiguous()) {
     throw std::invalid_argument(
         "Tensor::reshape() requires contiguous tensor!");
   }
 
-  TensorPtr out = std::make_shared<Tensor>(a);
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
   out->shape = s;
   out->stride = full_contiguous_stride(s);
 
-  if (a.get_size() != out->get_size()) {
+  if (a->get_size() != out->get_size()) {
     throw std::invalid_argument(
         "Tensor::reshape() sizes do not match! (If you have broadcast indices, "
         "try removing them, reshaping, and adding them back.)");
@@ -488,13 +488,13 @@ TensorPtr Tensor::reshape(const Tensor &a, const std::vector<tcapint> &s) {
   return out;
 }
 
-TensorPtr Tensor::transpose(const Tensor &a) {
-  if (a.shape.size() > 2U) {
+TensorPtr Tensor::transpose(const TensorPtr a) {
+  if (a->shape.size() > 2U) {
     throw std::invalid_argument("Tensor::transpose is only for 2D tensors (and "
                                 "vectors and covectors)!");
   }
 
-  TensorPtr out = std::make_shared<Tensor>(a);
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
 
   if (out->shape.size() == 1U) {
     // Treat input as column vector, and transpose to row vector
@@ -510,15 +510,15 @@ TensorPtr Tensor::transpose(const Tensor &a) {
   return out;
 }
 
-TensorPtr Tensor::transpose(const Tensor &a, symint i, symint j) {
+TensorPtr Tensor::transpose(const TensorPtr a, symint i, symint j) {
   while (i < 0) {
-    i += a.shape.size();
+    i += a->shape.size();
   }
   while (j < 0) {
-    j += a.shape.size();
+    j += a->shape.size();
   }
 
-  TensorPtr out = std::make_shared<Tensor>(a);
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
 
   if (i == j) {
     return out;
@@ -528,6 +528,31 @@ TensorPtr Tensor::transpose(const Tensor &a, symint i, symint j) {
   std::swap(out->stride[i], out->stride[j]);
 
   return out;
+}
+
+TensorPtr Tensor::softmax(const TensorPtr x, symint axis) {
+  while (axis < 0) {
+    axis += x->shape.size();
+  }
+
+  TensorPtr m = max(x, axis);
+  TensorPtr x_shifted = x - m;
+  TensorPtr ex = exp(x_shifted);
+  TensorPtr denom = sum(ex, axis);
+
+  return ex / denom;
+}
+
+TensorPtr Tensor::logsoftmax(const TensorPtr x, symint axis) {
+  while (axis < 0) {
+    axis += x->shape.size();
+  }
+
+  TensorPtr m = Tensor::max(x, axis);
+  TensorPtr x_shifted = x - m;
+  TensorPtr logsum = Tensor::log(Tensor::sum(Tensor::exp(x_shifted), axis));
+
+  return x_shifted - logsum;
 }
 
 TensorPtr Tensor::sum(TensorPtr a) {
@@ -1094,7 +1119,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     TensorPtr out_grad = out->grad->cast(dtag);
     if (a->requires_grad) {
       TensorPtr a_grad = a->grad->cast(dtag);
-      TensorPtr bt = transpose(*(b.get()))->cast(dtag);
+      TensorPtr bt = transpose(b)->cast(dtag);
       const DType &dt = get_dtype_by_presidence({b, out_grad});
       TensorPtr tmp = Tensor::allocate_like(*(a_grad.get()), dt, false,
                                             IS_SPARSE(out_grad));
@@ -1105,7 +1130,7 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
     }
     if (b->requires_grad) {
       TensorPtr b_grad = b->grad->cast(dtag);
-      TensorPtr at = transpose(*(a.get()))->cast(dtag);
+      TensorPtr at = transpose(a)->cast(dtag);
       const DType &dt = get_dtype_by_presidence({a, out_grad});
       TensorPtr tmp = Tensor::allocate_like(*(b_grad.get()), dt, false,
                                             IS_SPARSE(out_grad));

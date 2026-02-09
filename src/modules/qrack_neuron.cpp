@@ -18,7 +18,7 @@ namespace Weed {
 QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
                          const Qrack::QNeuronActivationFn &activation,
                          const bool &init_rand)
-    : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
+    : Module(QRACK_NEURON_T), neuron(qn), activation_fn(activation) {
   const size_t sz = qn->GetInputPower();
   if (init_rand) {
     std::random_device rd;
@@ -45,7 +45,7 @@ QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
 QrackNeuron::QrackNeuron(Qrack::QNeuronPtr qn,
                          const std::vector<real1> &init_angles,
                          const Qrack::QNeuronActivationFn &activation)
-    : Module(QRACK_NEURON), neuron(qn), activation_fn(activation) {
+    : Module(QRACK_NEURON_T), neuron(qn), activation_fn(activation) {
   angles = std::make_shared<Parameter>(
       init_angles, std::vector<tcapint>{(tcapint)(qn->GetInputPower())},
       std::vector<tcapint>{1U}, DeviceTag::CPU);

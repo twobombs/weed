@@ -60,7 +60,7 @@ QrackNeuronLayer::QrackNeuronLayer(
     const real1_f &nw, const bool &md, const bool &sd, const bool &sh,
     const bool &bdt, const bool &pg, const bool &tn, const bool &hy,
     const bool &oc, const bool &hp, const bool &sp)
-    : Module(QRACK_NEURON_LAYER), input_indices(input_q),
+    : Module(QRACK_NEURON_LAYER_T), input_indices(input_q),
       hidden_indices(hidden_q), output_indices(output_q),
       activation_fn(activation), post_init_fn(post_init), requires_grad(true) {
   const bitLenInt num_qubits = input_q + output_q + hidden_q;

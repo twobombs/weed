@@ -152,25 +152,6 @@ struct Tensor : public BaseTensor {
                   const tcapint &length);
 
   /**
-   * Reshape tensor
-   */
-  TensorPtr reshape(const std::vector<tcapint> &s) {
-    return Tensor::reshape(*this, s);
-  }
-
-  /**
-   * Transpose this tensor (if it has two indices)
-   */
-  TensorPtr transpose() { return transpose(*this); }
-
-  /**
-   * Transpose this tensor (between the two specified indices)
-   */
-  TensorPtr transpose(const symint &i, const symint &j) {
-    return transpose(*this, i, j);
-  }
-
-  /**
    * Tensor initialized with 0
    */
   static TensorPtr zeros(const std::vector<tcapint> &shape,
@@ -287,17 +268,27 @@ struct Tensor : public BaseTensor {
   /**
    * Reshape the tensor
    */
-  static TensorPtr reshape(const Tensor &a, const std::vector<tcapint> &s);
+  static TensorPtr reshape(const TensorPtr a, const std::vector<tcapint> &s);
 
   /**
    * If the tensor has exactly two indices, transpose them
    */
-  static TensorPtr transpose(const Tensor &a);
+  static TensorPtr transpose(const TensorPtr a);
 
   /**
    * Transpose the two tensor indices
    */
-  static TensorPtr transpose(const Tensor &a, symint i, symint j);
+  static TensorPtr transpose(const TensorPtr a, symint i, symint j);
+
+  /**
+   * Softmax activation function
+   */
+  static TensorPtr softmax(const TensorPtr x, symint axis);
+
+  /**
+   * Logarithmic softmax activation function
+   */
+  static TensorPtr logsoftmax(const TensorPtr x, symint axis);
 
   /**
    * Sum of all elements (with autograd)

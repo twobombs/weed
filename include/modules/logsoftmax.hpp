@@ -15,16 +15,17 @@
 
 namespace Weed {
 /**
- * Softmax activation
+ * Logarithmic softmax activation
  */
 struct LogSoftmax : public Module {
-  tcapint axis;
-
-  explicit LogSoftmax(const tcapint &axis_ = -1)
-      : Module(LOGSOFTMAX), axis(axis_) {}
-
-  TensorPtr forward(const TensorPtr x) override;
-  void save(std::ostream &) const override;
+  symint axis;
+  LogSoftmax(const symint &axis_ = -1) : Module(LOGSOFTMAX_T), axis(axis_) {}
+  TensorPtr forward(const TensorPtr x) override {
+    return Tensor::logsoftmax(x, axis);
+  }
+  void save(std::ostream &os) const override {
+    Serializer::write_symint(os, axis);
+  }
 };
 typedef std::shared_ptr<LogSoftmax> LogSoftmaxPtr;
 } // namespace Weed

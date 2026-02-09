@@ -18,12 +18,14 @@ namespace Weed {
  * Softmax activation
  */
 struct Softmax : public Module {
-  tcapint axis;
-
-  explicit Softmax(const tcapint &axis_ = -1) : Module(SOFTMAX), axis(axis_) {}
-
-  TensorPtr forward(const TensorPtr x) override;
-  void save(std::ostream &) const override;
+  symint axis;
+  Softmax(const symint &axis_ = -1) : Module(SOFTMAX_T), axis(axis_) {}
+  TensorPtr forward(const TensorPtr x) override {
+    return Tensor::softmax(x, axis);
+  }
+  void save(std::ostream &os) const override {
+    Serializer::write_symint(os, axis);
+  }
 };
 typedef std::shared_ptr<Softmax> SoftmaxPtr;
 } // namespace Weed

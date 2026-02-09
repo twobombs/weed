@@ -28,13 +28,12 @@ add_library (weed STATIC
     src/modules/gru.cpp
     src/modules/layernorm.cpp
     src/modules/linear.cpp
-    src/modules/logsoftmax.cpp
     src/modules/lstm.cpp
     src/modules/migrate_cpu.cpp
     src/modules/migrate_gpu.cpp
     src/modules/module.cpp
+    src/modules/multihead_attention.cpp
     src/modules/sequential.cpp
-    src/modules/softmax.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp
@@ -245,6 +244,7 @@ install (FILES
     include/modules/migrate_cpu.hpp
     include/modules/migrate_gpu.hpp
     include/modules/module.hpp
+    include/modules/multihead_attention.hpp
     include/modules/relu.hpp
     include/modules/qrack_neuron.hpp
     include/modules/qrack_neuron_layer.hpp
