@@ -18,8 +18,8 @@ struct Parameter;
 typedef std::shared_ptr<Parameter> ParameterPtr;
 
 /**
- * A Parameter is simply a tensor that always requires gradient calculation and
- * "lives" on a module"
+ * A Parameter is simply a tensor that always requires gradient calculation
+ * during training and "lives" on a module"
  */
 struct Parameter : Tensor {
   Parameter(const std::vector<tcapint> &shp, const std::vector<tcapint> &strd,

@@ -28,42 +28,71 @@ typedef std::shared_ptr<Module> ModulePtr;
 struct Module {
   ModuleType mtype;
   Module(ModuleType t) : mtype(t) {}
+  virtual ~Module() {}
 #if QRACK_AVAILABLE
+  /**
+   * Run inference on a quantum simulator with explicit input and output indices
+   * (and setup gradient nodes if in training mode)
+   */
   virtual TensorPtr forward(Qrack::QInterfacePtr q,
                             const std::vector<bitLenInt> &c,
                             const bitLenInt &t) {
     throw std::domain_error(
         "Only quantum Module instances apply forward() with QInterface!");
   }
+  /**
+   * Run inference on a quantum simulator with cached input and output indices
+   * (and setup gradient nodes if in training mode)
+   */
   virtual TensorPtr forward(Qrack::QInterfacePtr q) {
     throw std::domain_error(
         "Only quantum Module instances apply forward() with QInterface!");
   }
+  /**
+   * Run inference on a cached quantum simulator with cached input and output
+   * indices (and setup gradient nodes if in training mode)
+   */
   virtual TensorPtr forward() {
     throw std::domain_error(
         "Only quantum Module instances apply forward() with no parameters!");
   }
 #endif
+  /**
+   * Run inference on a real or complex Tensor (and setup gradient nodes if in
+   * training mode)
+   */
   virtual TensorPtr forward(const TensorPtr) = 0;
+  /**
+   * Run inference on a symbolic, real, or complex Tensor (and setup gradient
+   * nodes if in training mode)
+   */
   virtual TensorPtr forward(const BaseTensorPtr t) {
     return forward(std::dynamic_pointer_cast<Tensor>(t));
   }
+  /**
+   * Get the trainable parameters of this module
+   */
   virtual std::vector<ParameterPtr> parameters() {
     return std::vector<ParameterPtr>();
   }
+  /**
+   * Setting in training mode (with gradients)
+   */
   virtual void train() {
     std::vector<ParameterPtr> params = parameters();
     for (const auto &p : params) {
       p->train();
     }
   }
+  /**
+   * Setting in evaluation mode (without gradients)
+   */
   virtual void eval() {
     std::vector<ParameterPtr> params = parameters();
     for (const auto &p : params) {
       p->eval();
     }
   }
-  virtual ~Module() {}
   /**
    * Serialize storage to ostream
    */
@@ -72,9 +101,15 @@ struct Module {
    * Load serialized storage from istream
    */
   static ModulePtr load(std::istream &);
+  /**
+   * Static helper function for module serialization to ostream
+   */
   static void write_module_type(std::ostream &out, const ModuleType &x) {
     out.write(reinterpret_cast<const char *>(&x), sizeof(ModuleType));
   }
+  /**
+   * Static helper function for module de-serialization from istream
+   */
   static void read_module_type(std::istream &in, ModuleType &x) {
     in.read(reinterpret_cast<char *>(&x), sizeof(ModuleType));
   }
