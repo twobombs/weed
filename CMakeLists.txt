@@ -14,6 +14,7 @@ include_directories ("include" "include/common" "${CMAKE_BINARY_DIR}/include/com
 set(CMAKE_WARN_DEPRECATED FALSE)
 
 option (ENABLE_EXAMPLES "Include usage examples" ON)
+option (ENABLE_TESTS "Include tests and benchmarks" ON)
 if (PACK_DEBIAN)
     set(ENABLE_EXAMPLES OFF)
 endif (PACK_DEBIAN)
@@ -71,7 +72,7 @@ if (WEED_ENABLE_PTHREAD)
     endif (NOT ANDROID AND NOT MSVC)
 endif (WEED_ENABLE_PTHREAD)
 
-if (NOT PACK_DEBIAN)
+if (ENABLE_TESTS AND NOT PACK_DEBIAN)
     add_executable (unittest
         test/test_main.cpp
         test/tests.cpp
@@ -84,7 +85,7 @@ if (NOT PACK_DEBIAN)
 
     target_link_libraries (unittest weed)
     target_link_libraries (benchmarks weed)
-endif (NOT PACK_DEBIAN)
+endif (ENABLE_TESTS AND NOT PACK_DEBIAN)
 
 # Included after the library and other modules have been declared
 option (WEED_ENABLE_OPENCL "Use OpenCL optimizations" ON)
