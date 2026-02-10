@@ -235,13 +235,14 @@ ModulePtr Module::load(std::istream &is) {
     QuantumFunctionType post_qfn;
     Serializer::read_quantum_fn(is, post_qfn);
     Qrack::QNeuronActivationFn activation_fn;
-    bool md, sd, bdt, hp, sp;
-    Serializer::read_bool(is, md);
-    Serializer::read_bool(is, sd);
-    Serializer::read_bool(is, bdt);
-    Serializer::read_bool(is, hp);
-    Serializer::read_bool(is, sp);
     Serializer::read_qneuron_activation_fn(is, activation_fn);
+    tcapint mask;
+    Serializer::read_tcapint(is, mask);
+    const bool md = (mask & 1U);
+    const bool sd = (mask & 2U);
+    const bool bdt = (mask & 4U);
+    const bool hp = (mask & 8U);
+    const bool sp = (mask & 16U);
 
     QrackNeuronLayerPtr qnl = std::make_shared<QrackNeuronLayer>(
         input_q, output_q, hidden_q, lowest_combo, highest_combo, pre_qfn,

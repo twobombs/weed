@@ -216,11 +216,20 @@ void QrackNeuronLayer::save(std::ostream &os) const {
   Serializer::write_quantum_fn(os, pre_qfn);
   Serializer::write_quantum_fn(os, post_qfn);
   Serializer::write_qneuron_activation_fn(os, activation_fn);
-  Serializer::write_bool(os, _md);
-  Serializer::write_bool(os, _sd);
-  Serializer::write_bool(os, _bdt);
-  Serializer::write_bool(os, _hp);
-  Serializer::write_bool(os, _sp);
+  tcapint mask = _md ? 1U : 0U;
+  if (_sd) {
+    mask |= 2U;
+  }
+  if (_bdt) {
+    mask |= 4U;
+  }
+  if (_hp) {
+    mask |= 8U;
+  }
+  if (_sp) {
+    mask |= 16U;
+  }
+  Serializer::write_tcapint(os, mask);
 
   for (size_t i = 0U; i < neurons.size(); ++i) {
     neurons[i]->angles->save(os);
