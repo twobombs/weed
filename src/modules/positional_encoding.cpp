@@ -23,10 +23,11 @@ PositionalEncoding::PositionalEncoding(tcapint max_seq_len_, tcapint d_model_,
   for (tcapint pos = 0; pos < max_seq_len; ++pos) {
     for (tcapint i = 0; i < max_i; ++i) {
       const tcapint idx = pos * d_model + (i << 1U);
-      const real1 div = (real1)std::pow(10000.0, (2.0 * i) / d_model);
+      const real1 coeff =
+          (real1)(1.0 / std::pow(8192.0, ((real1)(i << 1U)) / d_model));
 
-      values[idx] = std::cos(pos / div);
-      values[idx + 1U] = std::sin(pos / div);
+      values[idx] = std::cos(coeff * pos);
+      values[idx + 1U] = std::sin(coeff * pos);
     }
     if (d_model & 1U) {
       const tcapint idx = pos * d_model + (max_i << 1U);
