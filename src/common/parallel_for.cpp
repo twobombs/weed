@@ -15,7 +15,7 @@
 #include <direct.h>
 #endif
 
-#if ENABLE_PTHREAD
+#if WEED_ENABLE_PTHREAD
 #include <atomic>
 #include <future>
 
@@ -26,7 +26,7 @@
 #endif
 
 namespace Weed {
-#if ENABLE_ENV_VARS
+#if WEED_ENABLE_ENV_VARS
 const tlenint PSTRIDEPOW_DEFAULT =
     (tlenint)(getenv("WEED_PSTRIDEPOW")
                   ? std::stoi(std::string(getenv("WEED_PSTRIDEPOW")))
@@ -37,7 +37,7 @@ const tlenint PSTRIDEPOW_DEFAULT = WEED_PSTRIDEPOW;
 
 ParallelFor::ParallelFor()
     : pStride(pow2Gpu((tlenint)PSTRIDEPOW_DEFAULT))
-#if ENABLE_PTHREAD
+#if WEED_ENABLE_PTHREAD
       ,
       numCores(std::thread::hardware_concurrency())
 #else
@@ -92,7 +92,7 @@ void ParallelFor::par_for(const std::set<tcapint> &sparseSet, ParallelFunc fn) {
       fn);
 }
 
-#if ENABLE_PTHREAD
+#if WEED_ENABLE_PTHREAD
 /*
  * Iterate through the permutations a maximum of end-begin times, allowing the
  * caller to control the incrementation offset through 'inc'.

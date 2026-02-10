@@ -19,21 +19,21 @@
 
 namespace Weed {
 
-#if TCAPPOW < 4
+#if WEED_TCAPPOW < 4
 #include "qheader_uint8cl.hpp"
-#elif TCAPPOW < 5
+#elif WEED_TCAPPOW < 5
 #include "qheader_uint16cl.hpp"
-#elif TCAPPOW < 6
+#elif WEED_TCAPPOW < 6
 #include "qheader_uint32cl.hpp"
 #else
 #include "qheader_uint64cl.hpp"
 #endif
 
-#if FPPOW < 5
+#if WEED_FPPOW < 5
 #include "qheader_halfcl.hpp"
-#elif FPPOW < 6
+#elif WEED_FPPOW < 6
 #include "qheader_floatcl.hpp"
-#elif FPPOW < 7
+#elif WEED_FPPOW < 7
 #include "qheader_doublecl.hpp"
 #else
 #include "qheader_quadcl.hpp"
@@ -198,7 +198,7 @@ cl::Program OCLEngine::MakeProgram(bool buildFromSource, std::string path,
                   << std::endl;
       }
 
-#if ENABLE_SNUCL
+#if WEED_ENABLE_SNUCL
       program = cl::Program(
           devCntxt->context, {devCntxt->device},
           {std::pair<const void *, size_t>(&buffer[0U], buffer.size())},
@@ -224,13 +224,13 @@ cl::Program OCLEngine::MakeProgram(bool buildFromSource, std::string path,
   }
 
   cl::Program::Sources sources;
-#if TCAPPOW < 4
+#if WEED_TCAPPOW < 4
   sources.push_back({(const char *)qheader_uint8_cl,
                      (long unsigned int)qheader_uint8_cl_len});
-#elif TCAPPOW < 5
+#elif WEED_TCAPPOW < 5
   sources.push_back({(const char *)qheader_uint16_cl,
                      (long unsigned int)qheader_uint16_cl_len});
-#elif TCAPPOW < 6
+#elif WEED_TCAPPOW < 6
   sources.push_back({(const char *)qheader_uint32_cl,
                      (long unsigned int)qheader_uint32_cl_len});
 #else
@@ -238,13 +238,13 @@ cl::Program OCLEngine::MakeProgram(bool buildFromSource, std::string path,
                      (long unsigned int)qheader_uint64_cl_len});
 #endif
 
-#if FPPOW < 5
+#if WEED_TCAPPOW < 5
   sources.push_back(
       {(const char *)qheader_half_cl, (long unsigned int)qheader_half_cl_len});
-#elif FPPOW < 6
+#elif WEED_TCAPPOW < 6
   sources.push_back({(const char *)qheader_float_cl,
                      (long unsigned int)qheader_float_cl_len});
-#elif FPPOW < 7
+#elif WEED_TCAPPOW < 7
   sources.push_back({(const char *)qheader_double_cl,
                      (long unsigned int)qheader_double_cl_len});
 #else
@@ -254,15 +254,6 @@ cl::Program OCLEngine::MakeProgram(bool buildFromSource, std::string path,
 
   sources.push_back(
       {(const char *)qengine_cl, (long unsigned int)qengine_cl_len});
-
-#if ENABLE_ALU
-  sources.push_back(
-      {(const char *)qheader_alu_cl, (long unsigned int)qheader_alu_cl_len});
-#if ENABLE_BCD
-  sources.push_back(
-      {(const char *)qheader_bcd_cl, (long unsigned int)qheader_bcd_cl_len});
-#endif
-#endif
 
   program = cl::Program(devCntxt->context, sources);
   std::cout << "Building JIT." << std::endl;
@@ -296,7 +287,7 @@ void OCLEngine::SaveBinary(cl::Program program, std::string path,
   }
 
   FILE *clBinFile = fopen((path + fileName).c_str(), "w");
-#if ENABLE_SNUCL
+#if WEED_ENABLE_SNUCL
   std::vector<char *> clBinaries = program.getInfo<CL_PROGRAM_BINARIES>();
   char *clBinary = clBinaries[clBinIndex];
   fwrite(clBinary, clBinSize, sizeof(char), clBinFile);
