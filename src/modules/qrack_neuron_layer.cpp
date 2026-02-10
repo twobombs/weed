@@ -71,6 +71,10 @@ QrackNeuronLayer::choose_quantum_fn(QuantumFunctionType fn) {
         s->AntiCNOT(input_indices[i - 1U], input_indices[i]);
       }
     };
+  case QFT_QFN:
+    return [&](Qrack::QInterfacePtr s) { s->QFTR(input_indices); };
+  case IQFT_QFN:
+    return [&](Qrack::QInterfacePtr s) { s->IQFTR(input_indices); };
   case CUSTOM_QFN:
   default:
     throw std::invalid_argument("Can't recognize QuantumFunctionType in "

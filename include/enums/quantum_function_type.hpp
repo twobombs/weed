@@ -21,6 +21,8 @@ enum QuantumFunctionType {
   CUSTOM_QFN = 0,
   NONE_QFN = 1,
   BELL_GHZ_QFN = 2,
-  ALT_BELL_GHZ_QFN = 3
+  ALT_BELL_GHZ_QFN = 3,
+  QFT_QFN = 4,
+  IQFT_QFN = 5
 };
 } // namespace Weed
