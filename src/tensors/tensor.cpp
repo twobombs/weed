@@ -1012,6 +1012,9 @@ void Tensor::make_clamp_node(TensorPtr a, real1 lo, real1 hi, TensorPtr out) {
 }
 
 TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1064,6 +1067,9 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1133,6 +1139,10 @@ TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
         "Tensor::matmul is only for matrices with 2 indices!");
   }
 
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
+
   const tcapint as0 = a->shape[0U];
   const tcapint bs1 = b->shape[1U];
   const std::vector<tcapint> shp = {as0, bs1};
@@ -1191,6 +1201,9 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1243,6 +1256,9 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});

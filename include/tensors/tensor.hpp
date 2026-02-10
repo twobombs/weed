@@ -141,6 +141,18 @@ struct Tensor : public BaseTensor {
   }
 
   /**
+   * Cast this CPU-based tensor to a GPU-based one tensor or vice-versa (if
+   * necessary)
+   */
+  void cast_in_place(const DeviceTag &dt) {
+    if (dt == DeviceTag::CPU) {
+      storage = storage->cpu();
+    } else if (dt == DeviceTag::GPU) {
+      storage = storage->gpu();
+    }
+  }
+
+  /**
    * Split tensor into equally-sized chunks along axis
    */
   std::vector<TensorPtr> chunk(const size_t &chunks, const int64_t &axis = -1);
