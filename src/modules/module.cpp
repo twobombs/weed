@@ -26,6 +26,7 @@
 #include "modules/migrate_gpu.hpp"
 #include "modules/min.hpp"
 #include "modules/multihead_attention.hpp"
+#include "modules/positional_encoding.hpp"
 #include "modules/relu.hpp"
 #include "modules/reshape.hpp"
 #include "modules/sequential.hpp"
@@ -203,6 +204,13 @@ ModulePtr Module::load(std::istream &is) {
     t->activation = load(is);
 
     return t;
+  }
+  case POSITIONAL_ENCODING_T: {
+    tcapint max_seq_len;
+    Serializer::read_tcapint(is, max_seq_len);
+    tcapint d_model;
+    Serializer::read_tcapint(is, d_model);
+    return std::make_shared<PositionalEncoding>(max_seq_len, d_model);
   }
   case ModuleType::NONE_MODULE_TYPE:
   default:

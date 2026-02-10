@@ -33,6 +33,7 @@ add_library (weed STATIC
     src/modules/migrate_gpu.cpp
     src/modules/module.cpp
     src/modules/multihead_attention.cpp
+    src/modules/positional_encoding.cpp
     src/modules/sequential.cpp
     src/modules/transformer_encoder_layer.cpp
     src/ops/abs.cpp
@@ -249,6 +250,7 @@ install (FILES
     include/modules/min.hpp
     include/modules/module.hpp
     include/modules/multihead_attention.hpp
+    include/modules/positional_encoding.hpp
     include/modules/relu.hpp
     include/modules/qrack_neuron.hpp
     include/modules/qrack_neuron_layer.hpp

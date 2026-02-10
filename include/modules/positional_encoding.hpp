@@ -12,18 +12,22 @@
 #pragma once
 
 #include "modules/module.hpp"
+#include "tensors/tensor.hpp"
 
 namespace Weed {
-/**
- * Positional encoding for transformers (constant operation, no gradient effect)
- */
 struct PositionalEncoding : public Module {
-  Tanh() : Module(POSITIONAL_ENCODING_T) {}
-  TensorPtr forward(const TensorPtr x) {
-    // x: [B, T, D]
-    TensorPtr pe_slice = pe->slice(0, 0, x->shape[1]);
-    return x + pe_slice;
-  }
+  tcapint max_seq_len;
+  tcapint d_model;
+
+  // [max_seq_len, d_model], requires_grad=false
+  ParameterPtr pe;
+
+  PositionalEncoding(tcapint max_seq_len, tcapint d_model,
+                     DeviceTag device = DEFAULT_DEVICE);
+
+  TensorPtr forward(const TensorPtr x) override;
+
+  void save(std::ostream &) const override;
 };
-typedef std::shared_ptr<Tanh> TanhPtr;
+typedef std::shared_ptr<PositionalEncoding> PositionalEncodingPtr;
 } // namespace Weed

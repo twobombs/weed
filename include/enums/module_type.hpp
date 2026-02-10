@@ -43,6 +43,8 @@ enum ModuleType {
   MAX_T = 22,
   RESHAPE_T = 23,
   VARIANCE_T = 24,
-  STDDEV_T = 25
+  STDDEV_T = 25,
+  POSITIONAL_ENCODING_T = 26
+
 };
 } // namespace Weed
