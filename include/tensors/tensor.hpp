@@ -310,6 +310,34 @@ struct Tensor : public BaseTensor {
   }
 
   /**
+   * Variance of all elements (with autograd)
+   */
+  static TensorPtr variance(TensorPtr a) {
+    return div(pow(sub(a, mean(a)), real1(2)),
+               SCALAR((real1)a->get_broadcast_size(), a));
+  }
+
+  /**
+   * Variance of all elements by axis (with autograd)
+   */
+  static TensorPtr variance(TensorPtr a, const tcapint &axis) {
+    return div(pow(sub(a, mean(a, axis)), real1(2)),
+               SCALAR((real1)a->shape[axis], a));
+  }
+
+  /**
+   * Standard deviation of all elements (with autograd)
+   */
+  static TensorPtr stddev(TensorPtr a) { return pow(variance(a), real1(0.5)); }
+
+  /**
+   * Standard deviation of all elements by axis (with autograd)
+   */
+  static TensorPtr stddev(TensorPtr a, const tcapint &axis) {
+    return pow(variance(a, axis), real1(0.5));
+  }
+
+  /**
    * Sum of all elements by axis (with autograd)
    */
   static TensorPtr sum(TensorPtr a, const tcapint &axis);

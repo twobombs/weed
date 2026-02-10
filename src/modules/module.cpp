@@ -31,8 +31,10 @@
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
 #include "modules/softmax.hpp"
+#include "modules/stddev.hpp"
 #include "modules/tanh.hpp"
 #include "modules/transformer_encoder_layer.hpp"
+#include "modules/variance.hpp"
 
 namespace Weed {
 void Module::save(std::ostream &os) const {
@@ -155,6 +157,16 @@ ModulePtr Module::load(std::istream &is) {
     symint axis;
     Serializer::read_symint(is, axis);
     return std::make_shared<Min>(axis);
+  }
+  case ModuleType::VARIANCE_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Variance>(axis);
+  }
+  case ModuleType::STDDEV_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Stddev>(axis);
   }
   case ModuleType::RESHAPE_T: {
     tcapint sz;

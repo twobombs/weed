@@ -15,20 +15,17 @@
 
 namespace Weed {
 /**
- * Convenience wrapper on reshape as a module
+ * Variance activation
  */
-struct Reshape : public Module {
-  std::vector<symint> shape;
-  Reshape(const std::vector<symint> &s) : Module(RESHAPE_T), shape(s) {}
+struct Variance : public Module {
+  symint axis;
+  Variance(const symint &axis_ = -1) : Module(VARIANCE_T), axis(axis_) {}
   TensorPtr forward(const TensorPtr x) override {
-    return Tensor::reshape(x, shape);
+    return Tensor::variance(x, axis);
   }
   void save(std::ostream &os) const override {
-    Serializer::write_tcapint(os, (tcapint)shape.size());
-    for (size_t i = 0U; i < shape.size(); ++i) {
-      Serializer::write_symint(os, shape[i]);
-    }
+    Serializer::write_symint(os, axis);
   }
 };
-typedef std::shared_ptr<Reshape> ReshapePtr;
+typedef std::shared_ptr<Variance> VariancePtr;
 } // namespace Weed

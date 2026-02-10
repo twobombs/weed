@@ -41,6 +41,8 @@ enum ModuleType {
   MEAN_T = 20,
   MIN_T = 21,
   MAX_T = 22,
-  RESHAPE_T = 23
+  RESHAPE_T = 23,
+  VARIANCE_T = 24,
+  STDDEV_T = 25
 };
 } // namespace Weed
