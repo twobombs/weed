@@ -28,7 +28,7 @@ using namespace Weed;
 TEST_CASE("test_random_real_mul") {
   std::cout << "# of elements (power of 2), Time (ms)" << std::endl;
 
-  for (tlenint b = 10U; b < 24U; ++b) {
+  for (tlenint b = 10U; b < 27U; ++b) {
     const tcapint p = pow2Gpu(b);
 
     TensorPtr x = std::make_shared<Tensor>(std::vector<tcapint>{p},
