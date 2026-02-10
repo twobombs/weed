@@ -392,6 +392,18 @@ complex GpuDevice::GetComplex(BufferPtr buffer, const tcapint &idx) {
 
   return v;
 }
+void GpuDevice::SetInt(const symint &val, BufferPtr buffer,
+                       const tcapint &idx) {
+  EventVecPtr waitVec = ResetWaitEvents();
+  device_context->EmplaceEvent(
+      [this, val, buffer, idx, waitVec](cl::Event &event) {
+        tryOcl("Failed to enqueue buffer write", [&] {
+          return queue.enqueueWriteBuffer(*buffer, CL_FALSE,
+                                          sizeof(symint) * idx, sizeof(symint),
+                                          &val, waitVec.get(), &event);
+        });
+      });
+}
 void GpuDevice::SetReal(const real1 &val, BufferPtr buffer,
                         const tcapint &idx) {
   EventVecPtr waitVec = ResetWaitEvents();
