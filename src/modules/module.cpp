@@ -241,12 +241,13 @@ ModulePtr Module::load(std::istream &is) {
     const bool md = (mask & 1U);
     const bool sd = (mask & 2U);
     const bool bdt = (mask & 4U);
-    const bool hp = (mask & 8U);
-    const bool sp = (mask & 16U);
+    const bool tn = (mask & 8U);
+    const bool hp = (mask & 16U);
+    const bool sp = (mask & 32U);
 
     QrackNeuronLayerPtr qnl = std::make_shared<QrackNeuronLayer>(
         input_q, output_q, hidden_q, lowest_combo, highest_combo, pre_qfn,
-        post_qfn, activation_fn, nullptr, nullptr, md, sd, bdt, hp, sp);
+        post_qfn, activation_fn, nullptr, nullptr, md, sd, bdt, tn, hp, sp);
 
     for (size_t i = 0U; i < qnl->neurons.size(); ++i) {
       const auto &n = qnl->neurons[i];

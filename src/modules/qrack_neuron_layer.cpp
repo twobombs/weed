@@ -89,7 +89,8 @@ QrackNeuronLayer::QrackNeuronLayer(
     const Qrack::QNeuronActivationFn &activation,
     const std::function<void(Qrack::QInterfacePtr)> &pre_init,
     const std::function<void(Qrack::QInterfacePtr)> &post_init, const bool &md,
-    const bool &sd, const bool &bdt, const bool &hp, const bool &sp)
+    const bool &sd, const bool &bdt, const bool &tn, const bool &hp,
+    const bool &sp)
     : Module(QRACK_NEURON_LAYER_T), lowest_cmb(lowest_combo),
       highest_cmb(highest_combo), pre_qfn(pre_fn), post_qfn(post_fn),
       activation_fn(activation), input_indices(input_q),
@@ -107,7 +108,7 @@ QrackNeuronLayer::QrackNeuronLayer(
   const bitLenInt num_qubits = input_q + output_q + hidden_q;
   prototype = Qrack::CreateArrangedLayersFull(
       false, md, sd, true, bdt, !sp, true, !sp, !sp, num_qubits,
-      Qrack::ZERO_BCI, nullptr, Qrack::CMPLX_DEFAULT_ARG, false, true, hp, sp);
+      Qrack::ZERO_BCI, nullptr, Qrack::CMPLX_DEFAULT_ARG, false, tn, hp, sp);
   qrack_config_mask = md ? 1U : 0U;
   if (sd) {
     qrack_config_mask |= 2U;
@@ -115,11 +116,14 @@ QrackNeuronLayer::QrackNeuronLayer(
   if (bdt) {
     qrack_config_mask |= 4U;
   }
-  if (hp) {
+  if (tn) {
     qrack_config_mask |= 8U;
   }
-  if (sp) {
+  if (hp) {
     qrack_config_mask |= 16U;
+  }
+  if (sp) {
+    qrack_config_mask |= 32U;
   }
 
   for (bitLenInt i = 0U; i < input_q; ++i) {
