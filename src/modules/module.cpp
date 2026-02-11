@@ -20,15 +20,28 @@
 #include "modules/linear.hpp"
 #include "modules/logsoftmax.hpp"
 #include "modules/lstm.hpp"
+#include "modules/max.hpp"
+#include "modules/mean.hpp"
+#include "modules/mean_center.hpp"
 #include "modules/migrate_cpu.hpp"
 #include "modules/migrate_gpu.hpp"
+#include "modules/min.hpp"
 #include "modules/multihead_attention.hpp"
+#include "modules/positional_encoding.hpp"
 #include "modules/relu.hpp"
+#include "modules/reshape.hpp"
 #include "modules/sequential.hpp"
 #include "modules/sigmoid.hpp"
 #include "modules/softmax.hpp"
+#include "modules/stddev.hpp"
 #include "modules/tanh.hpp"
 #include "modules/transformer_encoder_layer.hpp"
+#include "modules/variance.hpp"
+
+#if QRACK_AVAILABLE
+#include "modules/qrack_neuron_layer.hpp"
+#include "storage/cpu_real_storage.hpp"
+#endif
 
 namespace Weed {
 void Module::save(std::ostream &os) const {
@@ -127,6 +140,9 @@ ModulePtr Module::load(std::istream &is) {
   case ModuleType::MIGRATE_GPU_T: {
     return std::make_shared<MigrateGpu>();
   }
+  case ModuleType::MEAN_CENTER_T: {
+    return std::make_shared<MeanCenter>();
+  }
   case ModuleType::SOFTMAX_T: {
     symint axis;
     Serializer::read_symint(is, axis);
@@ -137,11 +153,45 @@ ModulePtr Module::load(std::istream &is) {
     Serializer::read_symint(is, axis);
     return std::make_shared<LogSoftmax>(axis);
   }
+  case ModuleType::MEAN_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Mean>(axis);
+  }
+  case ModuleType::MAX_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Max>(axis);
+  }
+  case ModuleType::MIN_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Min>(axis);
+  }
+  case ModuleType::VARIANCE_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Variance>(axis);
+  }
+  case ModuleType::STDDEV_T: {
+    symint axis;
+    Serializer::read_symint(is, axis);
+    return std::make_shared<Stddev>(axis);
+  }
+  case ModuleType::RESHAPE_T: {
+    tcapint sz;
+    Serializer::read_tcapint(is, sz);
+    std::vector<symint> shape(sz);
+    for (tcapint i = 0U; i < sz; ++i) {
+      Serializer::read_symint(is, shape[i]);
+    }
+    return std::make_shared<Reshape>(shape);
+  }
   case ModuleType::MULTIHEAD_ATTENTION_T: {
     MultiHeadAttentionPtr m = std::make_shared<MultiHeadAttention>();
-    Serializer::read_tcapint(is, m->d_model);
-    Serializer::read_tcapint(is, m->num_heads);
-    Serializer::read_tcapint(is, m->head_dim);
+    Serializer::read_symint(is, m->d_model);
+    Serializer::read_symint(is, m->num_heads);
+    Serializer::read_symint(is, m->head_dim);
     m->W_q = std::dynamic_pointer_cast<Linear>(Linear::load(is));
     m->W_k = std::dynamic_pointer_cast<Linear>(Linear::load(is));
     m->W_v = std::dynamic_pointer_cast<Linear>(Linear::load(is));
@@ -164,6 +214,52 @@ ModulePtr Module::load(std::istream &is) {
 
     return t;
   }
+  case POSITIONAL_ENCODING_T: {
+    tcapint max_seq_len;
+    Serializer::read_tcapint(is, max_seq_len);
+    tcapint d_model;
+    Serializer::read_tcapint(is, d_model);
+    return std::make_shared<PositionalEncoding>(max_seq_len, d_model);
+  }
+#if QRACK_AVAILABLE
+  case QRACK_NEURON_LAYER_T: {
+    tcapint input_q, output_q, hidden_q;
+    Serializer::read_tcapint(is, input_q);
+    Serializer::read_tcapint(is, output_q);
+    Serializer::read_tcapint(is, hidden_q);
+    tcapint lowest_combo, highest_combo;
+    Serializer::read_tcapint(is, lowest_combo);
+    Serializer::read_tcapint(is, highest_combo);
+    QuantumFunctionType pre_qfn;
+    Serializer::read_quantum_fn(is, pre_qfn);
+    QuantumFunctionType post_qfn;
+    Serializer::read_quantum_fn(is, post_qfn);
+    Qrack::QNeuronActivationFn activation_fn;
+    Serializer::read_qneuron_activation_fn(is, activation_fn);
+    tcapint mask;
+    Serializer::read_tcapint(is, mask);
+    const bool md = (mask & 1U);
+    const bool sd = (mask & 2U);
+    const bool bdt = (mask & 4U);
+    const bool hp = (mask & 8U);
+    const bool sp = (mask & 16U);
+
+    QrackNeuronLayerPtr qnl = std::make_shared<QrackNeuronLayer>(
+        input_q, output_q, hidden_q, lowest_combo, highest_combo, pre_qfn,
+        post_qfn, activation_fn, nullptr, nullptr, md, sd, bdt, hp, sp);
+
+    for (size_t i = 0U; i < qnl->neurons.size(); ++i) {
+      const auto &n = qnl->neurons[i];
+      n->angles = Parameter::load(is);
+      n->data =
+          static_cast<CpuRealStorage *>(n->angles->storage.get())->data.get();
+    }
+
+    qnl->update_param_vector();
+
+    return qnl;
+  }
+#endif
   case ModuleType::NONE_MODULE_TYPE:
   default:
     throw std::domain_error("Can't recognize ModuleType in Module::load!");

@@ -37,6 +37,14 @@ enum ModuleType {
   QRACK_NEURON_LAYER_T = 16,
   MULTIHEAD_ATTENTION_T = 17,
   TRANSFORMER_ENCODER_LAYER_T = 18,
-  GELU_T = 19
+  GELU_T = 19,
+  MEAN_T = 20,
+  MIN_T = 21,
+  MAX_T = 22,
+  RESHAPE_T = 23,
+  VARIANCE_T = 24,
+  STDDEV_T = 25,
+  POSITIONAL_ENCODING_T = 26,
+  MEAN_CENTER_T = 27
 };
 } // namespace Weed

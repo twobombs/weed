@@ -263,7 +263,7 @@ struct GpuDevice {
   /**
    * Read a single real1 from a buffer
    */
-  real1 GetInt(BufferPtr buffer, const tcapint &idx);
+  symint GetInt(BufferPtr buffer, const tcapint &idx);
   /**
    * Read a single real1 from a buffer
    */
@@ -275,7 +275,7 @@ struct GpuDevice {
   /**
    * Write a single real1 to a buffer
    */
-  void SetInt(const real1 &val, BufferPtr buffer, const tcapint &idx);
+  void SetInt(const symint &val, BufferPtr buffer, const tcapint &idx);
   /**
    * Write a single real1 to a buffer
    */

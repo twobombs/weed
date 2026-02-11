@@ -114,9 +114,8 @@ void Tensor::make_gradient(const bool &force_sparse) {
     }
   }
 
-  grad = Tensor::make_gradient(shape, storage->dtype, dtag,
-                               storage->get_device_id(),
-                               force_sparse || storage->is_sparse());
+  grad = Tensor::make_gradient(shape, force_sparse || storage->is_sparse(),
+                               storage->dtype, dtag, storage->get_device_id());
 }
 
 TensorPtr Tensor::allocate_scalar_like(const Tensor &orig, const bool &rg) {
@@ -145,13 +144,12 @@ TensorPtr Tensor::allocate_like(const std::vector<tcapint> &shp,
   const DeviceTag dtag = orig.storage->device;
   const int64_t did = orig.storage->get_device_id();
 
-  return std::make_shared<Tensor>(shp, strd, rg, dt, dtag, did, s);
+  return std::make_shared<Tensor>(shp, strd, rg, s, dt, dtag, did);
 }
 
 Tensor::Tensor(const std::vector<tcapint> &shp,
-               const std::vector<tcapint> &strd, const bool &rg,
-               const DType &dtype, const DeviceTag &_dtag, const int64_t &did,
-               const bool &s)
+               const std::vector<tcapint> &strd, const bool &rg, const bool &s,
+               const DType &dtype, const DeviceTag &_dtag, const int64_t &did)
     : BaseTensor(shp, strd), grad_node(nullptr), requires_grad(rg),
       freeze(shp.size(), false) {
 
@@ -470,21 +468,57 @@ void Tensor::backward(TensorPtr loss) {
   }
 }
 
-TensorPtr Tensor::reshape(const TensorPtr a, const std::vector<tcapint> &s) {
+TensorPtr Tensor::reshape(const TensorPtr a, const std::vector<symint> &s) {
   if (!a->is_contiguous()) {
     throw std::invalid_argument(
         "Tensor::reshape() requires contiguous tensor!");
   }
 
-  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
-  out->shape = s;
-  out->stride = full_contiguous_stride(s);
+  const tcapint total = a->get_size();
 
-  if (a->get_size() != out->get_size()) {
-    throw std::invalid_argument(
-        "Tensor::reshape() sizes do not match! (If you have broadcast indices, "
-        "try removing them, reshaping, and adding them back.)");
+  // Resolve -1
+  std::vector<tcapint> resolved;
+  resolved.reserve(s.size());
+  for (size_t i = 0U; i < s.size(); ++i) {
+    resolved.push_back((tcapint)s[i]);
   }
+
+  symint infer_index = -1;
+  tcapint known_product = 1U;
+
+  for (size_t i = 0U; i < s.size(); ++i) {
+    if (s[i] < 0) {
+      if (infer_index != -1) {
+        throw std::invalid_argument(
+            "Tensor::reshape(): only one -1 dimension allowed");
+      }
+      infer_index = (symint)i;
+    } else {
+      known_product *= s[i];
+    }
+  }
+
+  if (infer_index >= 0) {
+    if ((!known_product) || (total % known_product)) {
+      throw std::invalid_argument(
+          "Tensor::reshape(): cannot infer dimension size");
+    }
+    resolved[infer_index] = total / known_product;
+  }
+
+  // Final size check
+  tcapint new_size = 1;
+  for (tcapint d : resolved) {
+    new_size *= d;
+  }
+
+  if (new_size != total) {
+    throw std::invalid_argument("Tensor::reshape(): sizes do not match");
+  }
+
+  TensorPtr out = std::make_shared<Tensor>(*(a.get()));
+  out->shape = resolved;
+  out->stride = full_contiguous_stride(resolved);
 
   return out;
 }
@@ -977,6 +1011,9 @@ void Tensor::make_clamp_node(TensorPtr a, real1 lo, real1 hi, TensorPtr out) {
 }
 
 TensorPtr Tensor::add(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1029,6 +1066,9 @@ void Tensor::make_add_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::mul(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1098,6 +1138,10 @@ TensorPtr Tensor::matmul(TensorPtr a, TensorPtr b) {
         "Tensor::matmul is only for matrices with 2 indices!");
   }
 
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
+
   const tcapint as0 = a->shape[0U];
   const tcapint bs1 = b->shape[1U];
   const std::vector<tcapint> shp = {as0, bs1};
@@ -1156,6 +1200,9 @@ void Tensor::make_matmul_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::sub(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});
@@ -1208,6 +1255,9 @@ void Tensor::make_sub_node(TensorPtr a, TensorPtr b, TensorPtr out) {
 }
 
 TensorPtr Tensor::div(TensorPtr a, TensorPtr b) {
+  const DeviceTag dtag = get_dtag_by_presidence({a, b});
+  a->cast_in_place(dtag);
+  b->cast_in_place(dtag);
   const bool rg = a->requires_grad || b->requires_grad;
   const bool s = IS_SPARSE(a) && IS_SPARSE(b);
   const DType dt = get_dtype_by_presidence({a, b});

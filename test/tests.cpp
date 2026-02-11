@@ -130,6 +130,50 @@ TEST_CASE("test_mean_complex") {
   REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(R(1) / R(3)));
 }
 
+TEST_CASE("test_variance_real") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<real1>{R(1), R(1), R(2)}, std::vector<tcapint>{3},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::variance(x);
+  Tensor::backward(y);
+
+  REQUIRE_FLOAT(GET_REAL(y), R(0.03704));
+  REQUIRE_FLOAT(GET_REAL(x->grad), R(R(-2) / R(9)));
+}
+
+TEST_CASE("test_variance_complex") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<complex>{R(1), R(1), R(2)}, std::vector<tcapint>{3},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::variance(x);
+  Tensor::backward(y);
+
+  REQUIRE_CMPLX(GET_COMPLEX(y), R(0.03704));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(R(-2) / R(9)));
+}
+
+TEST_CASE("test_stddev_real") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<real1>{R(1), R(1), R(2)}, std::vector<tcapint>{3},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::stddev(x);
+  Tensor::backward(y);
+
+  REQUIRE_FLOAT(GET_REAL(y), R(sqrt(0.03704)));
+  REQUIRE_FLOAT(GET_REAL(x->grad), R(-0.57735));
+}
+
+TEST_CASE("test_stddev_complex") {
+  TensorPtr x = std::make_shared<Tensor>(
+      std::vector<complex>{R(1), R(1), R(2)}, std::vector<tcapint>{3},
+      std::vector<tcapint>{1}, true, TEST_DTAG);
+  TensorPtr y = Tensor::stddev(x);
+  Tensor::backward(y);
+
+  REQUIRE_CMPLX(GET_COMPLEX(y), R(sqrt(0.03704)));
+  REQUIRE_CMPLX(GET_COMPLEX(x->grad), R(-0.57735));
+}
+
 TEST_CASE("test_sum_axis_real") {
   TensorPtr x = std::make_shared<Tensor>(
       std::vector<real1>{R(1), R(1)}, std::vector<tcapint>{2},

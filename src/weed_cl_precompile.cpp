@@ -10,7 +10,7 @@
 // https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
 
 #include "config.h"
-#if ENABLE_OPENCL
+#if WEED_ENABLE_OPENCL
 #include "common/oclengine.hpp"
 #endif
 
@@ -18,7 +18,7 @@
 #include <string>
 
 int main(int argc, char *argv[]) {
-#if ENABLE_OPENCL
+#if WEED_ENABLE_OPENCL
   // Precompile, if OpenCL is available.
   std::cout << "Precompiling OCL kernels..." << std::endl;
   if (argc < 2) {

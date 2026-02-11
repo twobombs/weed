@@ -33,6 +33,7 @@ add_library (weed STATIC
     src/modules/migrate_gpu.cpp
     src/modules/module.cpp
     src/modules/multihead_attention.cpp
+    src/modules/positional_encoding.cpp
     src/modules/sequential.cpp
     src/modules/transformer_encoder_layer.cpp
     src/ops/abs.cpp
@@ -236,16 +237,22 @@ install (FILES
     include/enums/dtype.hpp
     include/enums/module_type.hpp
     include/enums/storage_type.hpp
+    include/enums/quantum_function_type.hpp
     include/modules/dropout.hpp
     include/modules/embedding.hpp
     include/modules/gru.hpp
     include/modules/linear.hpp
     include/modules/logsoftmax.hpp
     include/modules/lstm.hpp
+    include/modules/max.hpp
+    include/modules/mean.hpp
+    include/modules/mean_center.hpp
     include/modules/migrate_cpu.hpp
     include/modules/migrate_gpu.hpp
+    include/modules/min.hpp
     include/modules/module.hpp
     include/modules/multihead_attention.hpp
+    include/modules/positional_encoding.hpp
     include/modules/relu.hpp
     include/modules/qrack_neuron.hpp
     include/modules/qrack_neuron_layer.hpp

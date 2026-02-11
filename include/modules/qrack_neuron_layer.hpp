@@ -15,6 +15,7 @@
 #error Qrack files were included without Qrack available.
 #endif
 
+#include "enums/quantum_function_type.hpp"
 #include "modules/module.hpp"
 #include "modules/qrack_neuron.hpp"
 
@@ -25,28 +26,42 @@ namespace Weed {
  * post-initialization function pointer)
  */
 struct QrackNeuronLayer : public Module {
+  size_t lowest_cmb;
+  size_t highest_cmb;
+  QuantumFunctionType pre_qfn;
+  QuantumFunctionType post_qfn;
+  Qrack::QNeuronActivationFn activation_fn;
+
   Qrack::QInterfacePtr prototype;
   std::vector<bitLenInt> input_indices;
   std::vector<bitLenInt> hidden_indices;
   std::vector<bitLenInt> output_indices;
-  Qrack::QNeuronActivationFn activation_fn;
   std::function<void(Qrack::QInterfacePtr)> post_init_fn;
   std::vector<QrackNeuronPtr> neurons;
   std::vector<ParameterPtr> param_vector;
   bool requires_grad;
 
-  QrackNeuronLayer() : Module(QRACK_NEURON_LAYER_T) {}
+  tcapint qrack_config_mask;
+
   QrackNeuronLayer(
       const size_t &input_q, const size_t &output_q, const size_t &hidden_q,
       const size_t &lowest_combo, const size_t &highest_combo,
+      const QuantumFunctionType pre_fn = BELL_GHZ_QFN,
+      const QuantumFunctionType post_fn = NONE_QFN,
       const Qrack::QNeuronActivationFn &activation =
           Qrack::QNeuronActivationFn::Sigmoid,
-      const std::function<void(Qrack::QInterfacePtr)> &post_init =
-          [](Qrack::QInterfacePtr q) {},
-      const real1_f &nw = ZERO_R1, const bool &md = false,
-      const bool &sd = true, const bool &sh = true, const bool &bdt = false,
-      const bool &pg = true, const bool &tn = true, const bool &hy = true,
-      const bool &oc = true, const bool &hp = false, const bool &sp = false);
+      const std::function<void(Qrack::QInterfacePtr)> &pre_init = nullptr,
+      const std::function<void(Qrack::QInterfacePtr)> &post_init = nullptr,
+      const bool &md = false, const bool &sd = true, const bool &bdt = false,
+      const bool &hp = false, const bool &sp = false);
+
+  void update_param_vector() {
+    param_vector.clear();
+    for (const auto &n : neurons) {
+      const std::vector<ParameterPtr> p = n->parameters();
+      param_vector.insert(param_vector.end(), p.begin(), p.end());
+    }
+  }
 
   std::vector<ParameterPtr> parameters() override { return param_vector; }
 
@@ -63,11 +78,11 @@ struct QrackNeuronLayer : public Module {
     requires_grad = false;
   }
 
-  void save(std::ostream &) const override {
-    throw std::domain_error("Can't serialize QrackNeuron or quantum objects!");
-  }
-
   TensorPtr forward(const TensorPtr x) override;
+  void save(std::ostream &) const override;
+
+  std::function<void(Qrack::QInterfacePtr)>
+  choose_quantum_fn(QuantumFunctionType fn);
 };
 typedef std::shared_ptr<QrackNeuronLayer> QrackNeuronLayerPtr;
 } // namespace Weed

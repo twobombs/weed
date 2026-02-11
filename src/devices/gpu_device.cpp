@@ -369,7 +369,7 @@ void GpuDevice::UpcastRealBuffer(BufferPtr buffer_in, BufferPtr buffer_out,
             std::vector<BufferPtr>{buffer_in, buffer_out});
 }
 
-real1 GpuDevice::GetInt(BufferPtr buffer, const tcapint &idx) {
+symint GpuDevice::GetInt(BufferPtr buffer, const tcapint &idx) {
   symint v;
   EventVecPtr waitVec = ResetWaitEvents();
   DISPATCH_BLOCK_READ(waitVec, *buffer, sizeof(symint) * idx, sizeof(symint),
@@ -391,6 +391,18 @@ complex GpuDevice::GetComplex(BufferPtr buffer, const tcapint &idx) {
                       &v);
 
   return v;
+}
+void GpuDevice::SetInt(const symint &val, BufferPtr buffer,
+                       const tcapint &idx) {
+  EventVecPtr waitVec = ResetWaitEvents();
+  device_context->EmplaceEvent(
+      [this, val, buffer, idx, waitVec](cl::Event &event) {
+        tryOcl("Failed to enqueue buffer write", [&] {
+          return queue.enqueueWriteBuffer(*buffer, CL_FALSE,
+                                          sizeof(symint) * idx, sizeof(symint),
+                                          &val, waitVec.get(), &event);
+        });
+      });
 }
 void GpuDevice::SetReal(const real1 &val, BufferPtr buffer,
                         const tcapint &idx) {

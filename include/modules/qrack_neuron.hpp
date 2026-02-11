@@ -30,7 +30,6 @@ struct QrackNeuron : public Module {
   ParameterPtr angles;
   real1 *data;
 
-  QrackNeuron() : Module(QRACK_NEURON_T) {}
   QrackNeuron(Qrack::QNeuronPtr qn,
               const Qrack::QNeuronActivationFn &activation =
                   Qrack::QNeuronActivationFn::Sigmoid,
@@ -44,7 +43,7 @@ struct QrackNeuron : public Module {
   }
 
   void save(std::ostream &) const override {
-    throw std::domain_error("Can't serialize QrackNeuron or quantum objects!");
+    throw std::domain_error("Can't serialize QrackNeuron!");
   }
 
   TensorPtr forward(TensorPtr x) override {

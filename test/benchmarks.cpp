@@ -28,16 +28,16 @@ using namespace Weed;
 TEST_CASE("test_random_real_mul") {
   std::cout << "# of elements (power of 2), Time (ms)" << std::endl;
 
-  for (tlenint b = 10U; b < 24U; ++b) {
+  for (tlenint b = 10U; b < 27U; ++b) {
     const tcapint p = pow2Gpu(b);
 
     TensorPtr x = std::make_shared<Tensor>(std::vector<tcapint>{p},
                                            std::vector<tcapint>{1U}, false,
-                                           DType::REAL, TEST_DTAG, -1, sparse);
+                                           sparse, DType::REAL, TEST_DTAG, -1);
     x->storage->FillOnes();
     TensorPtr y = std::make_shared<Tensor>(std::vector<tcapint>{p},
                                            std::vector<tcapint>{1U}, false,
-                                           DType::REAL, TEST_DTAG, -1, sparse);
+                                           sparse, DType::REAL, TEST_DTAG, -1);
     y->storage->FillOnes();
 
     const auto start = std::chrono::high_resolution_clock::now();
