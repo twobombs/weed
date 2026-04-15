@@ -11,7 +11,7 @@ This repository is for the base **C++ Weed library**. Once you have trained mode
 
 The project provides a set of essential CPU and GPU **kernels**, used by `Tensor` instances that perform _autograd._ We also provide _stochastic gradient descent (SGD)_ and _Adam_ optimizer implementations. (Build and check the API reference to get started.)
 
-GPT-2, BERT, and Qwen loading is experimental and mostly provided as proof-of-concept, also of the fine-tuning pipeline. Implementation was from published literature design, rather than direct analysis of any open source, to implement these model architectures. Their outputs, in **Weed**, are not yet coherent English, as a result.
+GPT-2, BERT, and Qwen (including 3.5) loading is experimental and mostly provided as proof-of-concept, also of the fine-tuning pipeline. Implementation was from published literature design, rather than direct analysis of any open source, to implement these model architectures. Their outputs, in **Weed**, are not yet coherent English, as a result.
 
 ## Why try Weed?
 
@@ -29,21 +29,32 @@ If a transformer model you load or train runs into an OpenCL "out-of-resources" 
 
 ## Building the API reference
 
-```sh
-    $ doxygen doxygen.config
-```
+
 
 ## Performing code coverage
 
-```sh
-    $ cd _build
-    $ cmake -DENABLE_CODECOVERAGE=ON ..
-    $ make unittest
-    $ ./unittest
-    $ make coverage
-    $ cd coverage_results
-    $ python -m http.server
-```
+
+
+## Directory Structure
+
+*   **cmake/**: CMake modules for build configuration.
+*   **debian/**: Debian packaging files.
+*   **docs/**: Documentation files (PDFs).
+*   **examples/**: Example code demonstrating usage.
+*   **include/**: Public API header files, organized by module.
+    *   `autograd/`: Optimizers and loss functions.
+    *   `common/`: Common utilities and definitions.
+    *   `devices/`: Device abstraction.
+    *   `enums/`: Enumerations.
+    *   `modules/`: Neural network modules.
+    *   `ops/`: Tensor operations.
+    *   `storage/`: Tensor storage implementations.
+    *   `tensors/`: Tensor interface.
+*   **src/**: Source code implementations, mirroring the `include/` structure (excluding header-only modules).
+*   **test/**: Unit tests.
+
+
+YT [explainer](https://youtu.be/lJvkaGy8QZg) 
 
 ## Copyright, License, and Acknowledgments
 
@@ -56,3 +67,56 @@ The Weed logo was produced with assistance from "Elara," an OpenAI custom GPT, a
 Licensed under the GNU Lesser General Public License V3.
 
 See [LICENSE.md](https://github.com/vm6502q/qrack/blob/main/LICENSE.md) in the project root or https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
+
+## Additional Files
+
+### [`API_REFERENCE.md`](API_REFERENCE.md)
+API reference documentation.
+
+### [`.gitignore`](.gitignore)
+Git ignore configuration.
+
+### [`BUILDRESULTS.md`](BUILDRESULTS.md)
+Build and test results summary.
+
+### [`WEEDFILEFORMAT.md`](WEEDFILEFORMAT.md)
+Weed file serialization format documentation.
+
+### [`UNITTESTS.md`](UNITTESTS.md)
+Unit test execution summaries.
+
+### [`BUILD.md`](BUILD.md)
+Build instructions and prerequisites.
+
+### [`Makefile-weed_loader`](Makefile-weed_loader)
+Makefile for building weed_loader package.
+
+### [`doxygen.config`](doxygen.config)
+Doxygen configuration for generating API docs.
+
+### [`fetch_qwen35-2bq4s.sh`](fetch_qwen35-2bq4s.sh)
+Script to fetch Qwen GGUF model.
+
+### [`gguf_to_weed.py`](gguf_to_weed.py)
+Script to convert GGUF format to Weed file format.
+
+### [`debug_gguf.py`](debug_gguf.py)
+Script to debug/dump GGUF file headers.
+
+### [`pyproject-weed_loader.toml`](pyproject-weed_loader.toml)
+Python project configuration for weed_loader.
+
+### [`libweed.pc.in`](libweed.pc.in)
+pkg-config template for libweed.
+
+### [`CMakeLists.txt`](CMakeLists.txt)
+Top-level CMake build configuration.
+
+### [`MANIFEST-weed_loader.in`](MANIFEST-weed_loader.in)
+Manifest for weed_loader packaging.
+
+### [`setup-weed_loader.py`](setup-weed_loader.py)
+Setup script for python weed_loader package.
+
+### [`DOCREPORT.md`](DOCREPORT.md)
+Documentation audit report.
