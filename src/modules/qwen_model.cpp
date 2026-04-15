@@ -12,6 +12,8 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 #include "modules/qwen_model.hpp"
+#include "modules/qwen.hpp"
+#include "enums/module_type.hpp"
 #include "tensors/real_tensor.hpp"
 #include "tensors/parameter.hpp"
 #include <algorithm>
@@ -39,7 +41,7 @@ QwenModel::QwenModel(tcapint vocab_size_, tcapint hidden_size_, tcapint num_laye
       causal_mask(),
       causal_mask_initialized(false),
       current_seq_len(0) {
-    
+  
     _init_decoder();
 }
 

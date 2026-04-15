@@ -21,6 +21,10 @@
 #define blasint int
 #else
 #include <cblas.h>
+// Define blasint if not provided by cblas.h
+#ifndef blasint
+#define blasint int
+#endif
 #endif
 #endif
 

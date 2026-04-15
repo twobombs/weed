@@ -51,6 +51,7 @@ enum ModuleType {
   RMS_NORM_T = 30,
   ROPE_T = 31,
   SWIGLU_T = 32,
-  QWEN_DECODER_LAYER_T = 33
+  QWEN_DECODER_LAYER_T = 33,
+  QWEN_MODEL_T = 34
 };
 } // namespace Weed

@@ -24,6 +24,14 @@ set_target_properties(binary_addition_transformer PROPERTIES RUNTIME_OUTPUT_DIRE
 target_link_libraries (binary_addition_transformer PUBLIC weed)
 target_compile_options (binary_addition_transformer PUBLIC ${EXAMPLE_COMPILE_OPTS})
 
+add_executable (qwen_inference
+    examples/qwen_inference.cpp
+    )
+set_target_properties(qwen_inference PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples")
+target_link_libraries (qwen_inference PUBLIC weed)
+target_include_directories (qwen_inference PUBLIC ${CMAKE_SOURCE_DIR})
+target_compile_options (qwen_inference PUBLIC ${EXAMPLE_COMPILE_OPTS})
+
 if (QRACK_LIB AND WEED_ENABLE_QRACK)
     add_executable (xor_qrack
         examples/xor_qrack.cpp

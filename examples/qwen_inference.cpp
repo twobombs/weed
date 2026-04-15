@@ -21,9 +21,9 @@
  * 4. Generate text autoregressively
  */
 
-#include "../include/modules/qwen_model.hpp"
-#include "../include/modules/qwen_tokenizer.hpp"
-#include "../include/storage/typed_storage.hpp"
+#include "modules/qwen_model.hpp"
+#include "modules/qwen_tokenizer.hpp"
+#include "storage/typed_storage.hpp"
 #include <iostream>
 #include <algorithm>
 #include <fstream>

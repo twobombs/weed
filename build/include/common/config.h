@@ -1,0 +1,19 @@
+#pragma once
+
+#define WEED_BLAS 1
+#define WEED_ENABLE_ENV_VARS 1
+/* #undef WEED_ENABLE_OPENCL */
+/* #undef WEED_ENABLE_SNUCL */
+#define WEED_ENABLE_OOO_OCL 1
+#define WEED_ENABLE_PTHREAD 1
+#define WEED_ENABLE_ASYNC 1
+#define WEED_FPPOW 5
+#define WEED_PSTRIDEPOW 18
+#define WEED_TCAPPOW 5
+/* #undef WEED_OPENCL_V3 */
+#define WEED_CPP_STD 14
+#define WEED_TILE_SIZE 32
+
+#if WEED_ENABLE_OPENCL
+#define ENABLE_GPU 1
+#endif

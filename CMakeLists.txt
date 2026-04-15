@@ -41,6 +41,9 @@ add_library (weed STATIC
     src/modules/swiglu.cpp
     src/modules/transformer_encoder_layer.cpp
     src/modules/qwen_decoder_layer.cpp
+    src/modules/qwen_model.cpp
+    src/modules/qwen_tokenizer.cpp
+    src/modules/qwen.cpp
     src/ops/abs.cpp
     src/ops/clamp.cpp
     src/ops/commuting.cpp

@@ -1,0 +1,26 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// (C) Daniel Strano and the Qrack contributors 2026. All rights reserved.
+//
+// Weed is for minimalist AI/ML inference and backprogation in the style of
+// Qrack.
+//
+// Licensed under the GNU Lesser General Public License V3.
+// See LICENSE.md in the project root or
+// https://www.gnu.org/licenses/lgpl-3.0.en.html for details.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef QWEN_HPP
+#define QWEN_HPP
+
+#include "modules/module.hpp"
+
+namespace Weed {
+
+// Forward declaration for Qwen class (if needed)
+class Qwen;
+
+} // namespace Weed
+
+#endif // QWEN_HPP
