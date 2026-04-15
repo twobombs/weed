@@ -82,7 +82,7 @@ TensorPtr QwenModel::_create_causal_mask(tcapint seq_len) const {
     auto mask = Tensor::zeros(
         std::vector<tcapint>{1, 1, seq_len, seq_len},
         false,  // not read-only
-        true,   // is scalar
+        false,  // not scalar
         DType::REAL,
         DeviceTag::CPU,
         -1

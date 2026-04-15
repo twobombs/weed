@@ -123,6 +123,9 @@ public:
      */
     static QwenModelPtr load(std::istream &is);
 
+    // Friend declaration for Module::load
+    friend ModulePtr Module::load(std::istream &is);
+
     // Model configuration
     tcapint vocab_size;
     tcapint hidden_size;

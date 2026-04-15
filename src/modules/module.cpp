@@ -43,6 +43,7 @@
 #include "modules/tanh.hpp"
 #include "modules/transformer_encoder_layer.hpp"
 #include "modules/variance.hpp"
+#include "modules/qwen_model.hpp"
 
 #if QRACK_AVAILABLE
 #include "modules/qrack_neuron_layer.hpp"
@@ -301,6 +302,42 @@ ModulePtr Module::load(std::istream &is) {
         std::dynamic_pointer_cast<RMSNorm>(Module::load(is));
 
     return q;
+  }
+  case ModuleType::QWEN_MODEL_T: {
+    tcapint vocab_size, hidden_size, num_layers, num_heads, num_kv_heads, intermediate_size, head_dim, max_seq_len;
+    is.read(reinterpret_cast<char*>(&vocab_size), sizeof(vocab_size));
+    is.read(reinterpret_cast<char*>(&hidden_size), sizeof(hidden_size));
+    is.read(reinterpret_cast<char*>(&num_layers), sizeof(num_layers));
+    is.read(reinterpret_cast<char*>(&num_heads), sizeof(num_heads));
+    is.read(reinterpret_cast<char*>(&num_kv_heads), sizeof(num_kv_heads));
+    is.read(reinterpret_cast<char*>(&intermediate_size), sizeof(intermediate_size));
+    is.read(reinterpret_cast<char*>(&head_dim), sizeof(head_dim));
+    is.read(reinterpret_cast<char*>(&max_seq_len), sizeof(max_seq_len));
+    
+    auto model = std::make_shared<QwenModel>(
+        vocab_size, hidden_size, num_layers, num_heads, num_kv_heads,
+        intermediate_size, max_seq_len
+    );
+    
+    // Load token embedding
+    model->token_embedding = std::dynamic_pointer_cast<Embedding>(Module::load(is));
+    
+    // Load decoder layers
+    tcapint num_decoder_layers;
+    is.read(reinterpret_cast<char*>(&num_decoder_layers), sizeof(num_decoder_layers));
+    std::vector<ModulePtr> layers;
+    for (tcapint i = 0; i < num_decoder_layers; ++i) {
+      layers.push_back(Module::load(is));
+    }
+    model->decoder = std::make_shared<Sequential>(layers);
+    
+    // Load final norm
+    model->final_norm = std::dynamic_pointer_cast<RMSNorm>(Module::load(is));
+    
+    // Load LM head
+    model->lm_head = std::dynamic_pointer_cast<Linear>(Module::load(is));
+    
+    return model;
   }
 #if QRACK_AVAILABLE
   case QRACK_NEURON_LAYER_T: {
